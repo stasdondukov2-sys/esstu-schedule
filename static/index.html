@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ВСГУТУ Расписание Live</title>
+  <meta name="description" content="Удобное мобильное расписание занятий ВСГУТУ для студентов и преподавателей">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="https://portal.esstu.ru/images/vsgutu.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+            slate: { 850: '#152033', 950: '#070d19' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar & mobile optimizations */
+    body { -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 9999px; }
+    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 glass border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-black text-xl">
+          В
+        </div>
+        <div>
+          <h1 class="text-base font-bold leading-tight flex items-center gap-1.5">
+            ВСГУТУ Live
+            <span id="headerWeekBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">I неделя</span>
+          </h1>
+          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-xs">
+            Загрузка расписания...
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-1.5">
+        <!-- Change Target Button -->
+        <button id="btnOpenSelector" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Выбрать группу / преподавателя">
+          <svg class="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="btnToggleTheme" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Переключить тему">
+          <svg id="iconSun" class="w-5 h-5 text-amber-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <svg id="iconMoon" class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-2xl mx-auto px-4 py-4 w-full flex-1 flex flex-col space-y-4">
+
+    <!-- Live Status Banner (Current Pair / Break) -->
+    <section id="liveStatusSection" class="hidden">
+      <div id="liveStatusCard" class="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
+        <div class="flex items-center justify-between mb-2">
+          <span id="liveBadge" class="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-white/20">
+            Идёт пара
+          </span>
+          <span id="liveTimer" class="text-xs font-semibold text-white/90">
+            Осталось: -- мин
+          </span>
+        </div>
+        <h2 id="liveSubject" class="text-lg font-bold leading-tight">
+          --
+        </h2>
+        <div class="mt-1 flex items-center justify-between text-xs text-white/80">
+          <span id="liveMeta">ауд. -- • Лекция</span>
+          <span id="liveTeacher">--</span>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-black/20 rounded-full h-1.5 mt-3 overflow-hidden">
+          <div id="liveProgressBar" class="bg-white h-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls: Week Switcher & Day Tabs -->
+    <section class="space-y-2.5">
+      <!-- Week Toggle -->
+      <div class="flex items-center justify-between bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-xl">
+        <button id="btnWeek1" class="flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-600 dark:text-slate-400">
+          I Неделя
+        </button>
+        <button id="btnWeek2" class="flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-600 dark:text-slate-400">
+          II Неделя
+        </button>
+      </div>
+
+      <!-- Days of Week (Horizontal Pills) -->
+      <div id="daysBar" class="grid grid-cols-6 gap-1.5">
+        <button data-day="monday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Пн</span>
+          <span class="text-xs font-bold mt-0.5">1</span>
+        </button>
+        <button data-day="tuesday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Вт</span>
+          <span class="text-xs font-bold mt-0.5">2</span>
+        </button>
+        <button data-day="wednesday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Ср</span>
+          <span class="text-xs font-bold mt-0.5">3</span>
+        </button>
+        <button data-day="thursday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Чт</span>
+          <span class="text-xs font-bold mt-0.5">4</span>
+        </button>
+        <button data-day="friday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Пт</span>
+          <span class="text-xs font-bold mt-0.5">5</span>
+        </button>
+        <button data-day="saturday" class="day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center transition border border-transparent">
+          <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Сб</span>
+          <span class="text-xs font-bold mt-0.5">6</span>
+        </button>
+      </div>
+
+      <!-- Tag / Subgroup Filter (Optional pill bar) -->
+      <div id="subgroupFilterBar" class="hidden flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+        <span class="text-[11px] font-semibold text-slate-400 whitespace-nowrap">Фильтр:</span>
+        <button data-filter="all" class="filter-pill px-2.5 py-1 rounded-full bg-blue-600 text-white font-medium whitespace-nowrap">Все</button>
+        <button data-filter="англ" class="filter-pill px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">Английский</button>
+        <button data-filter="франц" class="filter-pill px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">Французский</button>
+        <button data-filter="нем" class="filter-pill px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">Немецкий</button>
+      </div>
+    </section>
+
+    <!-- Schedule List for Selected Day -->
+    <section id="scheduleContainer" class="space-y-3 flex-1">
+      <!-- Loading skeleton -->
+      <div class="animate-pulse space-y-3">
+        <div class="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+        <div class="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+        <div class="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+      </div>
+    </section>
+
+    <!-- Empty Day Banner -->
+    <div id="emptyDayState" class="hidden py-12 text-center space-y-3">
+      <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl font-bold">
+        ✓
+      </div>
+      <div>
+        <h3 class="text-base font-bold">В этот день пар нет</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Отдыхайте или готовьтесь к следующим занятиям</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Selection Modal (Group or Teacher) -->
+  <div id="selectorModal" class="fixed inset-0 z-50 bg-black/60 glass hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base">Выбор расписания</h3>
+          <p class="text-xs text-slate-500">Студенческая группа или преподаватель</p>
+        </div>
+        <button id="btnCloseSelector" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
+          ✕
+        </button>
+      </div>
+
+      <!-- Mode Switch (Студент / Преподаватель) -->
+      <div class="p-4 pb-2 space-y-3">
+        <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <button id="tabStudent" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400">
+            Студент
+          </button>
+          <button id="tabTeacher" class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500 dark:text-slate-400">
+            Преподаватель
+          </button>
+        </div>
+
+        <!-- Section Switch for Students -->
+        <div id="studentSectionControls" class="flex gap-2">
+          <select id="selectSection" class="w-full text-xs bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-3 py-2.5 font-medium">
+            <option value="bakalavriat">Бакалавриат / Специалитет</option>
+            <option value="spezialitet">Магистратура / Колледж</option>
+            <option value="zo1">Заочное 1</option>
+            <option value="zo2">Заочное 2</option>
+          </select>
+        </div>
+
+        <!-- Search input -->
+        <div class="relative">
+          <input id="searchInput" type="text" placeholder="Поиск группы (например: 1146, 245)..."
+                 class="w-full text-sm bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 rounded-xl px-4 py-2.5 pl-10 focus:outline-none">
+          <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Results list -->
+      <div id="resultsList" class="p-4 overflow-y-auto space-y-2 flex-1 divide-y divide-slate-100 dark:divide-slate-800">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Note Dialog Modal -->
+  <div id="noteModal" class="fixed inset-0 z-50 bg-black/60 glass hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-4 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+      <h3 class="font-bold text-sm" id="noteModalTitle">Заметка к паре</h3>
+      <textarea id="noteInput" rows="3" placeholder="Например: сдать реферат, взять калькулятор..."
+                class="w-full text-sm bg-slate-100 dark:bg-slate-800 rounded-xl p-3 border-none focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+      <div class="flex justify-end space-x-2">
+        <button id="btnCancelNote" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-200 dark:bg-slate-800">Отмена</button>
+        <button id="btnSaveNote" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Logic -->
+  <script>
+    // --- State ---
+    const STATE = {
+      theme: localStorage.getItem('esstu_theme') || 'dark',
+      mode: localStorage.getItem('esstu_mode') || 'student', // student | teacher
+      section: localStorage.getItem('esstu_section') || 'bakalavriat',
+      groupId: localStorage.getItem('esstu_group_id') || '1',
+      groupName: localStorage.getItem('esstu_group_name') || '1146 тпуп',
+      teacherKey: localStorage.getItem('esstu_teacher_key') || '',
+      teacherName: localStorage.getItem('esstu_teacher_name') || '',
+      currentWeek: 1,      // 1 or 2
+      selectedWeek: 1,     // 1 or 2
+      selectedDay: 'monday',
+      scheduleData: null,
+      cachedGroups: [],
+      cachedTeachers: [],
+      activeFilter: 'all',
+      notes: JSON.parse(localStorage.getItem('esstu_notes') || '{}')
+    };
+
+    const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const DAYS_RU = { monday: 'Пн', tuesday: 'Вт', wednesday: 'Ср', thursday: 'Чт', friday: 'Пт', saturday: 'Сб' };
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      initServiceWorker();
+      setupEventListeners();
+      await syncStatusAndWeek();
+      await loadSchedule();
+      startLiveTicker();
+    });
+
+    // --- Theme Handling ---
+    function initTheme() {
+      if (STATE.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('iconSun').classList.remove('hidden');
+        document.getElementById('iconMoon').classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('iconSun').classList.add('hidden');
+        document.getElementById('iconMoon').classList.remove('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      STATE.theme = STATE.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('esstu_theme', STATE.theme);
+      initTheme();
+    }
+
+    // --- Service Worker ---
+    function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+      }
+    }
+
+    // --- Server Status & Week Calculation ---
+    async function syncStatusAndWeek() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        STATE.currentWeek = data.week_number;
+        STATE.selectedWeek = data.week_number;
+        document.getElementById('headerWeekBadge').innerText = data.week_title;
+      } catch (e) {
+        console.warn('API status offline, using client week calculation');
+        // Fallback week calculation
+        const now = new Date();
+        const year = now.getFullYear();
+        const refYear = now.getMonth() <= 6 ? year - 1 : year;
+        const refDate = new Date(refYear, 8, 1);
+        const diffWeeks = (now - refDate) / (1000 * 60 * 60 * 24 * 7);
+        STATE.currentWeek = Math.trunc(diffWeeks) % 2 === 0 ? 1 : 2;
+        STATE.selectedWeek = STATE.currentWeek;
+      }
+
+      // Detect current day
+      const dayIndex = new Date().getDay(); // 0 is Sunday
+      if (dayIndex >= 1 && dayIndex <= 6) {
+        STATE.selectedDay = DAYS_ORDER[dayIndex - 1];
+      } else {
+        STATE.selectedDay = 'monday'; // Sunday -> show Monday
+      }
+
+      updateWeekButtonsUI();
+      updateDayButtonsUI();
+    }
+
+    // --- Load Schedule ---
+    async function loadSchedule() {
+      const container = document.getElementById('scheduleContainer');
+      const emptyState = document.getElementById('emptyDayState');
+
+      document.getElementById('headerSubtitle').innerText =
+        STATE.mode === 'student' ? `Группа: ${STATE.groupName}` : `Преп.: ${STATE.teacherName || 'Выбор...'}`;
+
+      try {
+        let endpoint = '';
+        if (STATE.mode === 'student') {
+          endpoint = `/api/schedule/${STATE.section}/${STATE.groupId}`;
+        } else {
+          // If teacher mode
+          endpoint = `/api/teachers/all?section=${STATE.section}`;
+        }
+
+        const res = await fetch(endpoint);
+        const data = await res.json();
+
+        if (STATE.mode === 'student') {
+          STATE.scheduleData = data;
+        } else {
+          STATE.cachedTeachers = data.teachers || [];
+          const found = STATE.cachedTeachers.find(t => t.teacher_key === STATE.teacherKey) || STATE.cachedTeachers[0];
+          if (found) {
+            STATE.teacherKey = found.teacher_key;
+            STATE.teacherName = found.teacher_name;
+            STATE.scheduleData = found;
+            document.getElementById('headerSubtitle').innerText = `Преп.: ${found.teacher_name}`;
+          }
+        }
+
+        renderScheduleForCurrentDay();
+      } catch (err) {
+        container.innerHTML = `
+          <div class="p-6 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-center space-y-2">
+            <p class="text-sm font-semibold text-red-600 dark:text-red-400">Не удалось загрузить расписание с портала ВСГУТУ</p>
+            <p class="text-xs text-slate-500">Проверьте интернет-соединение или повторите попытку позже.</p>
+          </div>
+        `;
+      }
+    }
+
+    // --- Render Schedule ---
+    function renderScheduleForCurrentDay() {
+      const container = document.getElementById('scheduleContainer');
+      const emptyState = document.getElementById('emptyDayState');
+      container.innerHTML = '';
+
+      if (!STATE.scheduleData || !STATE.scheduleData.weeks) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      const weekKey = String(STATE.selectedWeek);
+      const dayData = STATE.scheduleData.weeks[weekKey]?.[STATE.selectedDay];
+      const pairs = dayData?.pairs || [];
+
+      // Check for non-empty pairs
+      const activePairs = pairs.filter(p => !p.is_empty);
+
+      if (activePairs.length === 0) {
+        emptyState.classList.remove('hidden');
+        document.getElementById('subgroupFilterBar').classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      document.getElementById('subgroupFilterBar').classList.remove('hidden');
+
+      activePairs.forEach(pair => {
+        pair.lessons.forEach((lesson, lIdx) => {
+          // Filter check
+          if (STATE.activeFilter !== 'all') {
+            const hasTag = lesson.tags && lesson.tags.some(t => t.includes(STATE.activeFilter));
+            if (!hasTag) return;
+          }
+
+          const card = createLessonCard(pair, lesson, lIdx);
+          container.appendChild(card);
+        });
+      });
+    }
+
+    function createLessonCard(pair, lesson, lIdx) {
+      const card = document.createElement('div');
+      card.className = "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow transition space-y-2.5 relative";
+
+      // Type Badge Colors
+      let badgeClass = "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300";
+      if (lesson.type_code === 'practice') {
+        badgeClass = "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300";
+      } else if (lesson.type_code === 'lab') {
+        badgeClass = "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300";
+      } else if (lesson.type_code === 'sport') {
+        badgeClass = "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300";
+      }
+
+      const noteKey = `${STATE.selectedWeek}_${STATE.selectedDay}_${pair.number}_${lesson.subject}`;
+      const savedNote = STATE.notes[noteKey] || '';
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-black w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300">
+              ${pair.number}
+            </span>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              ${pair.start} – ${pair.end}
+            </span>
+          </div>
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${badgeClass}">
+            ${lesson.type}
+          </span>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug">
+            ${lesson.subject}
+          </h4>
+          <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400">
+            ${lesson.room ? `<span class="flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400">📍 ${lesson.room}</span>` : ''}
+            ${lesson.teacher ? `<span>👤 ${lesson.teacher}</span>` : ''}
+            ${lesson.groups ? `<span class="font-medium text-slate-500">👥 ${lesson.groups}</span>` : ''}
+          </div>
+        </div>
+
+        ${savedNote ? `
+          <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 flex items-start justify-between">
+            <span>📝 ${savedNote}</span>
+            <button onclick="editNote('${noteKey}')" class="text-[10px] text-amber-600 underline ml-2">изм.</button>
+          </div>
+        ` : `
+          <button onclick="editNote('${noteKey}')" class="text-[11px] text-slate-400 hover:text-blue-500 flex items-center gap-1 pt-1 transition">
+            + добавить заметку к паре
+          </button>
+        `}
+      `;
+      return card;
+    }
+
+    // --- Notes ---
+    let currentNoteKey = '';
+    window.editNote = function(key) {
+      currentNoteKey = key;
+      document.getElementById('noteInput').value = STATE.notes[key] || '';
+      document.getElementById('noteModal').classList.remove('hidden');
+    };
+
+    document.getElementById('btnCancelNote').addEventListener('click', () => {
+      document.getElementById('noteModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnSaveNote').addEventListener('click', () => {
+      const val = document.getElementById('noteInput').value.trim();
+      if (val) {
+        STATE.notes[currentNoteKey] = val;
+      } else {
+        delete STATE.notes[currentNoteKey];
+      }
+      localStorage.setItem('esstu_notes', JSON.stringify(STATE.notes));
+      document.getElementById('noteModal').classList.add('hidden');
+      renderScheduleForCurrentDay();
+    });
+
+    // --- UI Update Helpers ---
+    function updateWeekButtonsUI() {
+      const b1 = document.getElementById('btnWeek1');
+      const b2 = document.getElementById('btnWeek2');
+      if (STATE.selectedWeek === 1) {
+        b1.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400";
+        b2.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800";
+      } else {
+        b2.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400";
+        b1.className = "flex-1 py-1.5 text-xs font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800";
+      }
+    }
+
+    function updateDayButtonsUI() {
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        const day = btn.dataset.day;
+        if (day === STATE.selectedDay) {
+          btn.className = "day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center bg-blue-600 text-white shadow-md shadow-blue-500/20";
+          btn.querySelector('span:first-child').className = "text-[11px] font-semibold text-blue-100";
+          btn.querySelector('span:last-child').className = "text-xs font-bold text-white";
+        } else {
+          btn.className = "day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-400";
+          btn.querySelector('span:first-child').className = "text-[11px] font-medium text-slate-400";
+          btn.querySelector('span:last-child').className = "text-xs font-bold";
+        }
+      });
+    }
+
+    // --- Event Listeners ---
+    function setupEventListeners() {
+      document.getElementById('btnToggleTheme').addEventListener('click', toggleTheme);
+
+      document.getElementById('btnWeek1').addEventListener('click', () => {
+        STATE.selectedWeek = 1;
+        updateWeekButtonsUI();
+        renderScheduleForCurrentDay();
+      });
+
+      document.getElementById('btnWeek2').addEventListener('click', () => {
+        STATE.selectedWeek = 2;
+        updateWeekButtonsUI();
+        renderScheduleForCurrentDay();
+      });
+
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          STATE.selectedDay = btn.dataset.day;
+          updateDayButtonsUI();
+          renderScheduleForCurrentDay();
+        });
+      });
+
+      // Filter pills
+      document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.filter-pill').forEach(p => {
+            p.className = "filter-pill px-2.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap";
+          });
+          pill.className = "filter-pill px-2.5 py-1 rounded-full bg-blue-600 text-white font-medium whitespace-nowrap";
+          STATE.activeFilter = pill.dataset.filter;
+          renderScheduleForCurrentDay();
+        });
+      });
+
+      // Selector Modal Open/Close
+      document.getElementById('btnOpenSelector').addEventListener('click', openSelectorModal);
+      document.getElementById('btnCloseSelector').addEventListener('click', () => {
+        document.getElementById('selectorModal').classList.add('hidden');
+      });
+
+      // Modal Tabs (Student / Teacher)
+      document.getElementById('tabStudent').addEventListener('click', () => {
+        switchModalTab('student');
+      });
+      document.getElementById('tabTeacher').addEventListener('click', () => {
+        switchModalTab('teacher');
+      });
+
+      // Section Select
+      document.getElementById('selectSection').addEventListener('change', (e) => {
+        STATE.section = e.target.value;
+        loadGroupsList();
+      });
+
+      // Search input
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        filterResultsList(e.target.value.toLowerCase().trim());
+      });
+    }
+
+    // --- Live Ticker & Realtime Status ---
+    function startLiveTicker() {
+      updateLiveBanner();
+      setInterval(updateLiveBanner, 30000); // Check every 30s
+    }
+
+    function updateLiveBanner() {
+      const banner = document.getElementById('liveStatusSection');
+      if (!STATE.scheduleData || STATE.selectedWeek !== STATE.currentWeek) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      // Check today's pairs
+      const dayIndex = new Date().getDay();
+      if (dayIndex === 0 || dayIndex > 6) {
+        banner.classList.add('hidden');
+        return;
+      }
+      const todayKey = DAYS_ORDER[dayIndex - 1];
+      const todayPairs = STATE.scheduleData.weeks?.[String(STATE.currentWeek)]?.[todayKey]?.pairs || [];
+      const activePairs = todayPairs.filter(p => !p.is_empty);
+
+      const now = new Date();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+
+      const toMin = (t) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      let currentPair = null;
+      let upcomingPair = null;
+
+      for (const p of activePairs) {
+        const sMin = toMin(p.start);
+        const eMin = toMin(p.end);
+        if (currentMin >= sMin && currentMin <= eMin) {
+          currentPair = { ...p, sMin, eMin };
+          break;
+        }
+        if (currentMin < sMin && !upcomingPair) {
+          upcomingPair = { ...p, sMin };
+        }
+      }
+
+      if (currentPair) {
+        banner.classList.remove('hidden');
+        const lesson = currentPair.lessons[0] || {};
+        const minLeft = currentPair.eMin - currentMin;
+        const total = currentPair.eMin - currentPair.sMin;
+        const pct = Math.round(((currentMin - currentPair.sMin) / total) * 100);
+
+        document.getElementById('liveBadge').innerText = 'Идёт пара прямо сейчас';
+        document.getElementById('liveBadge').className = 'text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-white/20';
+        document.getElementById('liveTimer').innerText = `До конца: ${minLeft} мин`;
+        document.getElementById('liveSubject').innerText = lesson.subject || 'Занятие';
+        document.getElementById('liveMeta').innerText = `Пара ${currentPair.number} • ауд. ${lesson.room || '—'} • ${lesson.type}`;
+        document.getElementById('liveTeacher').innerText = lesson.teacher || '';
+        document.getElementById('liveProgressBar').style.width = `${pct}%`;
+      } else if (upcomingPair) {
+        banner.classList.remove('hidden');
+        const lesson = upcomingPair.lessons[0] || {};
+        const minUntil = upcomingPair.sMin - currentMin;
+
+        document.getElementById('liveBadge').innerText = 'Скоро начнётся';
+        document.getElementById('liveBadge').className = 'text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-emerald-400/30 text-emerald-100';
+        document.getElementById('liveTimer').innerText = `Через ${minUntil} мин`;
+        document.getElementById('liveSubject').innerText = lesson.subject || 'Следующая пара';
+        document.getElementById('liveMeta').innerText = `Пара ${upcomingPair.number} • ауд. ${lesson.room || '—'} • ${lesson.type}`;
+        document.getElementById('liveTeacher').innerText = lesson.teacher || '';
+        document.getElementById('liveProgressBar').style.width = `0%`;
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    // --- Modal Selection Handling ---
+    let modalMode = 'student';
+
+    function openSelectorModal() {
+      document.getElementById('selectorModal').classList.remove('hidden');
+      switchModalTab(STATE.mode);
+    }
+
+    function switchModalTab(mode) {
+      modalMode = mode;
+      const ts = document.getElementById('tabStudent');
+      const tt = document.getElementById('tabTeacher');
+      const secControls = document.getElementById('studentSectionControls');
+      const search = document.getElementById('searchInput');
+
+      if (mode === 'student') {
+        ts.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400";
+        tt.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500 dark:text-slate-400";
+        secControls.classList.remove('hidden');
+        search.placeholder = "Поиск группы (например: 1146, 245)...";
+        loadGroupsList();
+      } else {
+        tt.className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400";
+        ts.className = "flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-500 dark:text-slate-400";
+        secControls.classList.add('hidden');
+        search.placeholder = "Поиск преподавателя по фамилии...";
+        loadTeachersList();
+      }
+    }
+
+    async function loadGroupsList() {
+      const list = document.getElementById('resultsList');
+      list.innerHTML = `<div class="p-4 text-xs text-center text-slate-400">Загрузка групп ВСГУТУ...</div>`;
+      try {
+        const res = await fetch(`/api/groups?section=${STATE.section}`);
+        const data = await res.json();
+        STATE.cachedGroups = data.groups || [];
+        renderGroups(STATE.cachedGroups);
+      } catch (e) {
+        list.innerHTML = `<div class="p-4 text-xs text-center text-red-500">Ошибка загрузки списка групп</div>`;
+      }
+    }
+
+    async function loadTeachersList() {
+      const list = document.getElementById('resultsList');
+      list.innerHTML = `<div class="p-4 text-xs text-center text-slate-400">Загрузка преподавателей...</div>`;
+      try {
+        const res = await fetch(`/api/teachers/all?section=${STATE.section}`);
+        const data = await res.json();
+        STATE.cachedTeachers = data.teachers || [];
+        renderTeachers(STATE.cachedTeachers);
+      } catch (e) {
+        list.innerHTML = `<div class="p-4 text-xs text-center text-red-500">Ошибка загрузки преподавателей</div>`;
+      }
+    }
+
+    function renderGroups(groups) {
+      const list = document.getElementById('resultsList');
+      list.innerHTML = '';
+      if (!groups.length) {
+        list.innerHTML = `<div class="p-4 text-xs text-center text-slate-400">Ничего не найдено</div>`;
+        return;
+      }
+      groups.forEach(g => {
+        const item = document.createElement('div');
+        item.className = "py-2.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between transition";
+        item.innerHTML = `
+          <div>
+            <div class="font-bold text-sm text-slate-900 dark:text-slate-100">${g.name}</div>
+            <div class="text-[11px] text-slate-400">${g.course} курс • ${g.section_title}</div>
+          </div>
+          <span class="text-xs font-semibold text-blue-500">Выбрать →</span>
+        `;
+        item.onclick = () => selectGroup(g);
+        list.appendChild(item);
+      });
+    }
+
+    function renderTeachers(teachers) {
+      const list = document.getElementById('resultsList');
+      list.innerHTML = '';
+      if (!teachers.length) {
+        list.innerHTML = `<div class="p-4 text-xs text-center text-slate-400">Ничего не найдено</div>`;
+        return;
+      }
+      teachers.forEach(t => {
+        const item = document.createElement('div');
+        item.className = "py-2.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between transition";
+        const prof = t.profile || {};
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <img src="${prof.photo || ''}" class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover" alt="avatar">
+            <div>
+              <div class="font-bold text-sm text-slate-900 dark:text-slate-100">${prof.full_name || t.teacher_name}</div>
+              <div class="text-[11px] text-slate-400 truncate max-w-[220px]">${prof.department || 'Кафедра'}</div>
+            </div>
+          </div>
+          <span class="text-xs font-semibold text-blue-500">Выбрать →</span>
+        `;
+        item.onclick = () => selectTeacher(t);
+        list.appendChild(item);
+      });
+    }
+
+    function filterResultsList(q) {
+      if (modalMode === 'student') {
+        const filtered = STATE.cachedGroups.filter(g => g.name.toLowerCase().includes(q));
+        renderGroups(filtered);
+      } else {
+        const filtered = STATE.cachedTeachers.filter(t =>
+          (t.profile?.full_name || t.teacher_name).toLowerCase().includes(q)
+        );
+        renderTeachers(filtered);
+      }
+    }
+
+    function selectGroup(g) {
+      STATE.mode = 'student';
+      STATE.groupId = g.id;
+      STATE.groupName = g.name;
+      STATE.section = g.section;
+      localStorage.setItem('esstu_mode', 'student');
+      localStorage.setItem('esstu_group_id', g.id);
+      localStorage.setItem('esstu_group_name', g.name);
+      localStorage.setItem('esstu_section', g.section);
+      document.getElementById('selectorModal').classList.add('hidden');
+      loadSchedule();
+    }
+
+    function selectTeacher(t) {
+      STATE.mode = 'teacher';
+      STATE.teacherKey = t.teacher_key;
+      STATE.teacherName = t.profile?.full_name || t.teacher_name;
+      localStorage.setItem('esstu_mode', 'teacher');
+      localStorage.setItem('esstu_teacher_key', t.teacher_key);
+      localStorage.setItem('esstu_teacher_name', STATE.teacherName);
+      document.getElementById('selectorModal').classList.add('hidden');
+      loadSchedule();
+    }
+  </script>
+</body>
+</html>

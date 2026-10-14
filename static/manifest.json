@@ -1,0 +1,16 @@
+{
+  "name": "ВСГУТУ Расписание Live",
+  "short_name": "ВСГУТУ Live",
+  "description": "Быстрое и удобное расписание ВСГУТУ для студентов и преподавателей",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://portal.esstu.ru/images/vsgutu.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
