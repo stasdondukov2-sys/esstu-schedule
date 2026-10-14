@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f2942" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="manifest.json" />
   <title>ВСГУТУ Расписание Live — Фирменный портал</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -1241,11 +1241,44 @@
     }
 
     // =========================================================================
-    // 6. ЗАГРУЗКА ДАННЫХ И МОДАЛЬНЫЕ ОКНА
+    // 6. ЗАГРУЗКА ДАННЫХ И МОДАЛЬНЫЕ ОКНА (Поддержка Localhost + GitHub Pages)
     // =========================================================================
+    function getApiUrl(path) {
+      const isGhPages = window.location.hostname.includes('github.io') || window.location.pathname.startsWith('/esstu-schedule');
+      const base = isGhPages ? '/esstu-schedule/api' : '/api';
+      if (!isGhPages && window.location.port) {
+        return path;
+      }
+      // GitHub Pages / Static JSON mapping
+      if (path.startsWith('/api/groups')) {
+        const sec = (path.match(/section=([^&]+)/) || [])[1] || 'bakalavriat';
+        return `${base}/groups/${sec}.json`;
+      }
+      if (path.startsWith('/api/schedule/')) {
+        const parts = path.replace('/api/schedule/', '').split('?')[0].split('/');
+        return `${base}/schedule/${parts[0]}/${parts[1]}.json`;
+      }
+      if (path.startsWith('/api/departments')) {
+        const sec = (path.match(/section=([^&]+)/) || [])[1] || 'bakalavriat';
+        return `${base}/departments/${sec}.json`;
+      }
+      if (path.startsWith('/api/teachers/all')) {
+        const sec = (path.match(/section=([^&]+)/) || [])[1] || 'bakalavriat';
+        return `${base}/teachers/all/${sec}.json`;
+      }
+      if (path.startsWith('/api/department/')) {
+        const parts = path.replace('/api/department/', '').split('?')[0].split('/');
+        return `${base}/department/${parts[0]}/${parts[1]}.json`;
+      }
+      if (path.startsWith('/api/status')) {
+        return `${base}/status.json`;
+      }
+      return path;
+    }
+
     async function loadGroups(section = 'bakalavriat') {
       try {
-        const res = await fetch(`/api/groups?section=${section}`);
+        const res = await fetch(getApiUrl(`/api/groups?section=${section}`));
         const data = await res.json();
         allGroups = data.groups || [];
         renderSectionTabs();
@@ -1258,7 +1291,7 @@
     async function loadStudentSchedule(section, groupId, groupName = null) {
       try {
         const nameParam = groupName ? `?group_name=${encodeURIComponent(groupName)}` : '';
-        const res = await fetch(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`);
+        const res = await fetch(getApiUrl(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`));
         const data = await res.json();
         appMode = 'student';
         localStorage.setItem('esstu_mode', 'student');
@@ -1286,8 +1319,8 @@
     async function loadDepartmentsAndTeachers() {
       try {
         const [deptRes, allTeachRes] = await Promise.all([
-          fetch('/api/departments?section=bakalavriat'),
-          fetch('/api/teachers/all?section=bakalavriat'),
+          fetch(getApiUrl('/api/departments?section=bakalavriat')),
+          fetch(getApiUrl('/api/teachers/all?section=bakalavriat')),
         ]);
         const deptData = await deptRes.json();
         const teachData = await allTeachRes.json();
@@ -1304,7 +1337,7 @@
         if (!allTeachersDirectory.length) await loadDepartmentsAndTeachers();
         let found = allTeachersDirectory.find((t) => t.teacher_key === teacherKey);
         if (!found && cafId) {
-          const res = await fetch(`/api/department/bakalavriat/${cafId}?merge=true`);
+          const res = await fetch(getApiUrl(`/api/department/bakalavriat/${cafId}?merge=true`));
           const data = await res.json();
           const list = data.teachers || [];
           found = list.find((t) => t.teacher_key === teacherKey) || list[0];
@@ -1572,7 +1605,7 @@
       setInterval(updateLiveHero, 1000);
 
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('sw.js').catch(() => {});
       }
     });
   </script>
