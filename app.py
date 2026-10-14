@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 from urllib.parse import urlparse, parse_qs, unquote
 import urllib.request
+from rooms import build_rooms_index
+from teachers import teachers_from_groups, departments_from_teachers
 
 from parser import (
     ESSTU_BASE_URL,
@@ -183,6 +185,25 @@ def service_schedule(section: str, group_id: str, group_name: Optional[str] = No
         raise
 
 
+def service_saved_group_teachers():
+    key = 'teachers_from_saved_groups'
+    if key in CACHE and time.time() - CACHE[key][0] < CACHE_TTL_SECONDS:
+        return CACHE[key][1]
+    schedules = []
+    for section in SECTIONS:
+        for path in (DEMO_DIR / section).glob('*.htm'):
+            if not path.stem.isdigit():
+                continue
+            try:
+                schedules.append(parse_group_schedule_html(path.read_bytes().decode('cp1251', errors='replace'),
+                                                          group_id=path.stem, section=section))
+            except Exception:
+                continue
+    result = teachers_from_groups(schedules)
+    CACHE[key] = (time.time(), result)
+    return result
+
+
 def service_departments(section: str = "bakalavriat") -> Dict[str, Any]:
     if section not in ("bakalavriat", "spezialitet"):
         section = "bakalavriat"
@@ -204,7 +225,8 @@ def service_departments(section: str = "bakalavriat") -> Dict[str, Any]:
         snap = load_snapshot(cache_key)
         if snap:
             return snap
-        raise
+        return {'section': section, 'institutes': departments_from_teachers(service_saved_group_teachers()),
+                'source': 'group_schedules', 'partial': True}
 
 
 def service_department_teachers(section: str, caf_id: str, merge: bool = True) -> Dict[str, Any]:
@@ -274,6 +296,8 @@ def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
                 except Exception:
                     continue
 
+        if not all_t:
+            all_t = service_saved_group_teachers()
         payload = {"count": len(all_t), "teachers": all_t}
         CACHE[cache_key] = (now, payload)
         save_snapshot(cache_key, payload)
@@ -283,6 +307,31 @@ def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
         if snap:
             return snap
         raise
+
+
+def service_rooms_index() -> Dict[str, Any]:
+    key = 'rooms_index_all'
+    now = time.time()
+    if key in CACHE and now - CACHE[key][0] < CACHE_TTL_SECONDS:
+        return CACHE[key][1]
+    schedules = []
+    errors = []
+    for section in SECTIONS:
+        try:
+            schedules.extend(service_all_teachers(section).get('teachers', []))
+            for group in service_groups(section).get('groups', []):
+                try:
+                    schedules.append(service_schedule(section, group['id'], group.get('name')))
+                except Exception:
+                    errors.append(f"{section}/{group['id']}")
+        except Exception:
+            errors.append(section)
+    payload = build_rooms_index(schedules)
+    payload['failed_sources'] = errors
+    if not schedules:
+        raise RuntimeError('Не удалось загрузить расписания для индекса аудиторий')
+    CACHE[key] = (time.time(), payload)
+    return payload
 
 
 def service_update_teacher_meta(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -313,6 +362,11 @@ class ESSTURequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if urlparse(self.path).path == '/api/rooms':
+            try:
+                return self._send_json(service_rooms_index())
+            except Exception as exc:
+                return self._send_json({'error': str(exc)}, status=503)
         parsed = urlparse(self.path)
         path, qs = parsed.path, parse_qs(parsed.query)
         try:
