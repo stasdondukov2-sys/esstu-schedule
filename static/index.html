@@ -92,7 +92,7 @@
   </header>
 
   <!-- ОСНОВНОЙ КОНТЕНТ -->
-  <main class="max-w-xl mx-auto px-4 pt-3.5 space-y-3.5">
+  <main class="max-w-xl mx-auto px-4 pt-3.5 space-y-3.5"><div id="favoritesBar" class="flex gap-2 overflow-x-auto text-xs"></div><button id="favStarBtn" onclick="toggleCurrentFavorite()" aria-label="Избранное">☆ Избранное</button>
 
     <!-- КАРТОЧКА ПРОФИЛЯ ПРЕПОДАВАТЕЛЯ (показывается в режиме Преподавателя) -->
     <section
@@ -216,37 +216,12 @@
         </div>
       </div>
 
-      <!-- Фильтр подгрупп и ин.яза (для студентов) -->
-      <div id="studentSubgroupFilterRow" class="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1.5">
-        <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-          <span>Моя подгруппа / ин.яз:</span>
-          <label class="flex items-center gap-1.5 cursor-pointer select-none text-slate-600 dark:text-slate-300 font-medium">
-            <input type="checkbox" id="hideEmptyToggle" checked onchange="saveFiltersAndRender()" class="rounded text-teal-600 focus:ring-0" />
-            <span>Скрывать пустые окна</span>
-          </label>
-        </div>
-        <div id="subgroupPills" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          <button onclick="setSubgroupFilter('all')" data-sub="all" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            Все
-          </button>
-          <button onclick="setSubgroupFilter('англ')" data-sub="англ" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            🇬🇧 Англ.
-          </button>
-          <button onclick="setSubgroupFilter('франц')" data-sub="франц" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            🇫🇷 Франц.
-          </button>
-          <button onclick="setSubgroupFilter('нем')" data-sub="нем" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            🇩🇪 Нем.
-          </button>
-          <button onclick="setSubgroupFilter('1 п/г')" data-sub="1 п/г" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            1 подгруппа
-          </button>
-          <button onclick="setSubgroupFilter('2 п/г')" data-sub="2 п/г" class="sub-pill shrink-0 px-2.5 py-1 rounded-xl text-xs font-semibold transition">
-            2 подгруппа
-          </button>
-        </div>
+      <div class="flex gap-2 flex-wrap text-xs">
+        <button onclick="openRoomsModal()">🚪 Свободные ауд.</button>
+        <button onclick="exportScheduleToICS()">📆 В календарь (.ics)</button>
+        <button onclick="shareCurrentScheduleLink()">🔗 Ссылка</button>
+        <button onclick="toggleTimeSim()">⏱ Тест времени</button>
       </div>
-
       <!-- Панель симуляции времени (Тест Live) -->
       <div id="timeSimPanel" class="hidden pt-2.5 border-t border-slate-200 dark:border-slate-800 text-xs space-y-2">
         <div class="flex items-center justify-between">
@@ -300,9 +275,9 @@
         <span class="text-base leading-none">👨🏫</span>
         <span class="text-[10px] mt-1">Кафедры</span>
       </button>
-      <button onclick="toggleTimeSim()" id="navBtnSim" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 dark:text-slate-400 font-medium">
+      <button onclick="openRoomsModal()" id="navBtnRooms" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 dark:text-slate-400 font-medium">
         <span class="text-base leading-none">⏱</span>
-        <span class="text-[10px] mt-1">Тест Live</span>
+        <span class="text-[10px] mt-1">Аудитории</span>
       </button>
     </div>
   </nav>
@@ -594,7 +569,6 @@
       teacherKey: localStorage.getItem('esstu_teacher_key') || 'дарибазарон э.ч.',
       teacherCafId: localStorage.getItem('esstu_teacher_caf') || 'Caf5',
       hideEmpty: localStorage.getItem('esstu_hide_empty') !== 'false',
-      subgroupFilter: localStorage.getItem('esstu_subgroup_filter') || 'all',
     };
 
     // Заметки
@@ -644,49 +618,7 @@
       renderPairsList();
     }
 
-    // Фильтр подгрупп
-    function setSubgroupFilter(sub) {
-      savedState.subgroupFilter = sub;
-      localStorage.setItem('esstu_subgroup_filter', sub);
-      renderAll();
-    }
-
-    function renderSubgroupPills() {
-      document.querySelectorAll('.sub-pill').forEach((btn) => {
-        const val = btn.getAttribute('data-sub');
-        const active = val === savedState.subgroupFilter;
-        btn.className = active
-          ? 'sub-pill shrink-0 px-3 py-1 rounded-xl text-xs font-bold bg-teal-600 text-white shadow-sm'
-          : 'sub-pill shrink-0 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700';
-      });
-    }
-
-    function filterLessons(lessons) {
-      if (!lessons || !lessons.length) return [];
-      if (appMode === 'teacher') return lessons;
-      const filterVal = savedState.subgroupFilter;
-      if (!filterVal || filterVal === 'all') return lessons;
-
-      const isLangFilter = ['англ', 'франц', 'нем', 'кит'].includes(filterVal);
-      const isSubgroupNum = ['1 п/г', '2 п/г'].includes(filterVal);
-
-      return lessons.filter((l) => {
-        const tags = l.tags || [];
-        const rawLower = (l.raw || '').toLowerCase();
-        if (isLangFilter) {
-          const hasAnyLang = tags.some((t) => ['англ', 'франц', 'нем', 'кит'].includes(t)) || /(англ|франц|нем|кит)/i.test(rawLower);
-          if (!hasAnyLang) return true;
-          return tags.includes(filterVal) || rawLower.includes(filterVal);
-        }
-        if (isSubgroupNum) {
-          const hasAnySub = tags.some((t) => ['1 п/г', '2 п/г'].includes(t)) || /([12]\s*п\/?г)/i.test(rawLower);
-          if (!hasAnySub) return true;
-          return tags.includes(filterVal);
-        }
-        return true;
-      });
-    }
-
+    function filterLessons(lessons) { return lessons || []; }
     function timeToMinutes(hhmm) {
       const [h, m] = hhmm.split(':').map(Number);
       return h * 60 + m;
@@ -864,14 +796,11 @@
     // =========================================================================
     function renderHeaderAndNav() {
       const profileCard = document.getElementById('teacherProfileCard');
-      const subRow = document.getElementById('studentSubgroupFilterRow');
 
       if (appMode === 'student') {
         profileCard.classList.add('hidden');
-        subRow.classList.remove('hidden');
         document.getElementById('currentEntityBtnText').textContent = `🎓 ${savedState.groupName}`;
       } else {
-        subRow.classList.add('hidden');
         if (currentSchedule && currentSchedule.profile) {
           const p = currentSchedule.profile;
           profileCard.classList.remove('hidden');
@@ -960,7 +889,11 @@
       const diffMin = startNext - endPrev;
       if (diffMin <= 0) return '';
 
+      const previous = decodeEsstuRoom(prevPair.lessons?.[0]?.room);
+      const next = decodeEsstuRoom(nextPair.lessons?.[0]?.room);
       let label = `☕ Перемена ${diffMin} мин`;
+      const transfer = previous && next && previous.building !== next.building
+        ? ` • 🏃 Смена корпуса: ${previous.building} → ${next.building}` : '';
       let style = 'text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0b1524]';
 
       if (diffMin === 40) {
@@ -977,7 +910,7 @@
         <div class="flex items-center gap-2 pl-6 py-0.5">
           <div class="w-0.5 h-4 bg-slate-300 dark:bg-slate-800"></div>
           <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${style}">
-            ${label}
+            ${label}${transfer}
           </span>
         </div>
       `;
@@ -1002,7 +935,7 @@
         return;
       }
 
-      const hideEmpty = document.getElementById('hideEmptyToggle').checked;
+      const hideEmpty = true;
       const now = getUlanUdeNow();
       const weekNow = getWeekNum(now);
       const todayIdx = (now.getDay() + 6) % 7;
@@ -1233,8 +1166,8 @@
     }
 
     function renderAll() {
+      renderFavoritesBar();
       renderHeaderAndNav();
-      renderSubgroupPills();
       renderDayTabs();
       renderPairsList();
       updateLiveHero();
@@ -1246,9 +1179,10 @@
     function getApiUrl(path) {
       const isGhPages = window.location.hostname.includes('github.io') || window.location.pathname.startsWith('/esstu-schedule');
       const base = isGhPages ? '/esstu-schedule/api' : '/api';
-      if (!isGhPages && window.location.port) {
+      if (!isGhPages) {
         return path;
       }
+      if (path === '/api/rooms') return `${base}/rooms.json`;
       // GitHub Pages / Static JSON mapping
       if (path.startsWith('/api/groups')) {
         const sec = (path.match(/section=([^&]+)/) || [])[1] || 'bakalavriat';
@@ -1470,7 +1404,7 @@
             <img src="${p.photo}" alt="" class="w-11 h-11 rounded-xl object-cover shrink-0 bg-slate-700" />
             <div class="min-w-0 flex-1">
               <div class="font-bold text-xs sm:text-sm truncate">${p.full_name || p.short_name}</div>
-              <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${p.degree}</div>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${p.degree || ""}</div><div class="text-[10px] text-teal-500">${getTeacherLiveStatus(t)}</div>
               <div class="text-[10px] text-teal-600 dark:text-teal-400 truncate">${p.department}</div>
             </div>
           </button>
@@ -1557,7 +1491,7 @@
     function selectDay(dayKey) { selectedDayKey = dayKey; renderAll(); }
 
     function saveFiltersAndRender() {
-      const hideEmpty = document.getElementById('hideEmptyToggle').checked;
+      const hideEmpty = true;
       localStorage.setItem('esstu_hide_empty', String(hideEmpty));
       renderAll();
     }
@@ -1586,13 +1520,24 @@
 
     window.addEventListener('DOMContentLoaded', async () => {
       applyTheme();
-      document.getElementById('hideEmptyToggle').checked = savedState.hideEmpty;
 
       const now = getUlanUdeNow();
       selectedWeek = getWeekNum(now);
       const dayIdx = (now.getDay() + 6) % 7;
       selectedDayKey = dayIdx < 6 ? DAY_KEYS[dayIdx] : 'monday';
 
+      const params = new URLSearchParams(location.search);
+      if (params.has('group')) {
+        appMode = 'student';
+        savedState.section = params.get('section') || 'bakalavriat';
+        const response = await fetch(getApiUrl(`/api/groups?section=${savedState.section}`));
+        const groups = (await response.json()).groups || [];
+        const group = groups.find(g => g.name === params.get('group'));
+        if (group) { savedState.groupId = group.id; savedState.groupName = group.name; }
+      } else if (params.has('teacher')) {
+        appMode = 'teacher'; savedState.teacherKey = params.get('teacher');
+        savedState.teacherCafId = params.get('caf') || 'Caf5';
+      }
       loadGroups(savedState.section);
       loadDepartmentsAndTeachers();
 
@@ -1609,5 +1554,6 @@
       }
     });
   </script>
+<script src="modern.js"></script>
 </body>
 </html>

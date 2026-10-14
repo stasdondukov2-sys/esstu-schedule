@@ -2,6 +2,7 @@ import json
 import shutil
 import time
 from pathlib import Path
+from rooms import build_rooms_index
 from parser import (
     SECTIONS,
     get_week_num,
@@ -141,6 +142,12 @@ def build():
         (api_dir / "teachers" / "all" / f"{section}.json").write_text(json.dumps(all_teach_payload, ensure_ascii=False), encoding="utf-8")
         print(f"✓ Generated {len(all_teachers)} teachers for '{section}'")
 
+    room_sources = []
+    for file in (api_dir / 'schedule').rglob('*.json'):
+        room_sources.append(json.loads(file.read_text(encoding='utf-8')))
+    for file in (api_dir / 'teachers' / 'all').glob('*.json'):
+        room_sources.extend(json.loads(file.read_text(encoding='utf-8')).get('teachers', []))
+    (api_dir / 'rooms.json').write_text(json.dumps(build_rooms_index(room_sources), ensure_ascii=False), encoding='utf-8')
     print(f"🎉 Build complete in {time.time()-start_time:.2f}s! All output saved to dist/")
 
 if __name__ == "__main__":

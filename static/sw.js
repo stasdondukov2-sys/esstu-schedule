@@ -1,8 +1,9 @@
-const CACHE_NAME = 'esstu-live-v1';
+const CACHE_NAME = 'esstu-live-v2';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './modern.js',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -27,9 +28,10 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+  if (event.request.method !== 'GET') return;
 
   // For API calls: Network first with Cache fallback
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.includes('/api/')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

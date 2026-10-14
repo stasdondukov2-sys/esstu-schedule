@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 from urllib.parse import urlparse, parse_qs, unquote
 import urllib.request
+from rooms import build_rooms_index
 
 from parser import (
     ESSTU_BASE_URL,
@@ -285,6 +286,31 @@ def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
         raise
 
 
+def service_rooms_index() -> Dict[str, Any]:
+    key = 'rooms_index_all'
+    now = time.time()
+    if key in CACHE and now - CACHE[key][0] < CACHE_TTL_SECONDS:
+        return CACHE[key][1]
+    schedules = []
+    errors = []
+    for section in SECTIONS:
+        try:
+            schedules.extend(service_all_teachers(section).get('teachers', []))
+            for group in service_groups(section).get('groups', []):
+                try:
+                    schedules.append(service_schedule(section, group['id'], group.get('name')))
+                except Exception:
+                    errors.append(f"{section}/{group['id']}")
+        except Exception:
+            errors.append(section)
+    payload = build_rooms_index(schedules)
+    payload['failed_sources'] = errors
+    if not schedules:
+        raise RuntimeError('Не удалось загрузить расписания для индекса аудиторий')
+    CACHE[key] = (time.time(), payload)
+    return payload
+
+
 def service_update_teacher_meta(data: Dict[str, Any]) -> Dict[str, Any]:
     t_key = data.get("teacher_key", "")
     upd = {k: str(data[k]).strip() for k in ("photo", "full_name", "degree", "building") if data.get(k)}
@@ -313,6 +339,11 @@ class ESSTURequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if urlparse(self.path).path == '/api/rooms':
+            try:
+                return self._send_json(service_rooms_index())
+            except Exception as exc:
+                return self._send_json({'error': str(exc)}, status=503)
         parsed = urlparse(self.path)
         path, qs = parsed.path, parse_qs(parsed.query)
         try:
