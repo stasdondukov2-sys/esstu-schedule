@@ -2,7 +2,7 @@ import json
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 from bs4 import BeautifulSoup
 
 ESSTU_BASE_URL = "https://portal.esstu.ru"
@@ -16,13 +16,34 @@ SECTIONS = {
 
 DAYS_MAP = {
     "пнд": ("monday", "Понедельник", "Пн", 0),
+    "пон": ("monday", "Понедельник", "Пн", 0),
     "втр": ("tuesday", "Вторник", "Вт", 1),
+    "вто": ("tuesday", "Вторник", "Вт", 1),
     "срд": ("wednesday", "Среда", "Ср", 2),
+    "сре": ("wednesday", "Среда", "Ср", 2),
     "чтв": ("thursday", "Четверг", "Чт", 3),
+    "чет": ("thursday", "Четверг", "Чт", 3),
     "птн": ("friday", "Пятница", "Пт", 4),
+    "пят": ("friday", "Пятница", "Пт", 4),
     "сбт": ("saturday", "Суббота", "Сб", 5),
+    "суб": ("saturday", "Суббота", "Сб", 5),
 }
 
+INDEX_TO_DAY = [
+    ("monday", "Понедельник", "Пн", 0),
+    ("tuesday", "Вторник", "Вт", 1),
+    ("wednesday", "Среда", "Ср", 2),
+    ("thursday", "Четверг", "Чт", 3),
+    ("friday", "Пятница", "Пт", 4),
+    ("saturday", "Суббота", "Сб", 5),
+]
+
+RU_MONTHS = {
+    "янв": 1, "фев": 2, "мар": 3, "апр": 4, "май": 5, "мая": 5,
+    "июн": 6, "июл": 7, "авг": 8, "сен": 9, "окт": 10, "ноя": 11, "дек": 12,
+}
+
+# Поддержка до 7 пар (для заочников zo1 / zo2)
 DEFAULT_BELLS = [
     {"number": 1, "label": "1-я", "start": "09:00", "end": "10:35"},
     {"number": 2, "label": "2-я", "start": "10:45", "end": "12:20"},
@@ -30,9 +51,20 @@ DEFAULT_BELLS = [
     {"number": 4, "label": "4-я", "start": "14:45", "end": "16:20"},
     {"number": 5, "label": "5-я", "start": "16:25", "end": "18:00"},
     {"number": 6, "label": "6-я", "start": "18:05", "end": "19:40"},
+    {"number": 7, "label": "7-я", "start": "19:45", "end": "21:20"},
 ]
 
 TEACHERS_META_PATH = Path(__file__).parent / "teachers_meta.json"
+
+
+def clean_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def normalize_group_name(name: str) -> str:
+    """Нормализует название группы для защиты от плавающих URL (Issue #4: 78.htm -> 80.htm)."""
+    s = clean_text(name).lower().replace("ё", "е").rstrip(".")
+    return re.sub(r"\s+", " ", s)
 
 
 def load_teachers_meta() -> Dict[str, Dict[str, Any]]:
@@ -44,8 +76,14 @@ def load_teachers_meta() -> Dict[str, Dict[str, Any]]:
     return {}
 
 
-def clean_text(text: str) -> str:
-    return re.sub(r"\s+", " ", text or "").strip()
+def save_teacher_meta_entry(teacher_key: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+    meta = load_teachers_meta()
+    norm_key = normalize_teacher_key(teacher_key)
+    existing = meta.get(norm_key, {})
+    existing.update(entry)
+    meta[norm_key] = existing
+    TEACHERS_META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    return existing
 
 
 def normalize_teacher_key(raw_name: str) -> str:
@@ -65,25 +103,13 @@ def format_teacher_display_name(raw_name: str) -> str:
     return cleaned
 
 
-def save_teacher_meta_entry(teacher_key: str, entry: Dict[str, Any]) -> Dict[str, Any]:
-    meta = load_teachers_meta()
-    norm_key = normalize_teacher_key(teacher_key)
-    existing = meta.get(norm_key, {})
-    existing.update(entry)
-    meta[norm_key] = existing
-    TEACHERS_META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    return existing
-
-
 def build_teacher_profile(raw_name: str, caf_id: str = "", department_name: str = "") -> Dict[str, Any]:
     norm_key = normalize_teacher_key(raw_name)
     display_name = format_teacher_display_name(raw_name)
     meta = load_teachers_meta().get(norm_key, {})
-
     parts = display_name.replace(".", " ").split()
     initials = "".join(p[0].upper() for p in parts[:2]) if parts else "П"
     default_avatar = f"https://ui-avatars.com/api/?name={initials}&background=2563eb&color=fff&size=256&bold=true"
-
     return {
         "key": norm_key,
         "raw_name": clean_text(raw_name),
@@ -117,7 +143,6 @@ def get_week_num(target_dt: Optional[datetime] = None) -> Dict[str, Any]:
         target_dt = datetime.now(ulan_ude_tz)
     elif target_dt.tzinfo is None:
         target_dt = target_dt.replace(tzinfo=ulan_ude_tz)
-
     ref_date = get_reference_date(target_dt)
     diff_weeks = (target_dt - ref_date).total_seconds() / (60 * 60 * 24 * 7)
     is_odd = (int(diff_weeks) % 2 == 0) if diff_weeks >= 0 else (int(diff_weeks + 1 / 7) % 2 != 0)
@@ -144,7 +169,7 @@ def extract_tags(text: str) -> List[str]:
 def parse_single_lesson_chunk(chunk: str) -> Dict[str, Any]:
     raw = clean_text(chunk)
     lesson_type, type_code, rest = "Занятие", "other", raw
-    type_match = re.match(r"^(лек\.|пр\.|лаб\.|сем\.)\s*(.*)$", raw, flags=re.IGNORECASE)
+    type_match = re.match(r"^(лек\.|пр\.|лаб\.|сем\.|конс\.|экз\.|зач\.)\s*(.*)$", raw, flags=re.I)
     if type_match:
         prefix = type_match.group(1).lower()
         rest = type_match.group(2).strip()
@@ -154,6 +179,8 @@ def parse_single_lesson_chunk(chunk: str) -> Dict[str, Any]:
             lesson_type, type_code = "Практика", "practice"
         elif prefix.startswith("лаб"):
             lesson_type, type_code = "Лабораторная", "lab"
+        elif prefix.startswith(("экз", "зач", "конс")):
+            lesson_type, type_code = "Аттестация", "lecture"
     elif "физическая культура" in raw.lower() or "фкс" in raw.lower():
         lesson_type, type_code = "Физкультура", "sport"
 
@@ -193,12 +220,10 @@ def parse_cell_lessons(cell_text: str) -> List[Dict[str, Any]]:
     text = clean_text(cell_text)
     if not text or text in ("_", "-", "—"):
         return []
-
-    parts = re.split(r"(?=(?:^|\s)(?:лек\.|пр\.|лаб\.|сем\.))", text, flags=re.IGNORECASE)
+    parts = re.split(r"(?=(?:^|\s)(?:лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.))", text, flags=re.I)
     parts = [clean_text(p) for p in parts if clean_text(p) and clean_text(p) != "_"]
     expanded_parts: List[str] = []
     base_prefix = ""
-
     for p in parts:
         m_pref = re.match(r"^(лек\.|пр\.|лаб\.|сем\.)\s*([А-ЯЁа-яё\s]+?)(?=\(|[А-ЯЁ]{2,})", p, flags=re.I)
         if m_pref:
@@ -216,7 +241,6 @@ def parse_cell_lessons(cell_text: str) -> List[Dict[str, Any]]:
                 if sc_clean.startswith("("):
                     sc_clean = base_prefix + sc_clean
             expanded_parts.append(sc_clean)
-
     final_parts = expanded_parts if expanded_parts else [text]
     return [parse_single_lesson_chunk(p) for p in final_parts]
 
@@ -225,9 +249,8 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
     text = clean_text(cell_text)
     if not text or text in ("_", "-", "—"):
         return []
-
     lesson_type, type_code, subject, before_subject, groups_str, room = "Занятие", "other", text, text, "", ""
-    type_match = re.search(r"\b(лек\.|пр\.|лаб\.|сем\.)\s*(.+)$", text, flags=re.IGNORECASE)
+    type_match = re.search(r"\b(лек\.|пр\.|лаб\.|сем\.)\s*(.+)$", text, flags=re.I)
     if type_match:
         prefix = type_match.group(1).lower()
         subject = clean_text(type_match.group(2))
@@ -238,14 +261,12 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
             lesson_type, type_code = "Практика", "practice"
         elif prefix.startswith("лаб"):
             lesson_type, type_code = "Лабораторная", "lab"
-
     room_match = re.search(r"\bа\.?\s*([0-9А-Яа-яA-Za-z\-/]+(?:\s+и/д)?)\s*$", before_subject, flags=re.I)
     if room_match:
         room = room_match.group(1).strip()
         groups_str = clean_text(before_subject[: room_match.start()])
     else:
         groups_str = before_subject
-
     tags = extract_tags(text)
     return [{
         "raw": text,
@@ -263,6 +284,32 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
     }]
 
 
+def parse_day_or_date_cell(raw_cell_text: str, fallback_row_idx: int) -> Optional[Tuple[str, str, str, int, str]]:
+    """Поддержка стандартных дней ('Пнд'..'Сбт') и дат сессии заочников ('15 янв', '16.01')."""
+    cleaned = clean_text(raw_cell_text).lower()
+    if not cleaned:
+        return None
+    prefix3 = cleaned[:3]
+    if prefix3 in DAYS_MAP:
+        day_key, day_title, day_short, day_index = DAYS_MAP[prefix3]
+        return day_key, day_title, day_short, day_index, ""
+
+    m_ru = re.search(r"(\d{1,2})\s*([а-яё]{3,})", cleaned)
+    if m_ru and m_ru.group(2)[:3] in RU_MONTHS:
+        day_num = int(m_ru.group(1))
+        mon_num = RU_MONTHS[m_ru.group(2)[:3]]
+        day_key, base_title, _, day_index = INDEX_TO_DAY[fallback_row_idx % 6]
+        date_label = f"{day_num:02d}.{mon_num:02d}"
+        return day_key, f"{base_title} ({date_label})", date_label, day_index, date_label
+
+    m_num = re.search(r"(\d{1,2})\.(\d{1,2})", cleaned)
+    if m_num:
+        date_label = f"{int(m_num.group(1)):02d}.{int(m_num.group(2)):02d}"
+        day_key, base_title, _, day_index = INDEX_TO_DAY[fallback_row_idx % 6]
+        return day_key, f"{base_title} ({date_label})", date_label, day_index, date_label
+    return None
+
+
 def parse_groups_list_html(html: str, section: str = "bakalavriat") -> List[Dict[str, Any]]:
     soup = BeautifulSoup(html, "html.parser")
     groups, seen = [], set()
@@ -272,12 +319,10 @@ def parse_groups_list_html(html: str, section: str = "bakalavriat") -> List[Dict
     rows = table.find_all("tr")
     if not rows:
         return groups
-
     courses = []
     for td in rows[0].find_all(["td", "th"]):
         m = re.search(r"(\d+)", clean_text(td.get_text()))
         courses.append(int(m.group(1)) if m else len(courses) + 1)
-
     for tr in rows[1:]:
         for col_idx, td in enumerate(tr.find_all("td")):
             course = courses[col_idx] if col_idx < len(courses) else col_idx + 1
@@ -291,6 +336,7 @@ def parse_groups_list_html(html: str, section: str = "bakalavriat") -> List[Dict
                     "id": href.replace(".htm", ""),
                     "href": href,
                     "name": name,
+                    "norm_name": normalize_group_name(name),
                     "course": course,
                     "section": section,
                     "section_title": SECTIONS.get(section, section),
@@ -300,29 +346,51 @@ def parse_groups_list_html(html: str, section: str = "bakalavriat") -> List[Dict
 
 def parse_14row_table(table, is_teacher: bool = False, owner_name: str = "", section: str = "bakalavriat") -> Dict[str, Any]:
     rows = table.find_all("tr") if table else []
-    bells = list(DEFAULT_BELLS)
-    weeks: Dict[str, Dict[str, Any]] = {"1": {}, "2": {}}
+    max_pairs = 6
+    if len(rows) > 0:
+        header_cells = rows[0].find_all(["td", "th"])[1:]
+        if len(header_cells) >= 7:
+            max_pairs = len(header_cells)
+    bells = list(DEFAULT_BELLS[:max_pairs])
 
+    if len(rows) > 1:
+        time_cells = rows[1].find_all(["td", "th"])[1:]
+        if len(time_cells) > max_pairs:
+            max_pairs = len(time_cells)
+        parsed_bells = []
+        for idx, td in enumerate(time_cells):
+            m = re.search(r"(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})", clean_text(td.get_text()))
+            if m:
+                s_t = "0" + m.group(1) if len(m.group(1)) == 4 else m.group(1)
+                e_t = "0" + m.group(2) if len(m.group(2)) == 4 else m.group(2)
+                parsed_bells.append({"number": idx + 1, "label": f"{idx + 1}-я", "start": s_t, "end": e_t})
+            elif idx < len(DEFAULT_BELLS):
+                parsed_bells.append(DEFAULT_BELLS[idx])
+        if parsed_bells:
+            bells = parsed_bells
+
+    weeks: Dict[str, Dict[str, Any]] = {"1": {}, "2": {}}
+    total_lessons = 0
     for row_idx, tr in enumerate(rows[2:]):
         tds = tr.find_all("td")
         if not tds:
             continue
-        day_raw = clean_text(tds[0].get_text()).lower()[:3]
-        if day_raw not in DAYS_MAP:
+        parsed_day = parse_day_or_date_cell(tds[0].get_text(), row_idx)
+        if not parsed_day:
             continue
-        day_key, day_title, day_short, day_index = DAYS_MAP[day_raw]
+        day_key, day_title, day_short, day_index, session_date = parsed_day
         has_blue_font = bool(tr.find("font", attrs={"color": re.compile(r"#0000ff", re.I)}))
         week_key = "2" if (has_blue_font or row_idx >= 6) else "1"
-
         pairs_list = []
-        for pair_idx, td in enumerate(tds[1:7]):
-            bell = bells[pair_idx] if pair_idx < len(bells) else DEFAULT_BELLS[pair_idx]
+        for pair_idx, td in enumerate(tds[1 : 1 + max_pairs]):
+            bell = bells[pair_idx] if pair_idx < len(bells) else {"number": pair_idx + 1, "label": f"{pair_idx + 1}-я", "start": "19:45", "end": "21:20"}
             cell_txt = td.get_text(" ")
             lessons = (
                 parse_teacher_cell_lessons(cell_txt, teacher_name=owner_name, section=section)
                 if is_teacher
                 else parse_cell_lessons(cell_txt)
             )
+            total_lessons += len(lessons)
             pairs_list.append({
                 "number": bell["number"],
                 "label": bell["label"],
@@ -336,9 +404,10 @@ def parse_14row_table(table, is_teacher: bool = False, owner_name: str = "", sec
             "day_title": day_title,
             "day_short": day_short,
             "day_index": day_index,
+            "session_date": session_date,
             "pairs": pairs_list,
         }
-    return {"bells": bells, "weeks": weeks}
+    return {"bells": bells, "weeks": weeks, "total_lessons": total_lessons}
 
 
 def parse_group_schedule_html(html: str, group_id: str = "1", section: str = "bakalavriat") -> Dict[str, Any]:
@@ -353,10 +422,12 @@ def parse_group_schedule_html(html: str, group_id: str = "1", section: str = "ba
         "mode": "student",
         "group_id": group_id,
         "group_name": group_name,
+        "norm_group_name": normalize_group_name(group_name),
         "section": section,
         "section_title": SECTIONS.get(section, section),
         "bells": parsed["bells"],
         "weeks": parsed["weeks"],
+        "total_lessons": parsed["total_lessons"],
     }
 
 
@@ -416,5 +487,5 @@ def merge_teacher_schedules(primary: Dict[str, Any], secondary: Optional[Dict[st
                 for lesson in sec_pairs[p_idx]["lessons"]:
                     if lesson["raw"] not in existing_raws:
                         prim_pairs[p_idx]["lessons"].append(lesson)
-                prim_pairs[p_idx]["is_empty"] = len(prim_pairs[p_idx]["lessons"]) == 0
+                        prim_pairs[p_idx]["is_empty"] = False
     return merged

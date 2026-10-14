@@ -1,19 +1,20 @@
 import json
 import mimetypes
 import os
+import ssl
 import time
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Dict, Any, Tuple
-from urllib.parse import urlparse, parse_qs
+from typing import Dict, Any, Tuple, Optional
+from urllib.parse import urlparse, parse_qs, unquote
 import urllib.request
-import ssl
 
 from parser import (
     ESSTU_BASE_URL,
     SECTIONS,
     get_week_num,
+    normalize_group_name,
     parse_groups_list_html,
     parse_group_schedule_html,
     parse_departments_list_html,
@@ -29,30 +30,55 @@ CACHE_TTL_SECONDS = 900
 BASE_DIR = Path(__file__).parent
 DEMO_DIR = BASE_DIR / "demo_data"
 STATIC_DIR = BASE_DIR / "static"
+SNAPSHOT_DIR = BASE_DIR / "cache_store"
+SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Create SSL context that allows portal access if cert is legacy
-ssl_ctx = ssl.create_default_context()
-ssl_ctx.check_hostname = False
-ssl_ctx.verify_mode = ssl.CERT_NONE
+
+def create_esstu_ssl_context() -> ssl.SSLContext:
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    if hasattr(ssl, "OP_LEGACY_SERVER_CONNECT"):
+        ctx.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT")
+    return ctx
+
+
+SSL_CONTEXT = create_esstu_ssl_context()
+
+
+def save_snapshot(key: str, payload: Dict[str, Any]) -> None:
+    safe_name = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in key)
+    try:
+        (SNAPSHOT_DIR / f"{safe_name}.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def load_snapshot(key: str) -> Optional[Dict[str, Any]]:
+    safe_name = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in key)
+    path = SNAPSHOT_DIR / f"{safe_name}.json"
+    if path.exists():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["is_stale_fallback"] = True
+            data["last_modified"] = "⚠️ Сайт ВСГУТУ обновляется — показана сохранённая рабочая копия"
+            return data
+        except Exception:
+            return None
+    return None
 
 
 def fetch_esstu_html_sync(relative_path: str, allow_group_fallback: bool = True) -> Tuple[str, str]:
     clean_rel = relative_path.lstrip("/")
     url = f"{ESSTU_BASE_URL}/{clean_rel}"
     try:
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ESSTU-Schedule-PWA/2.0",
-                "Accept": "text/html,application/xhtml+xml",
-            },
-        )
-        with urllib.request.urlopen(req, timeout=8, context=ssl_ctx) as resp:
+        req = urllib.request.Request(url, headers={"User-Agent": "ESSTU-Schedule-PWA/2.1"})
+        with urllib.request.urlopen(req, timeout=6, context=SSL_CONTEXT) as resp:
             raw = resp.read()
             html = raw.decode("cp1251", errors="replace")
             last_mod = resp.headers.get("Last-Modified") or "Прямая синхронизация с portal.esstu.ru"
             return html, last_mod
-    except Exception as e:
+    except Exception:
         local_file = DEMO_DIR / clean_rel
         if local_file.exists():
             return local_file.read_bytes().decode("cp1251", errors="replace"), "Локальный кэш ВСГУТУ (cp1251)"
@@ -60,7 +86,7 @@ def fetch_esstu_html_sync(relative_path: str, allow_group_fallback: bool = True)
             fallback = DEMO_DIR / "bakalavriat" / "1.htm"
             if fallback.exists():
                 return fallback.read_bytes().decode("cp1251", errors="replace"), "Локальный кэш ВСГУТУ"
-        raise FileNotFoundError(f"Страница {clean_rel} не найдена на портале и в кэше: {e}")
+        raise FileNotFoundError(f"Страница {clean_rel} не найдена")
 
 
 def service_status() -> Dict[str, Any]:
@@ -73,40 +99,88 @@ def service_status() -> Dict[str, Any]:
     }
 
 
-def service_groups(section: str = "bakalavriat") -> Dict[str, Any]:
+def service_groups(section: str = "bakalavriat", force_refresh: bool = False) -> Dict[str, Any]:
     if section not in SECTIONS:
         section = "bakalavriat"
     cache_key, now = f"groups:{section}", time.time()
-    if cache_key in CACHE and (now - CACHE[cache_key][0]) < CACHE_TTL_SECONDS:
+    if not force_refresh and cache_key in CACHE and (now - CACHE[cache_key][0]) < CACHE_TTL_SECONDS:
         return CACHE[cache_key][1]
+    try:
+        html, last_mod = fetch_esstu_html_sync(f"{section}/raspisan.htm", allow_group_fallback=False)
+        groups = parse_groups_list_html(html, section=section)
+        payload = {
+            "section": section,
+            "section_title": SECTIONS[section],
+            "last_modified": last_mod,
+            "count": len(groups),
+            "groups": groups,
+        }
+        CACHE[cache_key] = (now, payload)
+        save_snapshot(cache_key, payload)
+        return payload
+    except Exception:
+        snap = load_snapshot(cache_key)
+        if snap:
+            return snap
+        raise
 
-    html, last_mod = fetch_esstu_html_sync(f"{section}/raspisan.htm")
-    groups = parse_groups_list_html(html, section=section)
-    payload = {
-        "section": section,
-        "section_title": SECTIONS[section],
-        "last_modified": last_mod,
-        "count": len(groups),
-        "groups": groups,
-    }
-    CACHE[cache_key] = (now, payload)
-    return payload
+
+def resolve_group_file_id(section: str, group_id: str, group_name: Optional[str] = None, force_refresh: bool = False) -> Tuple[str, str]:
+    clean_id = unquote(group_id).replace(".htm", "").strip()
+    target_name = unquote(group_name or "").strip()
+    try:
+        groups_list = service_groups(section, force_refresh=force_refresh).get("groups", [])
+        search_norms = []
+        if target_name:
+            search_norms.append(normalize_group_name(target_name))
+        if not clean_id.isdigit():
+            search_norms.append(normalize_group_name(clean_id))
+        for norm_q in search_norms:
+            for g in groups_list:
+                if g.get("norm_name") == norm_q:
+                    return g["id"], g["name"]
+        for g in groups_list:
+            if g["id"] == clean_id:
+                return g["id"], g["name"]
+    except Exception:
+        pass
+    return clean_id, target_name or clean_id
 
 
-def service_schedule(section: str, group_id: str) -> Dict[str, Any]:
+def service_schedule(section: str, group_id: str, group_name: Optional[str] = None) -> Dict[str, Any]:
     if section not in SECTIONS:
         section = "bakalavriat"
-    clean_id = group_id.replace(".htm", "")
-    cache_key, now = f"sched:{section}:{clean_id}", time.time()
-    if cache_key in CACHE and (now - CACHE[cache_key][0]) < CACHE_TTL_SECONDS:
-        return CACHE[cache_key][1]
+    actual_id, expected_name = resolve_group_file_id(section, group_id, group_name, force_refresh=False)
+    norm_expected = normalize_group_name(expected_name) if expected_name else ""
+    cache_key = f"sched:{section}:{actual_id}"
+    snapshot_key = f"sched_{section}_{norm_expected or actual_id}"
+    now = time.time()
 
-    html, last_mod = fetch_esstu_html_sync(f"{section}/{clean_id}.htm")
-    schedule = parse_group_schedule_html(html, group_id=clean_id, section=section)
-    schedule["last_modified"] = last_mod
-    schedule["week_now"] = get_week_num()
-    CACHE[cache_key] = (now, schedule)
-    return schedule
+    if cache_key in CACHE and (now - CACHE[cache_key][0]) < CACHE_TTL_SECONDS:
+        cached = CACHE[cache_key][1]
+        if not norm_expected or cached.get("norm_group_name") == norm_expected:
+            return cached
+
+    try:
+        html, last_mod = fetch_esstu_html_sync(f"{section}/{actual_id}.htm")
+        schedule = parse_group_schedule_html(html, group_id=actual_id, section=section)
+        if norm_expected and not norm_expected.isdigit() and schedule.get("norm_group_name") != norm_expected:
+            new_id, _ = resolve_group_file_id(section, group_id, expected_name, force_refresh=True)
+            if new_id != actual_id:
+                actual_id = new_id
+                html, last_mod = fetch_esstu_html_sync(f"{section}/{actual_id}.htm")
+                schedule = parse_group_schedule_html(html, group_id=actual_id, section=section)
+        schedule["resolved_group_id"] = actual_id
+        schedule["last_modified"] = last_mod
+        schedule["week_now"] = get_week_num()
+        CACHE[f"sched:{section}:{actual_id}"] = (now, schedule)
+        save_snapshot(snapshot_key, schedule)
+        return schedule
+    except Exception:
+        snap = load_snapshot(snapshot_key)
+        if snap:
+            return snap
+        raise
 
 
 def service_departments(section: str = "bakalavriat") -> Dict[str, Any]:
@@ -116,14 +190,21 @@ def service_departments(section: str = "bakalavriat") -> Dict[str, Any]:
     if cache_key in CACHE and (now - CACHE[cache_key][0]) < CACHE_TTL_SECONDS:
         return CACHE[cache_key][1]
 
-    html, last_mod = fetch_esstu_html_sync(f"{section}/craspisanEdt.htm", allow_group_fallback=False)
-    payload = {
-        "section": section,
-        "last_modified": last_mod,
-        "institutes": parse_departments_list_html(html, section=section),
-    }
-    CACHE[cache_key] = (now, payload)
-    return payload
+    try:
+        html, last_mod = fetch_esstu_html_sync(f"{section}/craspisanEdt.htm", allow_group_fallback=False)
+        payload = {
+            "section": section,
+            "last_modified": last_mod,
+            "institutes": parse_departments_list_html(html, section=section),
+        }
+        CACHE[cache_key] = (now, payload)
+        save_snapshot(cache_key, payload)
+        return payload
+    except Exception:
+        snap = load_snapshot(cache_key)
+        if snap:
+            return snap
+        raise
 
 
 def service_department_teachers(section: str, caf_id: str, merge: bool = True) -> Dict[str, Any]:
@@ -143,30 +224,37 @@ def service_department_teachers(section: str, caf_id: str, merge: bool = True) -
     except Exception:
         pass
 
-    html_p, last_mod = fetch_esstu_html_sync(f"{section}/{clean_caf}.htm", allow_group_fallback=False)
-    teachers_p = parse_department_teachers_html(html_p, caf_id=clean_caf, section=section, department_name=dept_name)
+    try:
+        html_p, last_mod = fetch_esstu_html_sync(f"{section}/{clean_caf}.htm", allow_group_fallback=False)
+        teachers_p = parse_department_teachers_html(html_p, caf_id=clean_caf, section=section, department_name=dept_name)
 
-    if merge:
-        other = "spezialitet" if section == "bakalavriat" else "bakalavriat"
-        try:
-            html_s, _ = fetch_esstu_html_sync(f"{other}/{clean_caf}.htm", allow_group_fallback=False)
-            sec_map = {
-                t["teacher_key"]: t
-                for t in parse_department_teachers_html(html_s, caf_id=clean_caf, section=other, department_name=dept_name)
-            }
-            teachers_p = [merge_teacher_schedules(t, sec_map.get(t["teacher_key"])) for t in teachers_p]
-        except Exception:
-            pass
+        if merge:
+            other = "spezialitet" if section == "bakalavriat" else "bakalavriat"
+            try:
+                html_s, _ = fetch_esstu_html_sync(f"{other}/{clean_caf}.htm", allow_group_fallback=False)
+                sec_map = {
+                    t["teacher_key"]: t
+                    for t in parse_department_teachers_html(html_s, caf_id=clean_caf, section=other, department_name=dept_name)
+                }
+                teachers_p = [merge_teacher_schedules(t, sec_map.get(t["teacher_key"])) for t in teachers_p]
+            except Exception:
+                pass
 
-    payload = {
-        "caf_id": clean_caf,
-        "department_name": dept_name,
-        "section": section,
-        "last_modified": last_mod,
-        "teachers": teachers_p,
-    }
-    CACHE[cache_key] = (now, payload)
-    return payload
+        payload = {
+            "caf_id": clean_caf,
+            "department_name": dept_name,
+            "section": section,
+            "last_modified": last_mod,
+            "teachers": teachers_p,
+        }
+        CACHE[cache_key] = (now, payload)
+        save_snapshot(cache_key, payload)
+        return payload
+    except Exception:
+        snap = load_snapshot(cache_key)
+        if snap:
+            return snap
+        raise
 
 
 def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
@@ -175,19 +263,26 @@ def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
         return CACHE[cache_key][1]
 
     all_t, seen = [], set()
-    for inst in service_departments(section).get("institutes", []):
-        for dept in inst.get("departments", []):
-            try:
-                for t in service_department_teachers(section, dept["caf_id"], merge=True).get("teachers", []):
-                    if t["teacher_key"] not in seen:
-                        seen.add(t["teacher_key"])
-                        all_t.append(t)
-            except Exception:
-                continue
+    try:
+        for inst in service_departments(section).get("institutes", []):
+            for dept in inst.get("departments", []):
+                try:
+                    for t in service_department_teachers(section, dept["caf_id"], merge=True).get("teachers", []):
+                        if t["teacher_key"] not in seen:
+                            seen.add(t["teacher_key"])
+                            all_t.append(t)
+                except Exception:
+                    continue
 
-    payload = {"count": len(all_t), "teachers": all_t}
-    CACHE[cache_key] = (now, payload)
-    return payload
+        payload = {"count": len(all_t), "teachers": all_t}
+        CACHE[cache_key] = (now, payload)
+        save_snapshot(cache_key, payload)
+        return payload
+    except Exception:
+        snap = load_snapshot(cache_key)
+        if snap:
+            return snap
+        raise
 
 
 def service_update_teacher_meta(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -224,10 +319,12 @@ class ESSTURequestHandler(BaseHTTPRequestHandler):
             if path == "/api/status":
                 return self._send_json(service_status())
             if path == "/api/groups":
-                return self._send_json(service_groups(qs.get("section", ["bakalavriat"])[0]))
+                refresh = qs.get("refresh", ["false"])[0].lower() == "true"
+                return self._send_json(service_groups(qs.get("section", ["bakalavriat"])[0], force_refresh=refresh))
             if path.startswith("/api/schedule/"):
                 parts = [p for p in path.split("/") if p]
-                return self._send_json(service_schedule(parts[2], parts[3]))
+                group_name = qs.get("group_name", [None])[0]
+                return self._send_json(service_schedule(parts[2], parts[3], group_name=group_name))
             if path == "/api/departments":
                 return self._send_json(service_departments(qs.get("section", ["bakalavriat"])[0]))
             if path.startswith("/api/department/"):

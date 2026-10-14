@@ -341,7 +341,7 @@
       try {
         let endpoint = '';
         if (STATE.mode === 'student') {
-          endpoint = `/api/schedule/${STATE.section}/${STATE.groupId}`;
+          endpoint = `/api/schedule/${STATE.section}/${STATE.groupId}?group_name=${encodeURIComponent(STATE.groupName)}`;
         } else {
           // If teacher mode
           endpoint = `/api/teachers/all?section=${STATE.section}`;
@@ -352,6 +352,13 @@
 
         if (STATE.mode === 'student') {
           STATE.scheduleData = data;
+          if (data.resolved_group_id && data.resolved_group_id !== STATE.groupId) {
+            STATE.groupId = data.resolved_group_id;
+            localStorage.setItem('esstu_group_id', data.resolved_group_id);
+          }
+          if (data.is_stale_fallback) {
+            document.getElementById('headerSubtitle').innerText = `${data.group_name} (${data.last_modified})`;
+          }
         } else {
           STATE.cachedTeachers = data.teachers || [];
           const found = STATE.cachedTeachers.find(t => t.teacher_key === STATE.teacherKey) || STATE.cachedTeachers[0];
@@ -510,8 +517,12 @@
     }
 
     function updateDayButtonsUI() {
+      const weekKey = String(STATE.selectedWeek);
       document.querySelectorAll('.day-btn').forEach(btn => {
         const day = btn.dataset.day;
+        const dayData = STATE.scheduleData?.weeks?.[weekKey]?.[day];
+        const dateLabel = dayData?.session_date || '';
+
         if (day === STATE.selectedDay) {
           btn.className = "day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center bg-blue-600 text-white shadow-md shadow-blue-500/20";
           btn.querySelector('span:first-child').className = "text-[11px] font-semibold text-blue-100";
@@ -520,6 +531,13 @@
           btn.className = "day-btn py-2 rounded-xl text-center flex flex-col items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-400";
           btn.querySelector('span:first-child').className = "text-[11px] font-medium text-slate-400";
           btn.querySelector('span:last-child').className = "text-xs font-bold";
+        }
+
+        if (dateLabel) {
+          btn.querySelector('span:last-child').innerText = dateLabel;
+        } else {
+          const defaultNums = { monday: '1', tuesday: '2', wednesday: '3', thursday: '4', friday: '5', saturday: '6' };
+          btn.querySelector('span:last-child').innerText = defaultNums[day] || '';
         }
       });
     }
