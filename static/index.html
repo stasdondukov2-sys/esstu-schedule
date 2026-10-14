@@ -343,7 +343,7 @@
         <input
           type="text"
           id="teacherSearchInput"
-          oninput="renderTeacherModalContent()"
+          oninput="selectedCafFilter='';renderTeacherModalContent()"
           placeholder="Поиск по фамилии или кафедре (Дарибазарон, Физика, Соколов)..."
           class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-teal-500"
         />
@@ -420,6 +420,7 @@
         return {
           badge: `ауд. ${r}`,
           location: `${mCorp ? 'Корпус ' + mCorp[1] + ' • ' : ''}Спортивный комплекс ВСГУТУ`,
+          building: mCorp ? `Корпус ${mCorp[1]}` : null,
         };
       }
 
@@ -428,6 +429,7 @@
         return {
           badge: `ауд. ${r}`,
           location: 'Военный учебный центр ВСГУТУ',
+          building: 'ВУЦ',
         };
       }
 
@@ -440,6 +442,7 @@
         return {
           badge: `ауд. ${r}`,
           location: `Корпус ${bld} • ${floor} этаж • каб. ${roomNum}${hasInteractiveBoard ? ' • Инт. доска' : ''}`,
+          building: `Корпус ${bld}`,
         };
       }
 
@@ -452,6 +455,7 @@
         return {
           badge: `ауд. ${r}`,
           location: `Корпус ${bld} • ${floor} этаж • ауд. ${cab}${hasInteractiveBoard ? ' • Инт. доска' : ''}`,
+          building: `Корпус ${bld}`,
         };
       }
 
@@ -464,6 +468,7 @@
         return {
           badge: `ауд. ${r}`,
           location: `Корпус ${bld} • ${floor} этаж • ауд. ${cab}${hasInteractiveBoard ? ' • Инт. доска' : ''}`,
+          building: `Корпус ${bld}`,
         };
       }
 
@@ -807,7 +812,7 @@
           document.getElementById('teacherAvatarImg').src = p.photo;
           document.getElementById('teacherFullName').textContent = p.full_name || p.short_name;
           document.getElementById('teacherDegreeAndDept').textContent = `${p.degree} • ${p.department}`;
-          document.getElementById('teacherBuildingInfo').textContent = p.building ? `📍 ${p.building}` : '';
+          document.getElementById('teacherBuildingInfo').textContent = (p.building ? `📍 ${p.building}` : '') + (currentSchedule.partial ? ' • По расписаниям групп: данные могут быть неполными' : '');
           document.getElementById('currentEntityBtnText').textContent = `👨🏫 ${p.short_name}`;
         }
       }
@@ -892,7 +897,7 @@
       const previous = decodeEsstuRoom(prevPair.lessons?.[0]?.room);
       const next = decodeEsstuRoom(nextPair.lessons?.[0]?.room);
       let label = `☕ Перемена ${diffMin} мин`;
-      const transfer = previous && next && previous.building !== next.building
+      const transfer = previous?.building && next?.building && previous.building !== next.building
         ? ` • 🏃 Смена корпуса: ${previous.building} → ${next.building}` : '';
       let style = 'text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0b1524]';
 
@@ -1250,46 +1255,54 @@
       }
     }
 
+    let teacherDirectoryLoading = null;
+    let teacherDirectoryError = '';
+    let selectedCafFilter = '';
+
+    function normSearch(value) {
+      return String(value || '').normalize('NFKC').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
+    }
+    function teacherMatches(t, query, caf = '') {
+      if (caf && normSearch(t.caf_id) !== normSearch(caf)) return false;
+      const p = t.profile || {};
+      const lessons = Object.values(t.weeks || {}).flatMap(days => Object.values(days).flatMap(d => (d.pairs || []).flatMap(p => p.lessons || [])));
+      const text = normSearch([t.teacher_key, p.full_name, p.short_name, p.department, p.degree, p.building,
+        ...lessons.map(l => `${l.subject || ''} ${l.room || ''} ${decodeEsstuRoom(l.room)?.building || ''}`)].join(' '));
+      return normSearch(query).split(' ').every(word => text.includes(word));
+    }
     async function loadDepartmentsAndTeachers() {
-      try {
-        const [deptRes, allTeachRes] = await Promise.all([
-          fetch(getApiUrl('/api/departments?section=bakalavriat')),
-          fetch(getApiUrl('/api/teachers/all?section=bakalavriat')),
-        ]);
-        const deptData = await deptRes.json();
-        const teachData = await allTeachRes.json();
-        departmentsHierarchy = deptData.institutes || [];
-        allTeachersDirectory = teachData.teachers || [];
-        renderTeacherModalContent();
-      } catch (e) {
-        console.error('Ошибка загрузки кафедр:', e);
-      }
+      if (teacherDirectoryLoading) return teacherDirectoryLoading;
+      teacherDirectoryLoading = (async () => {
+        teacherDirectoryError = '';
+        try {
+          const results = await Promise.allSettled([
+            fetch(getApiUrl('/api/departments?section=bakalavriat')).then(r => { if (!r.ok) throw Error(); return r.json(); }),
+            fetch(getApiUrl('/api/teachers/all?section=bakalavriat')).then(r => { if (!r.ok) throw Error(); return r.json(); }),
+          ]);
+          if (results[0].status === 'fulfilled') departmentsHierarchy = results[0].value.institutes || [];
+          if (results[1].status === 'fulfilled') allTeachersDirectory = results[1].value.teachers || [];
+          else if (!allTeachersDirectory.length) teacherDirectoryError = 'Не удалось загрузить преподавателей. Проверьте соединение и повторите загрузку.';
+        } finally { teacherDirectoryLoading = null; renderTeacherModalContent(); }
+      })();
+      renderTeacherModalContent();
+      return teacherDirectoryLoading;
     }
 
-    async function loadTeacherSchedule(teacherKey, cafId = 'Caf5') {
-      try {
-        if (!allTeachersDirectory.length) await loadDepartmentsAndTeachers();
-        let found = allTeachersDirectory.find((t) => t.teacher_key === teacherKey);
-        if (!found && cafId) {
-          const res = await fetch(getApiUrl(`/api/department/bakalavriat/${cafId}?merge=true`));
-          const data = await res.json();
-          const list = data.teachers || [];
-          found = list.find((t) => t.teacher_key === teacherKey) || list[0];
-        }
-        if (!found && allTeachersDirectory.length) found = allTeachersDirectory[0];
-        if (found) {
-          appMode = 'teacher';
-          localStorage.setItem('esstu_mode', 'teacher');
-          savedState.teacherKey = found.teacher_key;
-          savedState.teacherCafId = found.caf_id || cafId;
-          localStorage.setItem('esstu_teacher_key', savedState.teacherKey);
-          localStorage.setItem('esstu_teacher_caf', savedState.teacherCafId);
-          currentSchedule = found;
-          renderAll();
-        }
-      } catch (e) {
-        console.error('Ошибка загрузки преподавателя:', e);
+    async function loadTeacherSchedule(teacherKey, cafId = '') {
+      if (!allTeachersDirectory.length) await loadDepartmentsAndTeachers();
+      let found = allTeachersDirectory.find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
+      if (!found && cafId) {
+        try {
+          const res = await fetch(getApiUrl(`/api/department/bakalavriat/${encodeURIComponent(cafId)}?merge=true`));
+          if (res.ok) found = ((await res.json()).teachers || []).find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
+        } catch (e) { console.error(e); }
       }
+      if (!found) { alert('Преподаватель не найден в сохранённых расписаниях. Попробуйте поиск по фамилии.'); return; }
+      appMode = 'teacher'; localStorage.setItem('esstu_mode', 'teacher');
+      savedState.teacherKey = found.teacher_key; savedState.teacherCafId = found.caf_id || '';
+      localStorage.setItem('esstu_teacher_key', savedState.teacherKey);
+      localStorage.setItem('esstu_teacher_caf', savedState.teacherCafId);
+      currentSchedule = found; renderAll();
     }
 
     function openSelectorModal() {
@@ -1380,15 +1393,7 @@
       const q = (document.getElementById('teacherSearchInput').value || '').trim().toLowerCase();
       const container = document.getElementById('teacherModalContent');
 
-      const filteredTeachers = allTeachersDirectory.filter((t) => {
-        if (!q) return true;
-        const p = t.profile || {};
-        return (
-          (p.full_name || '').toLowerCase().includes(q) ||
-          (p.short_name || '').toLowerCase().includes(q) ||
-          (p.department || '').toLowerCase().includes(q)
-        );
-      });
+      const filteredTeachers = allTeachersDirectory.filter(t => teacherMatches(t, q, selectedCafFilter));
 
       const teachersCards = filteredTeachers.map((t) => {
         const p = t.profile || {};
@@ -1406,6 +1411,7 @@
               <div class="font-bold text-xs sm:text-sm truncate">${p.full_name || p.short_name}</div>
               <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${p.degree || ""}</div><div class="text-[10px] text-teal-500">${getTeacherLiveStatus(t)}</div>
               <div class="text-[10px] text-teal-600 dark:text-teal-400 truncate">${p.department}</div>
+              <div class="text-[10px] text-slate-400 truncate">${escapeHTML([...new Set(Object.values(t.weeks || {}).flatMap(w => Object.values(w).flatMap(d => (d.pairs || []).flatMap(p => (p.lessons || []).map(l => l.subject)))))].join(', '))}</div>
             </div>
           </button>
         `;
@@ -1417,7 +1423,7 @@
           <div class="flex flex-wrap gap-1.5">
             ${(inst.departments || []).map((d) => `
               <button
-                onclick="filterByCaf('${d.name.replace(/'/g, "\\'")}')"
+                onclick="filterByCaf('${d.caf_id.replace(/'/g, "\\'")}')"
                 class="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500 transition"
               >
                 🏛 ${d.name}
@@ -1431,20 +1437,23 @@
         <div class="space-y-2">
           <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Преподаватели (${filteredTeachers.length})
+            <button onclick="selectedCafFilter='';document.getElementById('teacherSearchInput').value='';renderTeacherModalContent()" class="ml-2 text-teal-500">Сбросить фильтры</button>
           </div>
-          <div class="space-y-2">${teachersCards || '<div class="text-xs text-slate-400 py-3 text-center">Не найдено</div>'}</div>
+          <div class="space-y-2">${teachersCards || `<div class="text-xs text-slate-400 py-3 text-center">${teacherDirectoryLoading ? 'Загрузка преподавателей…' : escapeHTML(teacherDirectoryError || 'По запросу преподаватели не найдены. Попробуйте другую фамилию или предмет.')}<button onclick="loadDepartmentsAndTeachers()" class="block mx-auto mt-2 text-teal-500">Повторить загрузку</button></div>`}</div>
         </div>
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Институты и кафедры ВСГУТУ
           </div>
           ${deptsHtml}
+          <p class="text-xs text-slate-400">Часть расписаний преподавателей восстановлена из расписаний групп и может быть неполной.</p>
         </div>
       `;
     }
 
-    function filterByCaf(deptName) {
-      document.getElementById('teacherSearchInput').value = deptName;
+    function filterByCaf(cafId) {
+      selectedCafFilter = cafId;
+      document.getElementById('teacherSearchInput').value = '';
       renderTeacherModalContent();
     }
 

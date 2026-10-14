@@ -3,6 +3,7 @@ import shutil
 import time
 from pathlib import Path
 from rooms import build_rooms_index
+from teachers import teachers_from_groups, departments_from_teachers
 from parser import (
     SECTIONS,
     get_week_num,
@@ -55,6 +56,7 @@ def build():
     (api_dir / "status.json").write_text(json.dumps(status_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 3. Parse and save groups list for all sections
+    group_schedules = []
     for section in SECTIONS.keys():
         rasp_file = DEMO_DIR / section / "raspisan.htm"
         if not rasp_file.exists():
@@ -79,16 +81,25 @@ def build():
                     sched["resolved_group_id"] = gid
                     sched["last_modified"] = "Статическая синхронизация ВСГУТУ"
                     sched["week_now"] = now_week
+                    group_schedules.append(sched)
                     (sec_sched_dir / f"{gid}.json").write_text(json.dumps(sched, ensure_ascii=False), encoding="utf-8")
                     count_sched += 1
                 except Exception as e:
                     pass
         print(f"✓ Generated {count_sched} schedule JSON files for '{section}'")
 
+    derived_teachers = teachers_from_groups(group_schedules)
     # 5. Departments and Teachers for bakalavriat and spezialitet
     for section in ("bakalavriat", "spezialitet"):
         crasp_file = DEMO_DIR / section / "craspisanEdt.htm"
         if not crasp_file.exists():
+            fallback = {'count': len(derived_teachers), 'teachers': derived_teachers,
+                        'source': 'group_schedules', 'partial': True}
+            (api_dir / 'teachers' / 'all' / f'{section}.json').write_text(json.dumps(fallback, ensure_ascii=False), encoding='utf-8')
+            (api_dir / 'departments' / f'{section}.json').write_text(json.dumps({
+                'institutes': departments_from_teachers(derived_teachers), 'source': 'group_schedules'
+            }, ensure_ascii=False), encoding='utf-8')
+            print(f"✓ Recovered {len(derived_teachers)} teachers from group schedules for '{section}'")
             continue
         html = crasp_file.read_bytes().decode("cp1251", errors="replace")
         institutes = parse_departments_list_html(html, section=section)
