@@ -1,0 +1,56 @@
+[
+  {
+    "source": "demo_data/bakalavriat/1.htm",
+    "sha256": "a0679f8a29640fee6ecafe736ccb376f9f26bc70e8fd07997b98575902d09648",
+    "kind": "group",
+    "section": "bakalavriat",
+    "id": "1",
+    "html": "bakalavriat-1.htm",
+    "json": "bakalavriat-1.json"
+  },
+  {
+    "source": "demo_data/spezialitet/1.htm",
+    "sha256": "06e365dce200d19414028dcae925387a457dcffdb32e4abc959282d05d531fec",
+    "kind": "group",
+    "section": "spezialitet",
+    "id": "1",
+    "html": "spezialitet-1.htm",
+    "json": "spezialitet-1.json"
+  },
+  {
+    "source": "demo_data/zo1/1.htm",
+    "sha256": "340706f50bfd4203e26e03e90d72dac1f530db77f19c855d136b915db41d7a44",
+    "kind": "group",
+    "section": "zo1",
+    "id": "1",
+    "html": "zo1-1.htm",
+    "json": "zo1-1.json"
+  },
+  {
+    "source": "demo_data/zo1/401.htm",
+    "sha256": "4d44b12e8c2edd1b3f4ca4abe05ff177bf27220a83cfeb6b68249b5e0fc7b990",
+    "kind": "group",
+    "section": "zo1",
+    "id": "401",
+    "html": "zo1-401.htm",
+    "json": "zo1-401.json"
+  },
+  {
+    "source": "demo_data/zo2/1.htm",
+    "sha256": "6d59f92e0c596bd0481f280e341a07d2c006e0008f45c0d23b1e01b9403c5dd3",
+    "kind": "group",
+    "section": "zo2",
+    "id": "1",
+    "html": "zo2-1.htm",
+    "json": "zo2-1.json"
+  },
+  {
+    "source": "demo_data/bakalavriat/Caf5.htm",
+    "sha256": "07205a4976f9c9a7c6a2e3bc791d0ef5aa5c24ffc66a7ffdc3c06598c75f75f2",
+    "kind": "teacher",
+    "section": "bakalavriat",
+    "id": "Caf5",
+    "html": "bakalavriat-Caf5.htm",
+    "json": "bakalavriat-Caf5.json"
+  }
+]

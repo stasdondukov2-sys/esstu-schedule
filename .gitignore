@@ -14,3 +14,6 @@ dist/
 node_modules/
 preview/
 portal-*-sample.htm
+
+test-results/
+playwright-report/

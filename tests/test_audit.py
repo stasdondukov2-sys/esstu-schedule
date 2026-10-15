@@ -56,12 +56,11 @@ class ReliabilityTests(unittest.TestCase):
         html = '<table><tr><td></td><td>1</td></tr><tr><td></td><td>09:00 - 10:35</td></tr>'
         html += '<tr><td>Пнд</td><td>лек. A</td></tr>' + '<tr><td></td></tr>' * 10
         html += '<tr><td>Втр</td><td>лек. B</td></tr><tr><td>Пнд</td><td>лек. C</td></tr></table>'
-        parsed = parser.parse_14row_table(BeautifulSoup(html, 'html.parser').table)
-        self.assertIn('tuesday', parsed['weeks']['1'])
-        self.assertIn('monday', parsed['weeks']['2'])
+        with self.assertRaises(parser.ScheduleStructureError):
+            parser.parse_14row_table(BeautifulSoup(html, 'lxml').table)
 
     def test_missing_teacher_heading_is_not_a_person(self):
-        with self.assertLogs(parser.LOGGER, level='WARNING'):
+        with self.assertLogs('esstu_schedule', level='WARNING'):
             self.assertEqual(parser.parse_department_teachers_html('<table><tr><td>A</td></tr></table>'), [])
 
     def test_meta_cache_and_explicit_invalidation(self):
@@ -144,6 +143,25 @@ class HTTPRegressionTests(unittest.TestCase):
     def test_invalid_json_body(self):
         self.assertEqual(self.request('/api/teacher/meta', method='POST', body='{')[0], 405)
         self.assertEqual(self.request('/api/teacher/meta', method='POST', body='[]')[0], 405)
+
+    def test_status_exposes_parser_diagnostics(self):
+        from esstu_schedule.data.diagnostics import record_error, parsing_status
+        previous=parsing_status()['parse_error_count']
+        with self.assertLogs('esstu_schedule',level='WARNING'):
+            record_error('test.htm','Unexpected structure')
+        status,_,body=self.request('/api/status')
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)['parse_error_count'],previous+1)
+
+    def test_rooms_route_reads_prebuilt_snapshot(self):
+        import os
+        from esstu_schedule.data.store import write_json_atomic
+        path=self.static.parent/'rooms.json'
+        write_json_atomic(path,{'count':1,'rooms':[{'room':'0410','slots':{}}]})
+        with patch.dict(os.environ,{'ESSTU_ROOMS_INDEX':str(path)}), patch.object(app,'service_all_teachers',side_effect=AssertionError('Must not scan')):
+            status,_,body=self.request('/api/rooms')
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)['rooms'][0]['room'],'0410')
 
 
 if __name__ == '__main__':

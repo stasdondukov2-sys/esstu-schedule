@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 import app
 import parser
-import test_audit
+from tests import test_audit
 
 
 class ReadOnlyHTTPTests(unittest.TestCase):

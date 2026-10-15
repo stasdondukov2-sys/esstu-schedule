@@ -88,6 +88,7 @@
 <!-- КОНТЕЙНЕР ТАЙМЛАЙНА ПАР ИЛИ СЕТКИ НА ВСЮ НЕДЕЛЮ -->
 <button id="activeSubgroupChip" class="hidden text-xs text-teal-600 dark:text-teal-300" onclick="openSimpleDialog('moreMenuModal')"></button>
 <p id="selectedDaySummary" class="text-xs font-semibold text-slate-500 dark:text-slate-400"></p>
+<div id="incompleteWarning" class="hidden text-sm text-amber-600 dark:text-amber-300" role="alert">Данные неполные: структура источника не распознана. Сверьте расписание с порталом.</div>
 <section class="space-y-2.5" id="pairsContainer"></section>
 <footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
 </main>
@@ -395,6 +396,7 @@
 
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
+      if (currentSchedule?.is_incomplete) { container.textContent='Данные неполные — расписание не удалось надёжно прочитать.'; return; }
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
       if ((hasDatedSchedule(currentSchedule) || viewMode === 'dates') && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
       if (scheduleTab === 'session') { renderSessionTimeline(container); return; }
@@ -940,6 +942,7 @@
 </div></div></details></div></div><div aria-labelledby="freshnessTitle" aria-modal="true" class="simple-overlay hidden" id="freshnessModal" role="dialog"><div class="simple-sheet"><div class="flex justify-between items-center"><h2 class="font-bold" id="freshnessTitle">Данные расписания</h2><button aria-label="Закрыть сведения" class="w-10 text-xl" onclick="closeSimpleDialog('freshnessModal')">×</button></div><div class="space-y-3 mt-3" id="freshnessSlot"><section class="rounded-2xl p-3 bg-white dark:bg-[#101c2e] border border-slate-500/20 text-xs" id="dataFreshnessBar">
 <div class="flex justify-between items-center gap-2"><b id="freshnessBadge">Загрузка данных…</b><button class="text-teal-600 dark:text-teal-300" id="refreshSchedule" onclick="forceRefreshSchedule()">🔄 Обновить</button></div>
 <p class="text-slate-500 mt-1 break-words" id="freshnessTimestamp"></p>
+<p id="parseQualityStatus" class="mt-2" role="status">Проверка качества данных…</p>
 </section><div id="lastModifiedText">Источник: portal.esstu.ru (windows-1251 → UTF-8)</div></div><p class="text-xs text-slate-500 mt-3" id="clockDisplay"></p></div></div>
 <div id="examModal" class="simple-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="examTitle"><div class="simple-sheet">
 <div class="flex justify-between items-center"><h2 id="examTitle" class="font-bold">Личная запись сессии</h2><button aria-label="Закрыть запись" onclick="closeSimpleDialog('examModal')" class="w-10 text-xl">×</button></div>

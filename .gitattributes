@@ -1,0 +1,2 @@
+# Golden HTML is a byte-for-byte cp1251 snapshot with SHA-256 provenance.
+tests/fixtures/*.htm binary
