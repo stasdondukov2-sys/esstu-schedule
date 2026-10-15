@@ -99,4 +99,8 @@ esstu-schedule/
 
 `app.py` хранит снимки в `cache_store/`, либо в каталоге `ESSTU_SNAPSHOT_DIR`. На эфемерном хостинге укажите подключённый постоянный диск; файловый кэш сам по себе не переживает удаление диска. Режим источника, дата проверки и HTTP Last-Modified — отдельные поля. Сохранённая копия не считается новой проверкой портала. Проверка TLS-сертификатов включена.
 
-Проверки: `python -m unittest test_rooms test_teachers test_sync test_study test_audit`; затем `node test_teacher_search.cjs`, `node test_experience.cjs`, `node test_sw.cjs`, `node test_campus.cjs`, `node test_study.cjs`, `node test_reference.cjs`, `node test_assets.cjs`. Для поиска преподавателей сначала нужна статическая сборка.
+Проверки: `python -m unittest test_rooms test_teachers test_sync test_study test_audit test_p0`; затем `node test_teacher_search.cjs`, `node test_experience.cjs`, `node test_sw.cjs`, `node test_campus.cjs`, `node test_study.cjs`, `node test_reference.cjs`, `node test_assets.cjs`, `node test_avatars.cjs`. Для поиска преподавателей сначала нужна статическая сборка.
+
+## Публичные профили и фотографии
+
+Публичный `app.py` работает только на чтение: изменение профилей через POST отключено (405), CORS не разрешает POST. Неверные/большие Content-Length возвращают 400, предел — 8 КБ. Форма редактирования удалена. Инициалы преподавателей генерируются в браузере без внешних сервисов. Для настоящей фотографии владелец помещает проверенный PNG/JPG/WebP в `static/avatars/` и указывает `photo: "avatars/name.webp"` в `teachers_meta.json`. Внешние URL и SVG для photo запрещены, файл должен существовать. Подробнее: [проверки P0](docs/P0.md).

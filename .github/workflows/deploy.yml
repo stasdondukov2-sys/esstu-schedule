@@ -64,7 +64,7 @@ jobs:
 
       - name: Verify schedule data and app behavior
         run: |
-          python -m unittest test_rooms test_teachers test_sync test_study test_audit
+          python -m unittest test_rooms test_teachers test_sync test_study test_audit test_p0
           node test_experience.cjs
           node test_sw.cjs
           node test_teacher_search.cjs
@@ -72,6 +72,7 @@ jobs:
           node test_study.cjs
           node test_reference.cjs
           node test_assets.cjs
+          node test_avatars.cjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

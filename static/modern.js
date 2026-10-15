@@ -1,6 +1,18 @@
 function escapeHTML(value) {
   return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function initialsAvatar(name) {
+  const initials=String(name || '').split(/\s+/).map(word=>word.match(/\p{L}/u)?.[0] || '').filter(Boolean).slice(0,2).join('').toUpperCase() || 'П';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="18" fill="#0f2942"/><text x="48" y="58" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#5eead4">${escapeHTML(initials)}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+function teacherAvatarURL(profile) {
+  const photo=profile?.photo;
+  return typeof photo==='string' && /^avatars\/[A-Za-z0-9_-]+\.(png|jpe?g|webp)$/i.test(photo) ? photo : initialsAvatar(profile?.short_name || profile?.full_name);
+}
+let visibleTeacherChoices=[];
+function chooseTeacherByIndex(index) {const teacher=visibleTeacherChoices[index];if(teacher)chooseTeacher(teacher.teacher_key,teacher.caf_id || '');}
+function filterCafByIndex(instituteIndex,departmentIndex) {const department=departmentsHierarchy[instituteIndex]?.departments?.[departmentIndex];if(department)filterByCaf(department.caf_id);}
 function getFavorites() {
   try { const value = JSON.parse(localStorage.getItem('esstu_favorites_v1') || '[]'); return Array.isArray(value) ? value : []; } catch { return []; }
 }

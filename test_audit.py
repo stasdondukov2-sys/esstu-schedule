@@ -142,8 +142,8 @@ class HTTPRegressionTests(unittest.TestCase):
         self.assertEqual(status, 304);self.assertEqual(body, b'')
 
     def test_invalid_json_body(self):
-        self.assertEqual(self.request('/api/teacher/meta', method='POST', body='{')[0], 400)
-        self.assertEqual(self.request('/api/teacher/meta', method='POST', body='[]')[0], 400)
+        self.assertEqual(self.request('/api/teacher/meta', method='POST', body='{')[0], 405)
+        self.assertEqual(self.request('/api/teacher/meta', method='POST', body='[]')[0], 405)
 
 
 if __name__ == '__main__':

@@ -24,7 +24,8 @@ function setScheduleTab(tab) {
 }
 function updateStudyUI() {
   const session=scheduleTab==='session';
-  const dated=hasDatedSchedule(currentSchedule);
+  const dated=hasDatedSchedule(currentSchedule) || viewMode==='dates';
+  document.getElementById('datedViewBtn').classList.toggle('hidden',!hasDatedRows(currentSchedule));
   document.getElementById('weekControls').classList.toggle('hidden',session || dated);
   document.getElementById('dayTabs').classList.toggle('hidden',session || dated || viewMode==='week');
   document.getElementById('selectedDaySummary').classList.toggle('hidden',session || dated);
@@ -38,7 +39,11 @@ function updateStudyUI() {
   const chip=document.getElementById('activeSubgroupChip');
   chip.classList.toggle('hidden',subgroup==='all');chip.textContent=`${subgroup} подгруппа · изменить`;
 }
-function hasDatedSchedule(schedule) {return Object.values(schedule?.weeks || {}).some(days=>Object.values(days).some(day=>day.session_date));}
+function hasDatedRows(schedule) {return Object.values(schedule?.weeks || {}).some(days=>Object.values(days).some(day=>day.session_date));}
+function hasDatedSchedule(schedule) {
+  const days=Object.values(schedule?.weeks || {}).flatMap(week=>Object.values(week));
+  return days.some(day=>day.session_date) && !days.some(day=>!day.session_date && (day.pairs || []).some(pair=>pair.lessons?.length));
+}
 let datedLessons=[];
 function renderDatedTimetable(container) {
   datedLessons=[];
