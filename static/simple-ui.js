@@ -25,7 +25,7 @@ function renderCalendarDays() {
   const dates=getWeekRangeDates(selectedWeek),week=currentSchedule?.weeks?.[selectedWeek] || {};
   document.getElementById('dayTabs').innerHTML=DAY_NAMES.map(day=>{
     const meta=dayDateMeta(week[day.key],day.key,dates),active=day.key===selectedDayKey;
-    const count=(week[day.key]?.pairs || []).filter(pair=>pair.lessons?.length).length;
+    const count=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length).length;
     return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="flex-1 min-w-[58px] px-1 py-2 rounded-xl border text-center ${active?'bg-teal-600 border-teal-600 text-white':'bg-white dark:bg-[#101c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'}"><div class="text-xs font-bold">${day.short}${meta.isToday?' <span class="text-amber-400" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?' ⚡':''}</div><div class="text-[10px] mt-1 whitespace-nowrap">${escapeHTML(meta.shortLabel)}</div><div class="text-[9px] mt-1 ${active?'text-teal-100':'text-slate-400'}">${count?count+' '+pairWord(count):'нет пар'}</div></button>`;
   }).join('');
   const day=DAY_NAMES.find(day=>day.key===selectedDayKey),meta=dayDateMeta(week[selectedDayKey],selectedDayKey,dates);
@@ -37,7 +37,7 @@ function heroState(schedule,now) {
   if(dayIndex===6)return {kind:'empty'};
   const day=schedule.weeks?.[getWeekNum(now)]?.[DAY_KEYS[dayIndex]];
   if(day?.session_date)return {kind:'dated'}; // A weekday alone cannot prove a session is today.
-  const pairs=(day?.pairs || []).filter(pair=>pair.lessons?.length).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start));
+  const pairs=(day?.pairs || []).map(pair=>({...pair,lessons:filterLessons(pair.lessons)})).filter(pair=>pair.lessons.length).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start));
   const current=pairs.find(pair=>minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end));
   const next=pairs.find(pair=>minutes<timeToMinutes(pair.start));
   if(current)return {kind:'current',pair:current,next,remaining:Math.ceil(timeToMinutes(current.end)-minutes),progress:Math.min(100,Math.max(0,100*(minutes-timeToMinutes(current.start))/(timeToMinutes(current.end)-timeToMinutes(current.start))))};
@@ -50,7 +50,7 @@ function updateCampusHero() {
   document.getElementById('weekBadge').textContent=week===1?'I неделя':'II неделя';
   document.getElementById('clockDisplay').textContent=now.toLocaleString('ru-RU')+' · Улан-Удэ'+(simOverride?' · ТЕСТ':'');
   const stamp=now.toDateString();
-  if(stamp!==campusDayStamp){campusDayStamp=stamp;renderCalendarDays();}
+  if(stamp!==campusDayStamp){campusDayStamp=stamp;renderCalendarDays();if(currentSchedule && scheduleTab==='session')renderPairsList();}
   if(!currentSchedule)return;
   const state=heroState(currentSchedule,now),pair=state.pair;
   const label=document.getElementById('heroStatusLabel'),remaining=document.getElementById('heroRemainingTime'),lessons=document.getElementById('heroLessons'),next=document.getElementById('heroNextPairRow');
@@ -139,16 +139,18 @@ function renderCompactDay(container) {
   const minutes=now.getHours()*60+now.getMinutes(),notes=getNotesMap();
   let previous=null;
   const rows=(day.pairs || []).map((pair,pairIndex)=>{
-    if(!pair.lessons?.length)return '';
+    const visible=filterLessons(pair.lessons);
+    if(!visible.length)return '';
     const current=isToday && minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end);
     let gap='';
     if(previous){
       const duration=timeToMinutes(pair.start)-timeToMinutes(previous.end);
-      const before=singleBuilding(previous),after=singleBuilding(pair);
+      const before=singleBuilding(previous),after=singleBuilding({...pair,lessons:visible});
       if(duration>0)gap=`<p class="pl-3 py-1 text-[11px] text-slate-500 dark:text-slate-400">Перерыв ${duration} мин${before && after && before!==after ? ` · <span class="text-amber-700 dark:text-amber-300">Смена корпуса по расписанию: ${escapeHTML(before)} → ${escapeHTML(after)}</span>`:''}</p>`;
     }
-    previous=pair;
+    previous={...pair,lessons:visible};
     const lessons=pair.lessons.map((lesson,index)=>{
+      if(!visible.includes(lesson))return '';
       const room=decodeEsstuRoom(lesson.room),note=notes[makeNoteKey(lesson.subject,pair.number)];
       const subtitle=appMode==='student'?lesson.teacher:lesson.groups;
       return `<details class="lesson-detail group py-1 pl-3 border-l-[3px] ${getTypeBorderClass(lesson.type_code)} ${index?'mt-3':''}">

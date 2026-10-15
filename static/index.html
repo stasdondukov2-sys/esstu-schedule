@@ -93,10 +93,11 @@
 <!-- =================================================================== -->
 <!-- ПАНЕЛЬ УПРАВЛЕНИЯ: НЕДЕЛЯ I/II + ВИД (ДЕНЬ/НЕДЕЛЯ) + ПОДГРУППЫ       -->
 <!-- =================================================================== -->
-<section class="flex items-center justify-between gap-2"><div class="inline-flex rounded-xl bg-slate-200/60 dark:bg-slate-800/60 p-1"><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek1" onclick="selectWeek(1)">I неделя</button><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek2" onclick="selectWeek(2)">II неделя</button></div><button class="px-3 text-xs font-semibold text-teal-600 dark:text-teal-400" onclick="bottomNavToday()">Сегодня</button></section>
+<section id="weekControls" class="flex items-center justify-between gap-2"><div class="inline-flex rounded-xl bg-slate-200/60 dark:bg-slate-800/60 p-1"><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek1" onclick="selectWeek(1)">I неделя</button><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek2" onclick="selectWeek(2)">II неделя</button></div><button class="px-3 text-xs font-semibold text-teal-600 dark:text-teal-400" onclick="bottomNavToday()">Сегодня</button></section>
 <!-- ТАБЫ ДНЕЙ НЕДЕЛИ (в режиме "День") -->
 <nav class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5" id="dayTabs"></nav>
 <!-- КОНТЕЙНЕР ТАЙМЛАЙНА ПАР ИЛИ СЕТКИ НА ВСЮ НЕДЕЛЮ -->
+<button id="activeSubgroupChip" class="hidden text-xs text-teal-600 dark:text-teal-300" onclick="openSimpleDialog('moreMenuModal')"></button>
 <p id="selectedDaySummary" class="text-xs font-semibold text-slate-500 dark:text-slate-400"></p>
 <section class="space-y-2.5" id="pairsContainer"></section>
 <footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
@@ -324,7 +325,7 @@
       renderPairsList();
     }
 
-    function filterLessons(lessons) { return lessons || []; }
+    function filterLessons(lessons) { return (lessons || []).filter(lesson=>matchesSubgroup(lesson,activeSubgroup())); }
     function timeToMinutes(hhmm) {
       const [h, m] = hhmm.split(':').map(Number);
       return h * 60 + m;
@@ -430,6 +431,7 @@
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
+      if (scheduleTab === 'session') { renderSessionTimeline(container); return; }
       if (viewMode === 'week') { renderFullWeekGrid(container); return; }
       renderCompactDay(container);
     }
@@ -481,12 +483,14 @@
     }
 
     function setViewMode(mode) {
+      scheduleTab = 'semester';
       viewMode = mode;
       localStorage.setItem('esstu_view_mode', mode);
       renderAll();
     }
 
     function bottomNavToday() {
+      scheduleTab = 'semester';
       const now = getUlanUdeNow();
       selectedWeek = getWeekNum(now);
       const dayIdx = (now.getDay() + 6) % 7;
@@ -516,6 +520,7 @@
       updateLiveHero();
       updateExperienceUI();
       updateCompactUI();
+      updateStudyUI();
     }
 
     // =========================================================================
@@ -898,6 +903,7 @@
       }
 
       setInterval(updateLiveHero, 1000);
+      await handleUrlShortcuts();
 
 
     });
@@ -905,6 +911,7 @@
 <script src="modern.js"></script>
 <script src="experience.js"></script>
 <script src="simple-ui.js"></script>
+<script src="study-tools.js"></script>
 <div aria-labelledby="searchTitle" aria-modal="true" class="simple-overlay hidden" id="searchModal" role="dialog">
 <div class="simple-sheet"><div class="flex justify-between items-center gap-2"><h2 class="font-bold" id="searchTitle">Выбрать расписание</h2><button aria-label="Закрыть поиск" class="w-10 text-xl" onclick="closeSearchModal()">×</button></div>
 <div aria-label="Каталог" class="flex gap-2 my-2" role="group"><button class="px-4 rounded-xl" id="searchStudentTab" onclick="openSearchModal('student')">Группы</button><button class="px-4 rounded-xl" id="searchTeacherTab" onclick="openSearchModal('teacher')">Преподаватели</button></div>
@@ -942,6 +949,10 @@
 </div>
 </div></div>
 </div></div><div aria-labelledby="moreTitle" aria-modal="true" class="simple-overlay hidden" id="moreMenuModal" role="dialog"><div class="simple-sheet"><div class="flex items-center justify-between"><h2 class="font-bold" id="moreTitle">Ещё</h2><button aria-label="Закрыть меню" class="w-10 text-xl" onclick="closeSimpleDialog('moreMenuModal')">×</button></div><div class="grid gap-1 mt-2" id="moreActions">
+<button class="menu-action" onclick="setScheduleTab('semester')">Расписание семестра</button>
+<button class="menu-action" onclick="setScheduleTab('session')">Сессия и зачёты</button>
+<button class="menu-action" onclick="openCampusMapModal()">Корпуса кампуса</button>
+<div id="subgroupFilterWrap" class="py-2 border-y border-slate-200 dark:border-slate-800"><p class="text-xs text-slate-500 mb-2">Моя подгруппа · сохраняется для этой группы</p><div class="flex gap-2" role="group" aria-label="Подгруппа"><button id="subgroupBtn_all" onclick="setSubgroupFilter('all')">Все</button><button id="subgroupBtn_1" onclick="setSubgroupFilter('1')">1 п/г</button><button id="subgroupBtn_2" onclick="setSubgroupFilter('2')">2 п/г</button></div></div>
 <button class="menu-action" onclick="exportScheduleToICS()">В календарь (.ics)</button>
 <button class="menu-action" onclick="shareCurrentScheduleLink()">Поделиться расписанием</button>
 <button aria-label="Сменить тему" class="menu-action" id="themeToggleBtn" onclick="cycleTheme()">Тема</button>
@@ -997,5 +1008,25 @@
 </div></div></details></div></div><div aria-labelledby="freshnessTitle" aria-modal="true" class="simple-overlay hidden" id="freshnessModal" role="dialog"><div class="simple-sheet"><div class="flex justify-between items-center"><h2 class="font-bold" id="freshnessTitle">Данные расписания</h2><button aria-label="Закрыть сведения" class="w-10 text-xl" onclick="closeSimpleDialog('freshnessModal')">×</button></div><div class="space-y-3 mt-3" id="freshnessSlot"><section class="rounded-2xl p-3 bg-white dark:bg-[#101c2e] border border-slate-500/20 text-xs" id="dataFreshnessBar">
 <div class="flex justify-between items-center gap-2"><b id="freshnessBadge">Загрузка данных…</b><button class="text-teal-600 dark:text-teal-300" id="refreshSchedule" onclick="forceRefreshSchedule()">🔄 Обновить</button></div>
 <p class="text-slate-500 mt-1 break-words" id="freshnessTimestamp"></p>
-</section><div id="lastModifiedText">Источник: portal.esstu.ru (windows-1251 → UTF-8)</div></div><p class="text-xs text-slate-500 mt-3" id="clockDisplay"></p></div></div></body>
+</section><div id="lastModifiedText">Источник: portal.esstu.ru (windows-1251 → UTF-8)</div></div><p class="text-xs text-slate-500 mt-3" id="clockDisplay"></p></div></div>
+<div id="examModal" class="simple-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="examTitle"><div class="simple-sheet">
+<div class="flex justify-between items-center"><h2 id="examTitle" class="font-bold">Личная запись сессии</h2><button aria-label="Закрыть запись" onclick="closeSimpleDialog('examModal')" class="w-10 text-xl">×</button></div>
+<form id="examForm" onsubmit="saveExam(event)" class="space-y-3 mt-3">
+<label class="block text-xs">Предмет<input id="exam_subject" required maxlength="200" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"/></label>
+<label class="block text-xs">Тип<select id="exam_kind" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"><option value="exam">Экзамен</option><option value="test">Зачёт</option><option value="consultation">Консультация</option></select></label>
+<div class="flex gap-3"><label class="block text-xs min-w-0 flex-1">Дата<input id="exam_date" required type="date" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"/></label><label class="block text-xs min-w-0 flex-1">Время<input id="exam_time" type="time" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"/></label></div>
+<label class="block text-xs">Аудитория<input id="exam_room" maxlength="80" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"/></label>
+<label class="block text-xs">Преподаватель<input id="exam_teacher" maxlength="150" class="block w-full mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800"/></label>
+<label class="flex items-center gap-2 text-xs"><input id="exam_done" type="checkbox"/>Отметить как сданное</label>
+<p class="text-xs text-slate-500">Сохраняется только в этом браузере для выбранной группы или преподавателя.</p>
+<p id="examFormError" role="alert" class="text-xs text-rose-600"></p>
+<div class="flex justify-between gap-2"><button id="deleteExamBtn" type="button" class="text-xs text-rose-600 px-3 hidden" onclick="deleteExam()">Удалить запись</button><button class="ml-auto px-4 rounded-xl bg-teal-600 text-white text-sm" type="submit">Сохранить</button></div>
+</form></div></div>
+<div id="campusMapModal" class="simple-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="campusTitle"><div class="simple-sheet">
+<div class="flex justify-between items-center"><h2 id="campusTitle" class="font-bold">Корпуса кампуса</h2><button aria-label="Закрыть схему" onclick="closeSimpleDialog('campusMapModal')" class="w-10 text-xl">×</button></div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Условная схема корпусов из обозначений аудиторий. Расположение блоков не отражает географию; маршруты и переходы не подтверждены.</p>
+<p id="campusStatus" class="text-xs mt-3" role="status"></p><div id="campusDiagram" class="mt-2"></div><div id="campusBldCard" class="mt-3"></div>
+<a href="https://site.esstu.ru/university/information" target="_blank" rel="noopener" class="text-xs text-teal-600 dark:text-teal-300 underline mt-4">Сведения и список корпусов на сайте ВСГУТУ</a>
+</div></div>
+</body>
 </html>

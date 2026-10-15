@@ -13,5 +13,55 @@
       "sizes": "192x192 512x512",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Следующая пара",
+      "short_name": "Пара",
+      "url": "./?action=now",
+      "icons": [
+        {
+          "src": "shortcut-now.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Свободные аудитории",
+      "short_name": "Аудитории",
+      "url": "./?action=rooms",
+      "icons": [
+        {
+          "src": "shortcut-rooms.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Сессия и зачёты",
+      "short_name": "Сессия",
+      "url": "./?action=session",
+      "icons": [
+        {
+          "src": "shortcut-session.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Корпуса кампуса",
+      "short_name": "Кампус",
+      "url": "./?action=campus",
+      "icons": [
+        {
+          "src": "shortcut-campus.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

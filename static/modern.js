@@ -107,14 +107,14 @@ async function shareCurrentScheduleLink() {
 function icsEscape(value) { return String(value || '').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;'); }
 function exportScheduleToICS() {
   if (!currentSchedule) return;
-  const now = getUlanUdeNow(), monday = new Date(now);
-  monday.setDate(now.getDate() - (now.getDay()+6)%7);
-  if (getWeekNum(monday) !== selectedWeek) monday.setDate(monday.getDate()+7);
+  if(scheduleTab==='session'){exportSessionICS();return;}
+  const monday = getWeekRangeDates(selectedWeek).monday.date;
   const stamp = (d,time) => `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}T${time.replace(':','')}00`;
   const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ESSTU//Schedule//RU','CALSCALE:GREGORIAN'];
   DAY_KEYS.forEach((day,index) => {
     const date = new Date(monday); date.setDate(monday.getDate()+index);
-    (currentSchedule.weeks?.[selectedWeek]?.[day]?.pairs || []).forEach(p => (p.lessons || []).forEach((l,idx) => {
+    if(currentSchedule.weeks?.[selectedWeek]?.[day]?.session_date)return;
+    (currentSchedule.weeks?.[selectedWeek]?.[day]?.pairs || []).forEach(p => filterLessons(p.lessons).forEach((l,idx) => {
       lines.push('BEGIN:VEVENT',`UID:${encodeURIComponent(favoriteKey(currentFavorite()))}-${stamp(date,p.start)}-${idx}@esstu-schedule`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')}`,`DTSTART;TZID=Asia/Irkutsk:${stamp(date,p.start)}`,`DTEND;TZID=Asia/Irkutsk:${stamp(date,p.end)}`,`SUMMARY:${icsEscape(l.subject)}`,`LOCATION:${icsEscape(l.room)}`,`DESCRIPTION:${icsEscape(l.teacher || l.groups)}`,'END:VEVENT');
     }));
   });

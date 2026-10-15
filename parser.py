@@ -159,10 +159,9 @@ def extract_tags(text: str) -> List[str]:
     for lang in ("англ", "франц", "нем", "кит"):
         if lang in low:
             tags.append(lang)
-    if re.search(r"1\s*п/?г", low):
-        tags.append("1 п/г")
-    if re.search(r"2\s*п/?г", low):
-        tags.append("2 п/г")
+    for subgroup in ("1", "2"):
+        if re.search(r"(?<!\d)" + subgroup + r"\s*(?:[-–]\s*[яй]\s*)?(?:п\s*/?\s*гр?\.?|подгрупп[а-яё]*|подгр\.?)(?![а-яё\d])", low):
+            tags.append(f"{subgroup} п/г")
     return tags
 
 
@@ -179,8 +178,12 @@ def parse_single_lesson_chunk(chunk: str) -> Dict[str, Any]:
             lesson_type, type_code = "Практика", "practice"
         elif prefix.startswith("лаб"):
             lesson_type, type_code = "Лабораторная", "lab"
-        elif prefix.startswith(("экз", "зач", "конс")):
-            lesson_type, type_code = "Аттестация", "lecture"
+        elif prefix.startswith("экз"):
+            lesson_type, type_code = "Экзамен", "exam"
+        elif prefix.startswith("зач"):
+            lesson_type, type_code = "Зачёт", "test"
+        elif prefix.startswith("конс"):
+            lesson_type, type_code = "Консультация", "consultation"
     elif "физическая культура" in raw.lower() or "фкс" in raw.lower():
         lesson_type, type_code = "Физкультура", "sport"
 
@@ -220,7 +223,7 @@ def parse_cell_lessons(cell_text: str) -> List[Dict[str, Any]]:
     text = clean_text(cell_text)
     if not text or text in ("_", "-", "—"):
         return []
-    parts = re.split(r"(?=(?:^|\s)(?:лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.))", text, flags=re.I)
+    parts = re.split(r"(?=(?:^|\s)(?:лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.|конс\.))", text, flags=re.I)
     parts = [clean_text(p) for p in parts if clean_text(p) and clean_text(p) != "_"]
     expanded_parts: List[str] = []
     base_prefix = ""
@@ -250,7 +253,7 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
     if not text or text in ("_", "-", "—"):
         return []
     lesson_type, type_code, subject, before_subject, groups_str, room = "Занятие", "other", text, text, "", ""
-    type_match = re.search(r"\b(лек\.|пр\.|лаб\.|сем\.)\s*(.+)$", text, flags=re.I)
+    type_match = re.search(r"\b(лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.|конс\.)\s*(.+)$", text, flags=re.I)
     if type_match:
         prefix = type_match.group(1).lower()
         subject = clean_text(type_match.group(2))
@@ -261,6 +264,12 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
             lesson_type, type_code = "Практика", "practice"
         elif prefix.startswith("лаб"):
             lesson_type, type_code = "Лабораторная", "lab"
+        elif prefix.startswith("экз"):
+            lesson_type, type_code = "Экзамен", "exam"
+        elif prefix.startswith("зач"):
+            lesson_type, type_code = "Зачёт", "test"
+        elif prefix.startswith("конс"):
+            lesson_type, type_code = "Консультация", "consultation"
     room_match = re.search(r"\bа\.\s*((?:[0-9][0-9А-Яа-яA-Za-z\-/]*|дист\.*|д\.о\.[/]*)(?:\s+и/д)?)", before_subject, flags=re.I)
     if room_match:
         room = room_match.group(1).strip()
