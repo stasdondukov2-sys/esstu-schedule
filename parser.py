@@ -261,10 +261,12 @@ def parse_teacher_cell_lessons(cell_text: str, teacher_name: str = "", section: 
             lesson_type, type_code = "Практика", "practice"
         elif prefix.startswith("лаб"):
             lesson_type, type_code = "Лабораторная", "lab"
-    room_match = re.search(r"\bа\.?\s*([0-9А-Яа-яA-Za-z\-/]+(?:\s+и/д)?)\s*$", before_subject, flags=re.I)
+    room_match = re.search(r"\bа\.\s*((?:[0-9][0-9А-Яа-яA-Za-z\-/]*|дист\.*|д\.о\.[/]*)(?:\s+и/д)?)", before_subject, flags=re.I)
     if room_match:
         room = room_match.group(1).strip()
         groups_str = clean_text(before_subject[: room_match.start()])
+        if not type_match:
+            subject = clean_text(before_subject[room_match.end():]) or 'Предмет не указан в источнике'
     else:
         groups_str = before_subject
     tags = extract_tags(text)
@@ -418,8 +420,16 @@ def parse_group_schedule_html(html: str, group_id: str = "1", section: str = "ba
             group_name = clean_text(f.get_text())
             break
     parsed = parse_14row_table(soup.find("table"), is_teacher=False, owner_name=group_name, section=section)
+    source_file = f'{section}/{group_id}.htm'
+    for days in parsed['weeks'].values():
+        for day in days.values():
+            for pair in day['pairs']:
+                for lesson in pair['lessons']:
+                    lesson.update(source_type='group_table', source_file=source_file)
     return {
         "mode": "student",
+        "source_file": source_file,
+        "source_type": "group_table",
         "group_id": group_id,
         "group_name": group_name,
         "norm_group_name": normalize_group_name(group_name),
@@ -455,8 +465,17 @@ def parse_department_teachers_html(html: str, caf_id: str = "Caf5", section: str
         raw_name = clean_text(prev_font.get_text()) if (prev_font and clean_text(prev_font.get_text())) else f"Преподаватель #{idx+1}"
         profile = build_teacher_profile(raw_name, caf_id=caf_id, department_name=department_name)
         parsed = parse_14row_table(table, is_teacher=True, owner_name=raw_name, section=section)
+        source_file = f'{section}/{caf_id}.htm'
+        profile['department'] = department_name or profile['department']
+        for days in parsed['weeks'].values():
+            for day in days.values():
+                for pair in day['pairs']:
+                    for lesson in pair['lessons']:
+                        lesson.update(source_type='official_caf', source_file=source_file)
         teachers_list.append({
             "mode": "teacher",
+            "source_file": source_file,
+            "source_type": "official_caf",
             "teacher_key": profile["key"],
             "teacher_name": profile["short_name"],
             "profile": profile,
@@ -483,9 +502,9 @@ def merge_teacher_schedules(primary: Dict[str, Any], secondary: Optional[Dict[st
             prim_pairs = prim_week[day_key].get("pairs", [])
             sec_pairs = sec_day.get("pairs", [])
             for p_idx in range(min(len(prim_pairs), len(sec_pairs))):
-                existing_raws = {l["raw"] for l in prim_pairs[p_idx]["lessons"]}
+                existing_raws = {(l["raw"], l.get('source_file')) for l in prim_pairs[p_idx]["lessons"]}
                 for lesson in sec_pairs[p_idx]["lessons"]:
-                    if lesson["raw"] not in existing_raws:
+                    if (lesson["raw"], lesson.get('source_file')) not in existing_raws:
                         prim_pairs[p_idx]["lessons"].append(lesson)
                         prim_pairs[p_idx]["is_empty"] = False
     return merged

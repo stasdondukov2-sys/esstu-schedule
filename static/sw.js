@@ -1,62 +1,40 @@
-const CACHE_NAME = 'esstu-live-v2';
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './modern.js',
-  './manifest.json'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
-  self.skipWaiting();
+const CACHE_NAME = 'esstu-live-v2.4.0';
+const SHELL = ['./', './index.html', './modern.js', './experience.js', './manifest.json'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((k) => {
-          if (k !== CACHE_NAME) return caches.delete(k);
-        })
-      )
-    )
-  );
-  self.clients.claim();
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
-
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  if (event.request.method !== 'GET') return;
-
-  // For API calls: Network first with Cache fallback
-  if (url.pathname.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // For static assets: Stale while revalidate
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.ok) {
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
-        }
-        return networkResponse;
-      }).catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
-    })
-  );
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key.startsWith('esstu-') && key !== CACHE_NAME).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
+self.addEventListener('fetch', event => {
+  const request = event.request, url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      const response = await fetch(request, {cache: 'no-cache', signal: AbortSignal.timeout(12000)});
+      if (!response.ok) {
+        const saved = await cache.match(request, {ignoreSearch:true});
+        if (saved) return cachedResponse(saved);
+        return response;
+      }
+      await cache.put(request, response.clone());
+      return response;
+    } catch {
+      const saved = await cache.match(request, {ignoreSearch:true}) ||
+        (request.mode === 'navigate' ? await cache.match(new URL('./', self.registration.scope)) : null);
+      return saved ? cachedResponse(saved) : new Response('Нет сохранённой копии. Подключитесь к интернету.', {status:503});
+    }
+  })());
+});
+function cachedResponse(saved) {
+  const headers = new Headers(saved.headers); headers.set('X-ESSTU-Cache', 'offline');
+  return new Response(saved.body, {status:saved.status,statusText:saved.statusText,headers});
+}

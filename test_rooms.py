@@ -1,7 +1,11 @@
 import unittest
-from rooms import build_rooms_index
+from rooms import build_rooms_index, normalize_room
 
 class RoomsTest(unittest.TestCase):
+    def test_board_annotation_does_not_create_another_room(self):
+        self.assertEqual(normalize_room('0410и/д'), '0410')
+        self.assertEqual(normalize_room(' 0410 и/д '), '0410')
+
     def test_collisions_and_duplicates(self):
         schedule = {'group_name': 'A', 'weeks': {'1': {'monday': {'pairs': [
             {'number': 1, 'start': '09:00', 'end': '10:35', 'lessons': [

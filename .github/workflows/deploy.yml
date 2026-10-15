@@ -35,8 +35,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Refresh official department snapshots
+        run: python sync_departments.py
+
       - name: Build static site & API JSON
         run: python build_static_site.py
+
+      - name: Verify schedule data and app behavior
+        run: |
+          python -m unittest test_rooms test_teachers
+          node test_experience.cjs
+          node test_sw.cjs
+          node test_teacher_search.cjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

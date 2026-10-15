@@ -10,7 +10,8 @@ from typing import Dict, Any, Tuple, Optional
 from urllib.parse import urlparse, parse_qs, unquote
 import urllib.request
 from rooms import build_rooms_index
-from teachers import teachers_from_groups, departments_from_teachers
+from teachers import teachers_from_groups, departments_from_teachers, combine_teacher_catalog
+from catalog import stamp_schedule, source_metadata
 
 from parser import (
     ESSTU_BASE_URL,
@@ -84,10 +85,6 @@ def fetch_esstu_html_sync(relative_path: str, allow_group_fallback: bool = True)
         local_file = DEMO_DIR / clean_rel
         if local_file.exists():
             return local_file.read_bytes().decode("cp1251", errors="replace"), "Локальный кэш ВСГУТУ (cp1251)"
-        if allow_group_fallback and not clean_rel.lower().endswith("craspisanedt.htm") and "caf" not in clean_rel.lower():
-            fallback = DEMO_DIR / "bakalavriat" / "1.htm"
-            if fallback.exists():
-                return fallback.read_bytes().decode("cp1251", errors="replace"), "Локальный кэш ВСГУТУ"
         raise FileNotFoundError(f"Страница {clean_rel} не найдена")
 
 
@@ -175,6 +172,10 @@ def service_schedule(section: str, group_id: str, group_name: Optional[str] = No
         schedule["resolved_group_id"] = actual_id
         schedule["last_modified"] = last_mod
         schedule["week_now"] = get_week_num()
+        stamp_schedule(schedule, source_metadata(DEMO_DIR), datetime.now(timezone.utc).isoformat())
+        if not last_mod.startswith('Локальный'):
+            schedule['source_checked_at'] = datetime.now(timezone.utc).isoformat()
+            schedule['source_mode'] = 'portal_live'
         CACHE[f"sched:{section}:{actual_id}"] = (now, schedule)
         save_snapshot(snapshot_key, schedule)
         return schedule
@@ -259,9 +260,16 @@ def service_department_teachers(section: str, caf_id: str, merge: bool = True) -
                     for t in parse_department_teachers_html(html_s, caf_id=clean_caf, section=other, department_name=dept_name)
                 }
                 teachers_p = [merge_teacher_schedules(t, sec_map.get(t["teacher_key"])) for t in teachers_p]
+                primary_keys = {t['teacher_key'] for t in teachers_p}
+                teachers_p.extend(t for key, t in sec_map.items() if key not in primary_keys)
             except Exception:
                 pass
 
+        for teacher in teachers_p:
+            stamp_schedule(teacher, source_metadata(DEMO_DIR), datetime.now(timezone.utc).isoformat())
+            if not last_mod.startswith('Локальный') and teacher.get('section') == section:
+                teacher['source_checked_at'] = datetime.now(timezone.utc).isoformat()
+                teacher['source_mode'] = 'portal_live'
         payload = {
             "caf_id": clean_caf,
             "department_name": dept_name,
@@ -290,14 +298,11 @@ def service_all_teachers(section: str = "bakalavriat") -> Dict[str, Any]:
             for dept in inst.get("departments", []):
                 try:
                     for t in service_department_teachers(section, dept["caf_id"], merge=True).get("teachers", []):
-                        if t["teacher_key"] not in seen:
-                            seen.add(t["teacher_key"])
-                            all_t.append(t)
+                        all_t.append(t)
                 except Exception:
                     continue
 
-        if not all_t:
-            all_t = service_saved_group_teachers()
+        all_t = combine_teacher_catalog(all_t, service_saved_group_teachers())
         payload = {"count": len(all_t), "teachers": all_t}
         CACHE[cache_key] = (now, payload)
         save_snapshot(cache_key, payload)
