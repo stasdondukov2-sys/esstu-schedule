@@ -1277,6 +1277,11 @@
         return true;
       } catch (e) {
         console.error('Ошибка загрузки расписания:', e);
+        document.getElementById('freshnessBadge').textContent = 'Расписание выбранной группы недоступно. Повторите обновление позже.';
+        if (!currentSchedule) {
+          document.getElementById('liveMainContent').textContent = 'Не удалось получить подтверждённое расписание этой группы.';
+          document.getElementById('pairsContainer').textContent = 'Источник недоступен или имя группы не совпало с каталогом.';
+        }
         return false;
       }
     }
@@ -1292,7 +1297,7 @@
       if (caf && !(t.caf_ids || [t.caf_id]).some(id => normSearch(id) === normSearch(caf))) return false;
       const p = t.profile || {};
       const lessons = Object.values(t.weeks || {}).flatMap(days => Object.values(days).flatMap(d => (d.pairs || []).flatMap(p => p.lessons || [])));
-      const text = normSearch([t.teacher_key, p.full_name, p.short_name, p.department, p.degree, p.building,
+      const text = normSearch([t.teacher_key, p.full_name, p.short_name, p.department, p.degree, p.building, ...(t.caf_ids || [t.caf_id]),
         ...lessons.map(l => `${l.subject || ''} ${l.room || ''} ${decodeEsstuRoom(l.room)?.building || ''}`)].join(' '));
       return normSearch(query).split(' ').every(word => text.includes(word));
     }
@@ -1438,6 +1443,7 @@
             <div class="min-w-0 flex-1">
               <div class="font-bold text-xs sm:text-sm truncate">${p.full_name || p.short_name}</div>
               <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${p.degree || ""}</div><div class="text-[10px] text-teal-500">${getTeacherLiveStatus(t)}</div>
+              <div class="text-[10px] text-teal-600 dark:text-teal-300">${escapeHTML((t.caf_ids?.length ? t.caf_ids : [t.caf_id]).filter(Boolean).map(id => `🏛 ${id}.htm`).join(' • ') || '📄 По расписаниям групп')}</div>
               <div class="text-[10px] text-teal-600 dark:text-teal-400 truncate">${p.department}</div>
               <div class="text-[10px] text-slate-400 truncate">${escapeHTML([...new Set(Object.values(t.weeks || {}).flatMap(w => Object.values(w).flatMap(d => (d.pairs || []).flatMap(p => (p.lessons || []).map(l => l.subject)))))].join(', '))}</div>
             </div>
@@ -1454,7 +1460,7 @@
                 onclick="filterByCaf('${d.caf_id.replace(/'/g, "\\'")}')"
                 class="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500 transition"
               >
-                🏛 ${d.name}
+                🏛 ${d.name} <span class="opacity-60">(${escapeHTML(d.caf_id)})</span>
               </button>
             `).join('')}
           </div>
@@ -1465,6 +1471,7 @@
         <div class="space-y-2">
           <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Преподаватели (${filteredTeachers.length})
+            ${selectedCafFilter ? `<span class="normal-case text-teal-500">• ${escapeHTML(selectedCafFilter)}</span>` : ''}
             <button onclick="selectedCafFilter='';document.getElementById('teacherSearchInput').value='';renderTeacherModalContent()" class="ml-2 text-teal-500">Сбросить фильтры</button>
           </div>
           <div class="space-y-2">${teachersCards || `<div class="text-xs text-slate-400 py-3 text-center">${teacherDirectoryLoading ? 'Загрузка преподавателей…' : escapeHTML(teacherDirectoryError || 'По запросу преподаватели не найдены. Попробуйте другую фамилию или предмет.')}<button onclick="loadDepartmentsAndTeachers()" class="block mx-auto mt-2 text-teal-500">Повторить загрузку</button></div>`}</div>

@@ -5,7 +5,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from parser import parse_departments_list_html, parse_department_teachers_html
+from parser import parse_departments_list_html, parse_department_teachers_html, parse_groups_list_html, parse_group_schedule_html
 
 ROOT = Path(__file__).parent / 'demo_data'
 SECTIONS = ('bakalavriat', 'spezialitet')
@@ -19,10 +19,17 @@ def fetch_page(relative):
         modified = response.headers.get('Last-Modified')
     html = raw.decode('cp1251', errors='replace')
     section, name = relative.split('/')
-    valid = (parse_departments_list_html(html, section) if name == 'craspisanEdt.htm'
-             else parse_department_teachers_html(html, name[:-4], section))
+    if name == 'craspisanEdt.htm':
+        valid = parse_departments_list_html(html, section)
+    elif name == 'raspisan.htm':
+        valid = parse_groups_list_html(html, section)
+    elif re.fullmatch(r'\d+\.htm', name):
+        schedule = parse_group_schedule_html(html, name[:-4], section)
+        valid = bool(schedule['weeks']['1'] or schedule['weeks']['2'])
+    else:
+        valid = parse_department_teachers_html(html, name[:-4], section)
     if not valid:
-        raise ValueError('Page contains no valid department data')
+        raise ValueError('Page contains no valid schedule data')
     target = ROOT / relative
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(raw)
