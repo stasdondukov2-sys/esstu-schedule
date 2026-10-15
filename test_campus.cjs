@@ -4,7 +4,7 @@ const context={console,Date,Intl,URL,URLSearchParams,localStorage:{getItem(){ret
 vm.createContext(context);
 for(const script of inline)new vm.Script(script[1]);
 vm.runInContext(inline.at(-1)[1],context);
-for(const file of ['modern.js','experience.js','simple-ui.js'])vm.runInContext(fs.readFileSync('static/'+file,'utf8'),context);
+for(const file of ['modern.js','experience.js','simple-ui.js','study-tools.js'])vm.runInContext(fs.readFileSync('static/'+file,'utf8'),context);
 const run=code=>vm.runInContext(code,context);
 for(const date of ['2026-10-15T12:00:00','2026-01-01T12:00:00','2026-12-31T12:00:00','2026-10-18T12:00:00']){
   context.now=new Date(date);

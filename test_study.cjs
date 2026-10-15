@@ -1,0 +1,46 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const storage=new Map(),inline=[...fs.readFileSync('static/index.html','utf8').matchAll(/<script>([\s\S]*?)<\/script>/g)];
+const context={console,Date,Intl,URL,URLSearchParams,localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},document:{addEventListener(){}},window:{addEventListener(){}},navigator:{onLine:true}};
+vm.createContext(context);vm.runInContext(inline.at(-1)[1],context);
+for(const file of ['modern.js','experience.js','simple-ui.js','study-tools.js'])vm.runInContext(fs.readFileSync('static/'+file,'utf8'),context);
+const run=code=>vm.runInContext(code,context);
+for(const [raw,one,two] of [['1 п/г',true,false],['2подгр.',false,true],['Физика 1',true,true],['11 п/г',true,true],['1-я подгруппа',true,false],['1 и 2 п/г',true,true],['1/2 п/г',true,true],['проект 2',true,true],['',true,true]]){
+  context.lesson={raw};assert.equal(run('matchesSubgroup(lesson,"1")'),one,raw);assert.equal(run('matchesSubgroup(lesson,"2")'),two,raw);
+}
+run('appMode="student";savedState.groupName="A";localStorage.setItem("esstu_subgroup_v2:"+studyOwner(),"1")');
+assert.equal(run('activeSubgroup()'),'1');
+run('savedState.groupName="B"');assert.equal(run('activeSubgroup()'),'all');
+run('appMode="teacher"');assert.equal(run('activeSubgroup()'),'all');
+run('appMode="student";savedState.groupName="A"');
+context.now=new Date('2026-10-12T09:30:00');context.week=run('getWeekNum(now)');
+context.schedule={weeks:{[context.week]:{monday:{pairs:[{number:1,start:'09:00',end:'10:35',lessons:[{subject:'Lab one',tag:'1 п/г'},{subject:'Lab two',tag:'2 п/г'}]}]}}}};
+assert.equal(run('heroState(schedule,now).pair.lessons.length'),1);
+assert.equal(run('heroState(schedule,now).pair.lessons[0].subject'),'Lab one');
+assert.equal(run('explicitISODate("31.02.2027")'),null);
+assert.equal(run('explicitISODate("16.01")'),null);
+assert.equal(run('explicitISODate("2028-02-29")'),'2028-02-29');
+assert.equal(run('countdownText({date:"2026-10-11"},now)'),'Дата прошла');
+assert.equal(run('countdownText({date:"2026-10-12"},now)'),'Сегодня');
+assert.equal(run('countdownText({date:"2026-10-13"},now)'),'Завтра');
+assert.equal(run('countdownText({date:"2026-10-11",done:true},now)'),'Отмечено как сданное');
+assert.equal(run('examKind({subject:"Зачётная работа",type:"Практика"})'),null);
+assert.equal(run('examKind({raw:"конс. Физика"})'),'consultation');
+run('saveCustomExams([{id:"personal",subject:"Math",kind:"exam",date:"2026-10-20"}])');
+assert.equal(run('getCustomExams().length'),1);
+run('savedState.groupName="B"');assert.equal(run('getCustomExams().length'),0);
+run('savedState.groupName="A"');
+context.schedule={weeks:{1:{monday:{session_date:'20.01',pairs:[{number:1,start:'09:00',end:'10:35',lessons:[{subject:'A',raw:'экз. A',tag:'1 п/г',room:'0410'},{subject:'B',raw:'экз. B',tag:'2 п/г'}]}]}},2:{monday:{session_date:'20.01',pairs:[{number:1,start:'09:00',end:'10:35',lessons:[{subject:'A',raw:'экз. A',tag:'1 п/г',room:'0410'}]}]}}}};
+assert.equal(run('collectSessionEvents(schedule).length'),2,'one official event deduplicated, plus personal record');
+assert.equal(run('collectSessionEvents(schedule).find(e=>e.source==="official").date'),null,'year must not be invented');
+run('currentSchedule=schedule;downloadICS=(lines)=>{exported=lines};exportSessionICS()');
+assert(run('exported.some(line=>line.includes("DTSTART;VALUE=DATE:20261020"))'));
+assert(!run('exported.some(line=>line.includes("20260120"))'));
+context.rooms=[{room:'0410'},{room:'0422'},{room:'15-572'},{room:'спорт'},{room:'???'}];
+assert.equal(run('buildCampusDirectory(rooms).length'),2);
+assert.equal(run('buildCampusDirectory(rooms)[0].rooms.length'),2);
+const manifest=JSON.parse(fs.readFileSync('static/manifest.json','utf8'));
+for(const shortcut of manifest.shortcuts){
+  assert(new URL(shortcut.url,'https://example.com/esstu-schedule/').pathname.startsWith('/esstu-schedule/'));
+  assert(fs.existsSync('static/'+shortcut.icons[0].src));
+}
+console.log('Subgroups, owner isolation, hero filtering, exams, dates, calendar export and scoped shortcuts OK');
