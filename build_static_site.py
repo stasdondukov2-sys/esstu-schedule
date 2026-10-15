@@ -23,6 +23,9 @@ STATIC_DIR = BASE_DIR / "static"
 DIST_DIR = BASE_DIR / "dist"
 
 def build():
+    css_path = STATIC_DIR / 'app.css'
+    if not css_path.is_file() or not all(selector in css_path.read_text(encoding='utf-8') for selector in ('.flex', '.bg-teal-600', '.rounded-xl')):
+        raise RuntimeError('Сначала соберите полный CSS: npm run build:css')
     print("🚀 Starting static build for GitHub Pages...")
     start_time = time.time()
     

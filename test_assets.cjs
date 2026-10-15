@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('static/index.html','utf8'),css=fs.readFileSync('static/app.css','utf8'),worker=fs.readFileSync('static/sw.js','utf8');
+assert(!html.includes('cdn.tailwindcss.com'));
+assert(!html.includes('fonts.googleapis.com'));
+assert(html.includes('href="app.css"'));
+assert(worker.includes('./app.css'));
+for(const selector of ['.flex','.rounded-xl','.bg-teal-600','.px-4'])assert(css.includes(selector),selector);
+assert(css.includes('.dark'),'dark theme rules must be compiled');
+assert(html.includes('lang="ru"'));
+assert(!html.includes('src=""'));
+assert(html.includes('name="description"'));
+assert(html.includes('property="og:title"'));
+console.log('Local stylesheet, offline shell, dark rules, metadata and image sources OK');

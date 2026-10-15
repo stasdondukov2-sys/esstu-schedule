@@ -10,25 +10,14 @@
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="manifest.json" rel="manifest"/>
 <title>Расписание ВСГУТУ</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            esstu: {
-              navy: '#0f2942',
-              teal: '#0d9488',
-              gold: '#f59e0b',
-            }
-          }
-        }
-      }
-    };
-  </script>
+<meta name="description" content="Расписание групп и преподавателей ВСГУТУ: занятия, аудитории, подгруппы и сессия."/>
+<link rel="icon" href="shortcut-now.svg" type="image/svg+xml"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Расписание ВСГУТУ"/>
+<meta property="og:description" content="Расписание групп, преподавателей и аудиторий ВСГУТУ."/>
+<meta property="og:url" content="https://stasdondukov2-sys.github.io/esstu-schedule/"/>
+<link href="app.css" rel="stylesheet"/>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
@@ -106,9 +95,9 @@
 <!-- НИЖНЯЯ НАВИГАЦИОННАЯ ПАНЕЛЬ (BOTTOM BAR ПОД БОЛЬШОЙ ПАЛЕЦ)            -->
 <!-- ===================================================================== -->
 <nav class="fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#0b1524]/95 border-t border-slate-200 dark:border-slate-800 px-2 py-1.5"><div class="max-w-xl mx-auto grid grid-cols-3 gap-2">
-<button class="flex flex-col items-center gap-1 py-1 text-teal-600 dark:text-teal-400" onclick="closeSearchModal();bottomNavToday()"><span aria-hidden="true">▦</span><span class="text-[11px] font-semibold">Расписание</span></button>
-<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openSearchModal()"><span aria-hidden="true">⌕</span><span class="text-[11px] font-semibold">Поиск</span></button>
-<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openRoomsModal()"><span aria-hidden="true">⌂</span><span class="text-[11px] font-semibold">Аудитории</span></button>
+<button class="flex flex-col items-center gap-1 py-1 text-teal-600 dark:text-teal-400" onclick="closeSearchModal();bottomNavToday()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z M4 9h16 M9 9v11"/></svg><span class="text-[11px] font-semibold">Расписание</span></button>
+<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openSearchModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 15l6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0"/></svg><span class="text-[11px] font-semibold">Поиск</span></button>
+<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openRoomsModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 21V3h12v18 M3 21h18 M14 12h1"/></svg><span class="text-[11px] font-semibold">Аудитории</span></button>
 </div></nav>
 <!-- ===================================================================== -->
 <!-- МОДАЛЬНОЕ ОКНО 1: ВЫБОР ГРУППЫ (110+ ГРУПП, 1-6 КУРС)                 -->
@@ -207,7 +196,8 @@
     function getWeekNum(targetDateTime = undefined) {
       const currentDateTime = targetDateTime === undefined ? new Date() : targetDateTime;
       const referenceDate = getReferenceDate(currentDateTime);
-      const diff = (currentDateTime - referenceDate) / (1000 * 60 * 60 * 24 * 7);
+      const calendarMillis = date => Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),date.getHours(),date.getMinutes(),date.getSeconds());
+      const diff = (calendarMillis(currentDateTime) - calendarMillis(referenceDate)) / (1000 * 60 * 60 * 24 * 7);
       return diff >= 0
         ? (Math.trunc(diff) % 2 === 0 ? 1 : 2)
         : (Math.trunc(diff + 1 / 7) % 2 === 0 ? 2 : 1);
@@ -431,6 +421,7 @@
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
+      if (hasDatedSchedule(currentSchedule) && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
       if (scheduleTab === 'session') { renderSessionTimeline(container); return; }
       if (viewMode === 'week') { renderFullWeekGrid(container); return; }
       renderCompactDay(container);
@@ -966,7 +957,7 @@
 </div><div id="profileSlot"><section class="hidden rounded-3xl p-4 bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 shadow-sm" id="teacherProfileCard">
 <div class="flex items-center gap-3.5">
 <div class="relative shrink-0">
-<img alt="Фото преподавателя" class="w-16 h-16 rounded-2xl object-cover border-2 border-teal-500/50 shadow-md bg-slate-800" id="teacherAvatarImg" src=""/>
+<img alt="Фото преподавателя" class="w-16 h-16 rounded-2xl object-cover border-2 border-teal-500/50 shadow-md bg-slate-800" id="teacherAvatarImg" src="shortcut-now.svg"/>
 <button class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 text-slate-950 text-xs flex items-center justify-center shadow hover:bg-amber-400 font-bold" onclick="openPhotoModal()" title="Изменить фото или данные преподавателя">
             📷
           </button>

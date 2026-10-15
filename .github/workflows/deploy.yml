@@ -40,6 +40,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build local stylesheet
+        run: |
+          npm ci --ignore-scripts
+          npm run build:css
+
       - name: Refresh official department and group snapshots
         if: github.event_name == 'schedule' || inputs.full_sync == true
         run: python -u sync_esstu.py
@@ -53,12 +64,14 @@ jobs:
 
       - name: Verify schedule data and app behavior
         run: |
-          python -m unittest test_rooms test_teachers test_sync test_study
+          python -m unittest test_rooms test_teachers test_sync test_study test_audit
           node test_experience.cjs
           node test_sw.cjs
           node test_teacher_search.cjs
           node test_campus.cjs
           node test_study.cjs
+          node test_reference.cjs
+          node test_assets.cjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

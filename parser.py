@@ -1,5 +1,9 @@
 import json
 import re
+import logging
+from copy import deepcopy
+from functools import lru_cache
+from threading import RLock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Dict, Optional, Any, Tuple
@@ -55,6 +59,8 @@ DEFAULT_BELLS = [
 ]
 
 TEACHERS_META_PATH = Path(__file__).parent / "teachers_meta.json"
+LOGGER = logging.getLogger(__name__)
+META_LOCK = RLock()
 
 
 def clean_text(text: str) -> str:
@@ -67,23 +73,32 @@ def normalize_group_name(name: str) -> str:
     return re.sub(r"\s+", " ", s)
 
 
+@lru_cache(maxsize=4)
+def _read_teachers_meta(path: str, modified_ns: int, size: int):
+    return json.loads(Path(path).read_text(encoding='utf-8'))
+
+
 def load_teachers_meta() -> Dict[str, Dict[str, Any]]:
-    if TEACHERS_META_PATH.exists():
-        try:
-            return json.loads(TEACHERS_META_PATH.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
-    return {}
+    try:
+        stat = TEACHERS_META_PATH.stat()
+        return deepcopy(_read_teachers_meta(str(TEACHERS_META_PATH), stat.st_mtime_ns, stat.st_size))
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError):
+        LOGGER.warning('Could not read teacher metadata', exc_info=True)
+        return {}
 
 
 def save_teacher_meta_entry(teacher_key: str, entry: Dict[str, Any]) -> Dict[str, Any]:
-    meta = load_teachers_meta()
-    norm_key = normalize_teacher_key(teacher_key)
-    existing = meta.get(norm_key, {})
-    existing.update(entry)
-    meta[norm_key] = existing
-    TEACHERS_META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-    return existing
+    with META_LOCK:
+        meta = load_teachers_meta()
+        norm_key = normalize_teacher_key(teacher_key)
+        existing = meta.get(norm_key, {})
+        existing.update(entry)
+        meta[norm_key] = existing
+        TEACHERS_META_PATH.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+        _read_teachers_meta.cache_clear()
+        return existing
 
 
 def normalize_teacher_key(raw_name: str) -> str:
@@ -131,7 +146,7 @@ def get_reference_date(target_dt: datetime) -> datetime:
     if wd == 0:
         return datetime(ref_year, 9, 1, tzinfo=target_dt.tzinfo)
     elif wd in (1, 2, 3, 4):
-        return datetime(ref_year, 8, 31 - wd, tzinfo=target_dt.tzinfo)
+        return datetime(ref_year, 8, 32 - wd, tzinfo=target_dt.tzinfo)
     elif wd == 5:
         return datetime(ref_year, 9, 3, tzinfo=target_dt.tzinfo)
     return datetime(ref_year, 9, 2, tzinfo=target_dt.tzinfo)
@@ -203,6 +218,11 @@ def parse_single_lesson_chunk(chunk: str) -> Dict[str, Any]:
         rest = rest[: teacher_match.start()].strip()
 
     tags = extract_tags(raw)
+    ambiguous = len(re.findall(r'\bа\.\s*\d', raw, re.I)) > 1 or room.endswith(('-', '/'))
+    if ambiguous:
+        # Keep the original cell for inspection instead of assigning one teacher/room to several lessons.
+        rest, lesson_type, type_code = 'Несколько занятий — сверьте с источником', 'Требуется сверка', 'other'
+        room, teacher, teacher_key, teacher_profile = '', '', '', None
     return {
         "raw": raw,
         "type": lesson_type,
@@ -216,6 +236,7 @@ def parse_single_lesson_chunk(chunk: str) -> Dict[str, Any]:
         "tag": ", ".join(tags),
         "tags": tags,
         "groups": "",
+        "parse_warning": 'В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.' if ambiguous else '',
     }
 
 
@@ -301,23 +322,32 @@ def parse_day_or_date_cell(raw_cell_text: str, fallback_row_idx: int) -> Optiona
     if not cleaned:
         return None
     prefix3 = cleaned[:3]
-    if prefix3 in DAYS_MAP:
-        day_key, day_title, day_short, day_index = DAYS_MAP[prefix3]
-        return day_key, day_title, day_short, day_index, ""
 
-    m_ru = re.search(r"(\d{1,2})\s*([а-яё]{3,})", cleaned)
+    m_ru = re.search(r"(\d{1,2})\s*([а-яё]{3,})(?:\s+(\d{4}))?", cleaned)
     if m_ru and m_ru.group(2)[:3] in RU_MONTHS:
         day_num = int(m_ru.group(1))
         mon_num = RU_MONTHS[m_ru.group(2)[:3]]
-        day_key, base_title, _, day_index = INDEX_TO_DAY[fallback_row_idx % 6]
-        date_label = f"{day_num:02d}.{mon_num:02d}"
-        return day_key, f"{base_title} ({date_label})", date_label, day_index, date_label
+        year = int(m_ru.group(3)) if m_ru.group(3) else None
+        date_label = f"{day_num:02d}.{mon_num:02d}" + (f'.{year:04d}' if year else '')
+        # A date without a year does not identify a weekday. Keep it as a dated row.
+        try:
+            datetime(year or 2000, mon_num, day_num)
+        except ValueError:
+            return None
+        return f'date_{date_label}', date_label, date_label, -1, date_label
 
-    m_num = re.search(r"(\d{1,2})\.(\d{1,2})", cleaned)
+    m_num = re.search(r"(\d{1,2})\.(\d{1,2})(?:\.(\d{4}))?", cleaned)
     if m_num:
-        date_label = f"{int(m_num.group(1)):02d}.{int(m_num.group(2)):02d}"
-        day_key, base_title, _, day_index = INDEX_TO_DAY[fallback_row_idx % 6]
-        return day_key, f"{base_title} ({date_label})", date_label, day_index, date_label
+        year = int(m_num.group(3)) if m_num.group(3) else None
+        date_label = f"{int(m_num.group(1)):02d}.{int(m_num.group(2)):02d}" + (f'.{year:04d}' if year else '')
+        try:
+            datetime(year or 2000, int(m_num.group(2)), int(m_num.group(1)))
+        except ValueError:
+            return None
+        return f'date_{date_label}', date_label, date_label, -1, date_label
+    if prefix3 in DAYS_MAP:
+        day_key, day_title, day_short, day_index = DAYS_MAP[prefix3]
+        return day_key, day_title, day_short, day_index, ""
     return None
 
 
@@ -382,6 +412,7 @@ def parse_14row_table(table, is_teacher: bool = False, owner_name: str = "", sec
 
     weeks: Dict[str, Dict[str, Any]] = {"1": {}, "2": {}}
     total_lessons = 0
+    day_occurrences = {}
     for row_idx, tr in enumerate(rows[2:]):
         tds = tr.find_all("td")
         if not tds:
@@ -390,8 +421,11 @@ def parse_14row_table(table, is_teacher: bool = False, owner_name: str = "", sec
         if not parsed_day:
             continue
         day_key, day_title, day_short, day_index, session_date = parsed_day
-        has_blue_font = bool(tr.find("font", attrs={"color": re.compile(r"#0000ff", re.I)}))
-        week_key = "2" if (has_blue_font or row_idx >= 6) else "1"
+        day_occurrences[day_key] = day_occurrences.get(day_key, 0) + 1
+        has_blue_font = bool(tds[0].find("font", attrs={"color": re.compile(r"#0000ff", re.I)}))
+        week_key = '1' if session_date else ('2' if has_blue_font or day_occurrences[day_key] == 2 else '1')
+        if day_key in weeks[week_key]:
+            raise ValueError(f'Неоднозначные строки расписания: {week_key}/{day_key}')
         pairs_list = []
         for pair_idx, td in enumerate(tds[1 : 1 + max_pairs]):
             bell = bells[pair_idx] if pair_idx < len(bells) else {"number": pair_idx + 1, "label": f"{pair_idx + 1}-я", "start": "19:45", "end": "21:20"}
@@ -471,7 +505,11 @@ def parse_department_teachers_html(html: str, caf_id: str = "Caf5", section: str
     teachers_list = []
     for idx, table in enumerate(soup.find_all("table")):
         prev_font = table.find_previous("font", attrs={"color": re.compile(r"#ff00ff", re.I)})
-        raw_name = clean_text(prev_font.get_text()) if (prev_font and clean_text(prev_font.get_text())) else f"Преподаватель #{idx+1}"
+        raw_name = clean_text(prev_font.get_text()) if prev_font else ''
+        previous_table = table.find_previous('table')
+        if not raw_name or (previous_table is not None and prev_font.find_previous('table') is not previous_table):
+            LOGGER.warning('Teacher heading missing: %s/%s table %s', section, caf_id, idx + 1)
+            continue
         profile = build_teacher_profile(raw_name, caf_id=caf_id, department_name=department_name)
         parsed = parse_14row_table(table, is_teacher=True, owner_name=raw_name, section=section)
         source_file = f'{section}/{caf_id}.htm'
@@ -503,17 +541,26 @@ def merge_teacher_schedules(primary: Dict[str, Any], secondary: Optional[Dict[st
     merged["merged_sections"] = list({primary.get("section", "bakalavriat"), secondary.get("section", "spezialitet")})
     for week_key in ("1", "2"):
         sec_week = secondary.get("weeks", {}).get(week_key, {})
-        prim_week = merged.get("weeks", {}).get(week_key, {})
+        prim_week = merged.setdefault("weeks", {}).setdefault(week_key, {})
         for day_key, sec_day in sec_week.items():
             if day_key not in prim_week:
-                prim_week[day_key] = sec_day
+                prim_week[day_key] = deepcopy(sec_day)
                 continue
             prim_pairs = prim_week[day_key].get("pairs", [])
             sec_pairs = sec_day.get("pairs", [])
-            for p_idx in range(min(len(prim_pairs), len(sec_pairs))):
-                existing_raws = {(l["raw"], l.get('source_file')) for l in prim_pairs[p_idx]["lessons"]}
-                for lesson in sec_pairs[p_idx]["lessons"]:
-                    if (lesson["raw"], lesson.get('source_file')) not in existing_raws:
-                        prim_pairs[p_idx]["lessons"].append(lesson)
-                        prim_pairs[p_idx]["is_empty"] = False
+            for pair in sec_pairs:
+                target = next((existing for existing in prim_pairs if
+                               (existing['number'], existing['start'], existing['end']) ==
+                               (pair['number'], pair['start'], pair['end'])), None)
+                if target is None:
+                    target = {**deepcopy(pair), 'lessons': []}
+                    prim_pairs.append(target)
+                existing_raws = {(lesson.get('raw'), lesson.get('source_file'), lesson.get('subject'), lesson.get('groups'), lesson.get('room')) for lesson in target['lessons']}
+                for lesson in pair.get('lessons', []):
+                    key = (lesson.get('raw'), lesson.get('source_file'), lesson.get('subject'), lesson.get('groups'), lesson.get('room'))
+                    if key not in existing_raws:
+                        target['lessons'].append(deepcopy(lesson))
+                        existing_raws.add(key)
+                target['is_empty'] = not target['lessons']
+            prim_pairs.sort(key=lambda pair: (pair['start'], pair['number']))
     return merged
