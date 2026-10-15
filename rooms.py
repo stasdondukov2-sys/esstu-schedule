@@ -1,4 +1,11 @@
 """Shared room index for the HTTP server and GitHub Pages snapshots."""
+import re
+
+
+def normalize_room(raw):
+    return re.sub(r'\s+', ' ', re.sub(r'\s*и/д', '', str(raw or ''), flags=re.I)).strip()
+
+
 def build_rooms_index(schedules):
     rooms = {}
     for schedule in schedules:
@@ -7,7 +14,7 @@ def build_rooms_index(schedules):
             for day, data in days.items():
                 for pair in data.get('pairs', []):
                     for lesson in pair.get('lessons', []):
-                        room = str(lesson.get('room') or '').strip()
+                        room = normalize_room(lesson.get('room'))
                         if not room:
                             continue
                         slots = rooms.setdefault(room, {'room': room, 'slots': {}})['slots']

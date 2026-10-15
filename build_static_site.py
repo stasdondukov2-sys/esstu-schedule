@@ -3,6 +3,8 @@ import shutil
 import time
 from pathlib import Path
 from rooms import build_rooms_index
+from catalog import build_catalog, source_metadata, stamp_schedule
+from datetime import datetime, timezone
 from teachers import teachers_from_groups, departments_from_teachers
 from parser import (
     SECTIONS,
@@ -35,6 +37,9 @@ def build():
         elif item.is_dir():
             shutil.copytree(item, DIST_DIR / item.name)
     print("✓ Copied static files to dist/")
+    worker_file = DIST_DIR / 'sw.js'
+    worker_file.write_text(worker_file.read_text(encoding='utf-8').replace(
+        'esstu-live-v2.4.0', f'esstu-live-v2.4.0-{int(start_time)}'), encoding='utf-8')
 
     # 2. Create API directory structure
     api_dir = DIST_DIR / "api"
@@ -57,6 +62,8 @@ def build():
 
     # 3. Parse and save groups list for all sections
     group_schedules = []
+    metadata = source_metadata(DEMO_DIR)
+    generated_at = datetime.now(timezone.utc).isoformat()
     for section in SECTIONS.keys():
         rasp_file = DEMO_DIR / section / "raspisan.htm"
         if not rasp_file.exists():
@@ -81,6 +88,7 @@ def build():
                     sched["resolved_group_id"] = gid
                     sched["last_modified"] = "Статическая синхронизация ВСГУТУ"
                     sched["week_now"] = now_week
+                    stamp_schedule(sched, metadata, generated_at)
                     group_schedules.append(sched)
                     (sec_sched_dir / f"{gid}.json").write_text(json.dumps(sched, ensure_ascii=False), encoding="utf-8")
                     count_sched += 1
@@ -88,76 +96,26 @@ def build():
                     pass
         print(f"✓ Generated {count_sched} schedule JSON files for '{section}'")
 
-    derived_teachers = teachers_from_groups(group_schedules)
-    # 5. Departments and Teachers for bakalavriat and spezialitet
-    for section in ("bakalavriat", "spezialitet"):
-        crasp_file = DEMO_DIR / section / "craspisanEdt.htm"
-        if not crasp_file.exists():
-            fallback = {'count': len(derived_teachers), 'teachers': derived_teachers,
-                        'source': 'group_schedules', 'partial': True}
-            (api_dir / 'teachers' / 'all' / f'{section}.json').write_text(json.dumps(fallback, ensure_ascii=False), encoding='utf-8')
-            (api_dir / 'departments' / f'{section}.json').write_text(json.dumps({
-                'institutes': departments_from_teachers(derived_teachers), 'source': 'group_schedules'
-            }, ensure_ascii=False), encoding='utf-8')
-            print(f"✓ Recovered {len(derived_teachers)} teachers from group schedules for '{section}'")
-            continue
-        html = crasp_file.read_bytes().decode("cp1251", errors="replace")
-        institutes = parse_departments_list_html(html, section=section)
-        dept_payload = {"section": section, "last_modified": "Синхронизировано", "institutes": institutes}
-        (api_dir / "departments" / f"{section}.json").write_text(json.dumps(dept_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-
-        sec_dept_dir = api_dir / "department" / section
-        sec_dept_dir.mkdir(parents=True, exist_ok=True)
-
-        all_teachers = []
-        seen = set()
-
-        for inst in institutes:
-            for dept in inst.get("departments", []):
-                caf_id = dept["caf_id"].replace(".htm", "")
-                dept_name = f"Кафедра «{dept['name']}» ({inst['institute']})"
-                caf_file = DEMO_DIR / section / f"{caf_id}.htm"
-                if caf_file.exists():
-                    try:
-                        caf_html = caf_file.read_bytes().decode("cp1251", errors="replace")
-                        teachers = parse_department_teachers_html(caf_html, caf_id=caf_id, section=section, department_name=dept_name)
-                        
-                        # Merge with other section if exists
-                        other_sec = "spezialitet" if section == "bakalavriat" else "bakalavriat"
-                        other_file = DEMO_DIR / other_sec / f"{caf_id}.htm"
-                        if other_file.exists():
-                            try:
-                                o_html = other_file.read_bytes().decode("cp1251", errors="replace")
-                                o_map = {t["teacher_key"]: t for t in parse_department_teachers_html(o_html, caf_id=caf_id, section=other_sec, department_name=dept_name)}
-                                teachers = [merge_teacher_schedules(t, o_map.get(t["teacher_key"])) for t in teachers]
-                            except Exception:
-                                pass
-                        
-                        caf_payload = {
-                            "caf_id": caf_id,
-                            "department_name": dept_name,
-                            "section": section,
-                            "last_modified": "Синхронизировано",
-                            "teachers": teachers
-                        }
-                        (sec_dept_dir / f"{caf_id}.json").write_text(json.dumps(caf_payload, ensure_ascii=False), encoding="utf-8")
-
-                        for t in teachers:
-                            if t["teacher_key"] not in seen:
-                                seen.add(t["teacher_key"])
-                                all_teachers.append(t)
-                    except Exception:
-                        pass
-        
-        all_teach_payload = {"count": len(all_teachers), "teachers": all_teachers}
-        (api_dir / "teachers" / "all" / f"{section}.json").write_text(json.dumps(all_teach_payload, ensure_ascii=False), encoding="utf-8")
-        print(f"✓ Generated {len(all_teachers)} teachers for '{section}'")
+    catalog, institutes, departments = build_catalog(DEMO_DIR, teachers_from_groups(group_schedules))
+    for section in ('bakalavriat', 'spezialitet'):
+        (api_dir / 'teachers' / 'all' / f'{section}.json').write_text(json.dumps({
+            'count': len(catalog), 'teachers': catalog, 'generated_at': generated_at
+        }, ensure_ascii=False), encoding='utf-8')
+        (api_dir / 'departments' / f'{section}.json').write_text(json.dumps({
+            'institutes': institutes[section] or departments_from_teachers(catalog), 'generated_at': generated_at
+        }, ensure_ascii=False), encoding='utf-8')
+    for section, caf, payload in departments:
+        target = api_dir / 'department' / section
+        target.mkdir(parents=True, exist_ok=True)
+        (target / f'{caf}.json').write_text(json.dumps(payload, ensure_ascii=False), encoding='utf-8')
+    print(f'Official department files: {len(departments)}; combined teachers: {len(catalog)}')
 
     room_sources = []
     for file in (api_dir / 'schedule').rglob('*.json'):
         room_sources.append(json.loads(file.read_text(encoding='utf-8')))
     for file in (api_dir / 'teachers' / 'all').glob('*.json'):
         room_sources.extend(json.loads(file.read_text(encoding='utf-8')).get('teachers', []))
+    (api_dir / 'catalog-status.json').write_text((DEMO_DIR / 'department-sync.json').read_text(encoding='utf-8') if (DEMO_DIR / 'department-sync.json').exists() else '{}', encoding='utf-8')
     (api_dir / 'rooms.json').write_text(json.dumps(build_rooms_index(room_sources), ensure_ascii=False), encoding='utf-8')
     print(f"🎉 Build complete in {time.time()-start_time:.2f}s! All output saved to dist/")
 

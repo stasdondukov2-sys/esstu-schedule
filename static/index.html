@@ -2,7 +2,8 @@
 <html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, " />
+  <meta name="app-version" content="2.4.0" />
   <meta name="theme-color" content="#0f2942" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -39,6 +40,12 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      button { min-height: 40px; }
+    @media(max-width: 480px) {
+      header > div { flex-wrap: wrap; }
+      header h1 { font-size: 14px; }
+      #favoritesBar button { min-height: 44px; }
+    }
   </style>
 </head>
 <body class="min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
@@ -91,9 +98,19 @@
     </div>
   </header>
 
+  <div id="appUpdateBanner" class="hidden sticky top-16 z-40 mx-4 p-3 rounded-2xl bg-teal-600 text-white text-sm shadow-xl">
+    🚀 Доступна новая версия расписания
+    <button onclick="applyAppUpdate()" class="font-bold underline ml-2">Обновить сейчас</button>
+  </div>
   <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main class="max-w-xl mx-auto px-4 pt-3.5 space-y-3.5"><div id="favoritesBar" class="flex gap-2 overflow-x-auto text-xs"></div><button id="favStarBtn" onclick="toggleCurrentFavorite()" aria-label="Избранное">☆ Избранное</button>
 
+    <section id="dataFreshnessBar" class="rounded-2xl p-3 bg-white dark:bg-[#101c2e] border border-slate-500/20 text-xs">
+      <div class="flex justify-between items-center gap-2"><b id="freshnessBadge">Загрузка данных…</b><button id="refreshSchedule" onclick="forceRefreshSchedule()" class="text-teal-600 dark:text-teal-300">🔄 Обновить</button></div>
+      <p id="freshnessTimestamp" class="text-slate-500 mt-1 break-words"></p>
+    </section>
+    <section id="prominentNext" class="hidden rounded-3xl p-4 bg-teal-500/10 border border-teal-500/40"></section>
+    <section id="scheduleChanges" class="hidden rounded-2xl p-3 text-xs bg-amber-500/10 border border-amber-500/30"></section>
     <!-- КАРТОЧКА ПРОФИЛЯ ПРЕПОДАВАТЕЛЯ (показывается в режиме Преподавателя) -->
     <section
       id="teacherProfileCard"
@@ -216,11 +233,14 @@
         </div>
       </div>
 
-      <div class="flex gap-2 flex-wrap text-xs">
-        <button onclick="openRoomsModal()">🚪 Свободные ауд.</button>
-        <button onclick="exportScheduleToICS()">📆 В календарь (.ics)</button>
-        <button onclick="shareCurrentScheduleLink()">🔗 Ссылка</button>
-        <button onclick="toggleTimeSim()">⏱ Тест времени</button>
+      <div class="flex gap-2 flex-wrap text-xs items-start">
+        <button onclick="openRoomsModal()" class="px-3 rounded-xl bg-teal-600 text-white">🚪 Аудитории</button>
+        <button id="btnToggleDiff" onclick="toggleDiffHighlightMode()" class="px-3 rounded-xl bg-amber-500/15 text-amber-600">⚡ Изменения (0)</button>
+        <details><summary class="cursor-pointer px-3 py-3">⚙️ Ещё</summary><div class="flex flex-col gap-2">
+          <button onclick="exportScheduleToICS()">📆 В календарь (.ics)</button>
+          <button onclick="shareCurrentScheduleLink()">🔗 Ссылка</button>
+          <button onclick="toggleTimeSim()">⏱ Тест времени</button>
+        </div></details>
       </div>
       <!-- Панель симуляции времени (Тест Live) -->
       <div id="timeSimPanel" class="hidden pt-2.5 border-t border-slate-200 dark:border-slate-800 text-xs space-y-2">
@@ -860,7 +880,7 @@
             }"
           >
             <div class="text-xs font-extrabold flex items-center justify-center gap-1">
-              <span>${tabLabel}</span>
+              <span>${tabLabel}${hasDayChanges(selectedWeek,d.key) ? ' ⚡' : ''}</span>
               ${isToday ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : ''}
             </div>
             <div class="text-[10px] ${isSelected ? 'text-teal-100' : 'text-slate-400'} mt-0.5 font-medium">
@@ -1004,6 +1024,7 @@
                 }
               </div>
 
+              ${renderLessonMeta(l, pair.number)}
               <!-- Название дисциплины -->
               <div class="font-extrabold text-sm sm:text-base leading-snug pt-0.5">${l.subject}</div>
 
@@ -1176,6 +1197,7 @@
       renderDayTabs();
       renderPairsList();
       updateLiveHero();
+      updateExperienceUI();
     }
 
     // =========================================================================
@@ -1187,6 +1209,7 @@
       if (!isGhPages) {
         return path;
       }
+      if (path === '/api/catalog-status') return `${base}/catalog-status.json`;
       if (path === '/api/rooms') return `${base}/rooms.json`;
       // GitHub Pages / Static JSON mapping
       if (path.startsWith('/api/groups')) {
@@ -1227,14 +1250,15 @@
       }
     }
 
-    async function loadStudentSchedule(section, groupId, groupName = null) {
+    async function loadStudentSchedule(section, groupId, groupName = null, forceFresh = false) {
       try {
         const nameParam = groupName ? `?group_name=${encodeURIComponent(groupName)}` : '';
-        const res = await fetch(getApiUrl(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`));
-        const data = await res.json();
+        const res = await fetch(getApiUrl(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`), {cache:forceFresh ? 'reload' : 'default'});
+        const data = await scheduleJSON(res);
         appMode = 'student';
         localStorage.setItem('esstu_mode', 'student');
         currentSchedule = data;
+        trackSchedule(data);
 
         const finalName = data.group_name || groupName || groupId;
         const resolvedId = data.resolved_group_id || data.group_id || groupId;
@@ -1250,8 +1274,10 @@
           document.getElementById('lastModifiedText').textContent = `Источник: portal.esstu.ru • ${data.last_modified}`;
         }
         renderAll();
+        return true;
       } catch (e) {
         console.error('Ошибка загрузки расписания:', e);
+        return false;
       }
     }
 
@@ -1263,33 +1289,34 @@
       return String(value || '').normalize('NFKC').toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
     }
     function teacherMatches(t, query, caf = '') {
-      if (caf && normSearch(t.caf_id) !== normSearch(caf)) return false;
+      if (caf && !(t.caf_ids || [t.caf_id]).some(id => normSearch(id) === normSearch(caf))) return false;
       const p = t.profile || {};
       const lessons = Object.values(t.weeks || {}).flatMap(days => Object.values(days).flatMap(d => (d.pairs || []).flatMap(p => p.lessons || [])));
       const text = normSearch([t.teacher_key, p.full_name, p.short_name, p.department, p.degree, p.building,
         ...lessons.map(l => `${l.subject || ''} ${l.room || ''} ${decodeEsstuRoom(l.room)?.building || ''}`)].join(' '));
       return normSearch(query).split(' ').every(word => text.includes(word));
     }
-    async function loadDepartmentsAndTeachers() {
+    async function loadDepartmentsAndTeachers(forceFresh = false) {
       if (teacherDirectoryLoading) return teacherDirectoryLoading;
       teacherDirectoryLoading = (async () => {
         teacherDirectoryError = '';
         try {
           const results = await Promise.allSettled([
             fetch(getApiUrl('/api/departments?section=bakalavriat')).then(r => { if (!r.ok) throw Error(); return r.json(); }),
-            fetch(getApiUrl('/api/teachers/all?section=bakalavriat')).then(r => { if (!r.ok) throw Error(); return r.json(); }),
+            fetch(getApiUrl('/api/teachers/all?section=bakalavriat'),{cache:forceFresh ? 'reload' : 'default'}).then(scheduleJSON),
           ]);
           if (results[0].status === 'fulfilled') departmentsHierarchy = results[0].value.institutes || [];
-          if (results[1].status === 'fulfilled') allTeachersDirectory = results[1].value.teachers || [];
+          if (results[1].status === 'fulfilled') allTeachersDirectory = (results[1].value.teachers || []).map(t=>({...t,_delivery:results[1].value._delivery}));
           else if (!allTeachersDirectory.length) teacherDirectoryError = 'Не удалось загрузить преподавателей. Проверьте соединение и повторите загрузку.';
+          if (forceFresh && results[1].status !== 'fulfilled') throw Error('Не удалось проверить новую версию каталога');
         } finally { teacherDirectoryLoading = null; renderTeacherModalContent(); }
       })();
       renderTeacherModalContent();
       return teacherDirectoryLoading;
     }
 
-    async function loadTeacherSchedule(teacherKey, cafId = '') {
-      if (!allTeachersDirectory.length) await loadDepartmentsAndTeachers();
+    async function loadTeacherSchedule(teacherKey, cafId = '', forceFresh = false) {
+      if (forceFresh || !allTeachersDirectory.length) await loadDepartmentsAndTeachers(forceFresh);
       let found = allTeachersDirectory.find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
       if (!found && cafId) {
         try {
@@ -1302,7 +1329,8 @@
       savedState.teacherKey = found.teacher_key; savedState.teacherCafId = found.caf_id || '';
       localStorage.setItem('esstu_teacher_key', savedState.teacherKey);
       localStorage.setItem('esstu_teacher_caf', savedState.teacherCafId);
-      currentSchedule = found; renderAll();
+      currentSchedule = found; trackSchedule(found); renderAll();
+      return true;
     }
 
     function openSelectorModal() {
@@ -1558,11 +1586,10 @@
 
       setInterval(updateLiveHero, 1000);
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      }
+
     });
   </script>
 <script src="modern.js"></script>
+<script src="experience.js"></script>
 </body>
 </html>
