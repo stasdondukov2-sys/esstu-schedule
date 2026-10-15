@@ -11,5 +11,6 @@ venv/
 Thumbs.db
 dist/
 .deps/
+node_modules/
 preview/
 portal-*-sample.htm

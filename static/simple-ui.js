@@ -33,6 +33,7 @@ function renderCalendarDays() {
 }
 function pairWord(count) {return count%100>=11 && count%100<=14?'пар':count%10===1?'пара':count%10>=2 && count%10<=4?'пары':'пар';}
 function heroState(schedule,now) {
+  if(hasDatedSchedule(schedule))return {kind:'dated'};
   const dayIndex=(now.getDay()+6)%7,minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
   if(dayIndex===6)return {kind:'empty'};
   const day=schedule.weeks?.[getWeekNum(now)]?.[DAY_KEYS[dayIndex]];
@@ -160,6 +161,7 @@ function renderCompactDay(container) {
           <div class="flex justify-between items-center gap-2 mt-1"><span class="text-xs text-slate-500 dark:text-slate-400">${escapeHTML(subtitle || (appMode==='student'?'Преподаватель не указан':'Группы не указаны'))}${note?' · 📝':''}</span><span aria-hidden="true" class="detail-chevron text-slate-400 text-xs">⌄</span></div>
         </summary>
         <div class="pt-1 pb-2 space-y-2 text-xs"><p class="text-slate-500">${escapeHTML([lesson.type,lesson.tag].filter(Boolean).join(' · '))}</p>
+          ${lesson.parse_warning?`<p class="text-amber-700 dark:text-amber-300">${escapeHTML(lesson.parse_warning)}</p><p class="text-slate-500 dark:text-slate-400 whitespace-pre-wrap">${escapeHTML(lesson.raw)}</p>`:''}
           ${room?`<p class="text-teal-600 dark:text-teal-300">${escapeHTML(room.location)}</p>`:''}
           ${renderLessonMeta(lesson,pair.number)}
           ${note?`<p class="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-200 whitespace-pre-wrap">${escapeHTML(note)}</p>`:''}
@@ -179,8 +181,9 @@ function updateCompactUI() {
   if(!currentSchedule)return;
   document.getElementById('currentEntityBtnText').textContent=appMode==='student'?savedState.groupName:(currentSchedule.profile?.short_name || savedState.teacherKey);
   const checked=currentSchedule.source_checked_at,offline=lastDelivery?.cached || !navigator.onLine;
+  const fallback=currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode);
   const text=checked?`Проверено ${displayDate(checked)}`:`Сборка ${displayDate(currentSchedule.generated_at)}`;
-  document.getElementById('compactFreshnessText').textContent=(offline?'Офлайн · ':'')+text+' ⓘ';
+  document.getElementById('compactFreshnessText').textContent=(offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }

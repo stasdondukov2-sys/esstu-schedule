@@ -24,9 +24,10 @@ function setScheduleTab(tab) {
 }
 function updateStudyUI() {
   const session=scheduleTab==='session';
-  document.getElementById('weekControls').classList.toggle('hidden',session);
-  document.getElementById('dayTabs').classList.toggle('hidden',session || viewMode==='week');
-  document.getElementById('selectedDaySummary').classList.toggle('hidden',session);
+  const dated=hasDatedSchedule(currentSchedule);
+  document.getElementById('weekControls').classList.toggle('hidden',session || dated);
+  document.getElementById('dayTabs').classList.toggle('hidden',session || dated || viewMode==='week');
+  document.getElementById('selectedDaySummary').classList.toggle('hidden',session || dated);
   const subgroup=activeSubgroup(),wrap=document.getElementById('subgroupFilterWrap');
   wrap.classList.toggle('hidden',appMode!=='student');
   for(const value of ['all','1','2']){
@@ -36,6 +37,28 @@ function updateStudyUI() {
   }
   const chip=document.getElementById('activeSubgroupChip');
   chip.classList.toggle('hidden',subgroup==='all');chip.textContent=`${subgroup} подгруппа · изменить`;
+}
+function hasDatedSchedule(schedule) {return Object.values(schedule?.weeks || {}).some(days=>Object.values(days).some(day=>day.session_date));}
+let datedLessons=[];
+function renderDatedTimetable(container) {
+  datedLessons=[];
+  const seen=new Set(),days=[];
+  for(const [week,entries] of Object.entries(currentSchedule.weeks || {}))for(const [key,day] of Object.entries(entries)){
+    const signature=JSON.stringify([day.session_date || `${week}:${key}`,day.pairs]);if(seen.has(signature))continue;seen.add(signature);
+    days.push({week,key,day});
+  }
+  container.innerHTML='<h2 class="font-bold">Занятия по датам</h2><p class="text-xs text-slate-500 dark:text-slate-400">Даты сохранены из источника. Без указанного года день недели не определяется.</p>'+days.map(({week,key,day})=>`<section class="rounded-2xl bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 p-4"><h3 class="font-bold text-sm">${escapeHTML(day.session_date || `${day.day_title || key} · ${week==='1'?'I':'II'} неделя`)}</h3>${(day.pairs || []).map(pair=>filterLessons(pair.lessons).map(lesson=>{
+    const index=datedLessons.push({week,key,pair,lesson})-1;
+    return `<div class="border-l-[3px] ${getTypeBorderClass(lesson.type_code)} pl-3 mt-3"><p class="text-xs text-slate-500 dark:text-slate-400">${escapeHTML(pair.start)}–${escapeHTML(pair.end)} · ${escapeHTML(lesson.type)}</p><p class="text-sm font-semibold mt-1">${escapeHTML(lesson.subject)}</p><p class="text-xs text-slate-500 mt-1">${escapeHTML(appMode==='teacher'?lesson.groups:lesson.teacher)}</p><div class="flex gap-2 text-xs mt-1">${lesson.room?`<button class="px-2 text-teal-600 dark:text-teal-300" onclick="datedLessonAction(${index},'room')">ауд. ${escapeHTML(lesson.room)}</button>`:''}<button class="px-2 text-teal-600 dark:text-teal-300" onclick="datedLessonAction(${index},'note')">Заметка</button></div></div>`;
+  }).join('')).join('') || '<p class="text-xs text-slate-500 mt-2">Занятия не указаны</p>'}</section>`).join('');
+}
+function datedLessonAction(index,action) {
+  const item=datedLessons[index];if(!item)return;
+  if(action==='room')openRoomsModal(item.lesson.room);
+  if(action==='note'){
+    const owner=appMode==='student'?savedState.groupName:savedState.teacherKey;
+    openNoteModal(`${owner}::${item.week}::${item.key}::${item.pair.number}::${item.lesson.subject}`,item.lesson.subject);
+  }
 }
 function examKind(lesson) {
   if(['exam','test','consultation'].includes(lesson.type_code))return lesson.type_code;

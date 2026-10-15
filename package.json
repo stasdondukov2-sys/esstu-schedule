@@ -1,0 +1,6 @@
+{
+  "name": "esstu-schedule",
+  "private": true,
+  "scripts": {"build:css": "tailwindcss -i styles/input.css -o static/app.css --minify"},
+  "devDependencies": {"tailwindcss": "4.3.3", "@tailwindcss/cli": "4.3.3"}
+}
