@@ -1,5 +1,5 @@
 const CACHE_NAME = 'esstu-live-v2.4.0';
-const SHELL = ['./', './index.html', './modern.js', './experience.js', './manifest.json'];
+const SHELL = ['./', './index.html', './modern.js', './experience.js', './simple-ui.js', './manifest.json'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
 });
