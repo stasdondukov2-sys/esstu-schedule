@@ -57,6 +57,7 @@ jobs:
           node test_experience.cjs
           node test_sw.cjs
           node test_teacher_search.cjs
+          node test_campus.cjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
