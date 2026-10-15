@@ -85,6 +85,9 @@ def build():
                 try:
                     g_html = htm_file.read_bytes().decode("cp1251", errors="replace")
                     sched = parse_group_schedule_html(g_html, group_id=gid, section=section)
+                    if normalize_group_name(sched['group_name']) != normalize_group_name(group['name']):
+                        print(f"⚠ Skipped mismatched group file: {section}/{gid}.htm")
+                        continue
                     sched["resolved_group_id"] = gid
                     sched["last_modified"] = "Статическая синхронизация ВСГУТУ"
                     sched["week_now"] = now_week

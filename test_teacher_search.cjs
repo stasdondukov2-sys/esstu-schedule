@@ -9,7 +9,7 @@ vm.createContext(ctx);vm.runInContext(scripts.at(-1)[1], ctx);
 vm.runInContext(fs.readFileSync('static/modern.js','utf8'), vm.createContext({...ctx, document:{...ctx.document,addEventListener(){}}}));
 ctx.escapeHTML = value => String(value || '');
 ctx.sample = {teacher_key:'семенов а.в.',caf_id:'Caf5',profile:{full_name:'Семёнов Алексей',department:'Физика'}, weeks:{1:{monday:{pairs:[{number:1,start:'09:00',end:'10:35',lessons:[{subject:'Квантовая механика',room:'8305'}]}]}}}};
-for(const term of ['Семенов','семёнов','КВАНТОВАЯ','8305','Корпус 8']) {
+for(const term of ['Семенов','семёнов','КВАНТОВАЯ','8305','Корпус 8','caf5']) {
   ctx.query=term;assert(vm.runInContext('teacherMatches(sample,query)',ctx),term);
 }
 assert(!vm.runInContext("teacherMatches(sample,'','Caf9')",ctx));

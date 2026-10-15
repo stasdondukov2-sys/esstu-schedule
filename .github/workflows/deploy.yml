@@ -5,8 +5,8 @@ on:
     branches: ["main"]
   workflow_dispatch:
   schedule:
-    # Daily sync at 02:00 UTC (10:00 AM Asia/Irkutsk / Ulan-Ude)
-    - cron: "0 2 * * *"
+    # Refresh published schedules every three hours (UTC).
+    - cron: "0 */3 * * *"
 
 permissions:
   contents: read
@@ -35,15 +35,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Refresh official department snapshots
-        run: python sync_departments.py
+      - name: Refresh official department and group snapshots
+        run: python sync_esstu.py
 
       - name: Build static site & API JSON
         run: python build_static_site.py
 
       - name: Verify schedule data and app behavior
         run: |
-          python -m unittest test_rooms test_teachers
+          python -m unittest test_rooms test_teachers test_sync
           node test_experience.cjs
           node test_sw.cjs
           node test_teacher_search.cjs
