@@ -4,6 +4,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      full_sync:
+        description: 'Обновить все группы перед публикацией (занимает больше времени)'
+        type: boolean
+        default: false
   schedule:
     # Refresh published schedules every three hours (UTC).
     - cron: "0 */3 * * *"
@@ -36,7 +41,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Refresh official department and group snapshots
-        run: python sync_esstu.py
+        if: github.event_name == 'schedule' || inputs.full_sync == true
+        run: python -u sync_esstu.py
+
+      - name: Refresh departments for a quick site release
+        if: github.event_name != 'schedule' && inputs.full_sync != true
+        run: python -u sync_departments.py
 
       - name: Build static site & API JSON
         run: python build_static_site.py

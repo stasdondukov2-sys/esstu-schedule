@@ -30,6 +30,8 @@ def sync_groups():
                 path, meta = future.result()
                 manifest[path] = meta
                 successes.append(path)
+                if len(successes) % 50 == 0:
+                    print(f'Group synchronization progress: {len(successes)} pages downloaded', flush=True)
             except Exception as exc:
                 failures.append({'path': pending[future], 'error': str(exc)})
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
