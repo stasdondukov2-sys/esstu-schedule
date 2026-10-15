@@ -18,7 +18,10 @@ function renderFavoritesBar() {
   getFavorites().forEach(f => {
     const button = document.createElement('button'); button.textContent = `${f.type === 'student' ? '🎓' : '👨‍🏫'} ${f.label}`;
     button.className = 'shrink-0 rounded-xl px-3 py-2 min-h-[44px] bg-teal-600 text-white';
-    button.onclick = () => f.type === 'student' ? loadStudentSchedule(f.section, f.id, f.label) : loadTeacherSchedule(f.teacherKey, f.cafId);
+    button.onclick = () => {
+      if(typeof closeSearchModal==='function')closeSearchModal();
+      return f.type === 'student' ? loadStudentSchedule(f.section, f.id, f.label) : loadTeacherSchedule(f.teacherKey, f.cafId);
+    };
     bar.append(button);
   });
   document.getElementById('favStarBtn').textContent = getFavorites().some(f => favoriteKey(f) === favoriteKey(currentFavorite())) ? '⭐ Избранное' : '☆ Избранное';
