@@ -125,32 +125,6 @@
 </div>
 </div>
 <!-- МОДАЛЬНОЕ ОКНО 4: ФОТО ПРЕПОДАВАТЕЛЯ -->
-<div class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4" id="photoModal">
-<div class="w-full max-w-md bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-2xl">
-<div class="flex items-center justify-between">
-<h3 class="font-bold text-sm">Фото и профиль преподавателя</h3>
-<button class="text-slate-400 hover:text-white" onclick="closePhotoModal()">✕</button>
-</div>
-<div class="space-y-2 text-xs">
-<div>
-<label class="block text-slate-500 dark:text-slate-400 mb-1">Ссылка на фото (URL):</label>
-<input class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm" id="photoUrlInput" type="url"/>
-</div>
-<div>
-<label class="block text-slate-500 dark:text-slate-400 mb-1">Полное ФИО:</label>
-<input class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm" id="photoFullNameInput" type="text"/>
-</div>
-<div>
-<label class="block text-slate-500 dark:text-slate-400 mb-1">Учёная степень / должность:</label>
-<input class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm" id="photoDegreeInput" type="text"/>
-</div>
-</div>
-<div class="flex justify-end gap-2 pt-2">
-<button class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-800" onclick="closePhotoModal()">Отмена</button>
-<button class="px-4 py-1.5 rounded-xl text-xs font-bold bg-teal-600 text-white hover:bg-teal-500" onclick="saveTeacherPhotoMeta()">Сохранить</button>
-</div>
-</div>
-</div>
 <script>
     // =========================================================================
     // 1. АВТО-РАСШИФРОВКА КОРПУСОВ И АУДИТОРИЙ ВСГУТУ (ФИШКА ВАРИАНТА 3)
@@ -339,9 +313,10 @@
         if (currentSchedule && currentSchedule.profile) {
           const p = currentSchedule.profile;
           profileCard.classList.remove('hidden');
-          document.getElementById('teacherAvatarImg').src = p.photo;
+          document.getElementById('teacherAvatarImg').src = teacherAvatarURL(p);
+          document.getElementById('teacherAvatarImg').onerror = function() { this.onerror=null;this.src=initialsAvatar(p.short_name || p.full_name); };
           document.getElementById('teacherFullName').textContent = p.full_name || p.short_name;
-          document.getElementById('teacherDegreeAndDept').textContent = `${p.degree} • ${p.department}`;
+          document.getElementById('teacherDegreeAndDept').textContent = `${p.degree} • ${escapeHTML(p.department)}`;
           document.getElementById('teacherBuildingInfo').textContent = (p.building ? `📍 ${p.building}` : '') + (currentSchedule.partial ? ' • По расписаниям групп: данные могут быть неполными' : '');
           document.getElementById('currentEntityBtnText').textContent = `👨🏫 ${p.short_name}`;
         }
@@ -421,7 +396,7 @@
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
-      if (hasDatedSchedule(currentSchedule) && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
+      if ((hasDatedSchedule(currentSchedule) || viewMode === 'dates') && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
       if (scheduleTab === 'session') { renderSessionTimeline(container); return; }
       if (viewMode === 'week') { renderFullWeekGrid(container); return; }
       renderCompactDay(container);
@@ -732,39 +707,40 @@
 
       const filteredTeachers = allTeachersDirectory.filter(t => teacherMatches(t, q, selectedCafFilter));
 
-      const teachersCards = filteredTeachers.map((t) => {
+      visibleTeacherChoices = filteredTeachers;
+      const teachersCards = filteredTeachers.map((t, teacherIndex) => {
         const p = t.profile || {};
         return `
           <button
-            onclick="chooseTeacher('${t.teacher_key.replace(/'/g, "\\'")}', '${(t.caf_id || 'Caf5').replace(/'/g, "\\'")}')"
+            onclick="chooseTeacherByIndex(${teacherIndex})"
             class="w-full p-2.5 rounded-2xl border flex items-center gap-3 text-left transition ${
               t.teacher_key === savedState.teacherKey && appMode === 'teacher'
                 ? 'bg-teal-600/15 border-teal-500'
                 : 'bg-slate-100/70 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/70 hover:border-teal-500/50'
             }"
           >
-            <img src="${p.photo}" alt="" class="w-11 h-11 rounded-xl object-cover shrink-0 bg-slate-700" />
+            <img src="${escapeHTML(teacherAvatarURL(p))}" data-name="${escapeHTML(p.short_name || p.full_name)}" onerror="this.onerror=null;this.src=initialsAvatar(this.dataset.name)" alt="" class="w-11 h-11 rounded-xl object-cover shrink-0 bg-slate-700" />
             <div class="min-w-0 flex-1">
-              <div class="font-bold text-xs sm:text-sm truncate">${p.full_name || p.short_name}</div>
-              <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${p.degree || ""}</div><div class="text-[10px] text-teal-500">${getTeacherLiveStatus(t)}</div>
+              <div class="font-bold text-xs sm:text-sm truncate">${escapeHTML(p.full_name || p.short_name)}</div>
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${escapeHTML(p.degree || "")}</div><div class="text-[10px] text-teal-500">${getTeacherLiveStatus(t)}</div>
               <div class="text-[10px] text-teal-600 dark:text-teal-300">${escapeHTML((t.caf_ids?.length ? t.caf_ids : [t.caf_id]).filter(Boolean).map(id => `🏛 ${id}.htm`).join(' • ') || '📄 По расписаниям групп')}</div>
-              <div class="text-[10px] text-teal-600 dark:text-teal-400 truncate">${p.department}</div>
+              <div class="text-[10px] text-teal-600 dark:text-teal-400 truncate">${escapeHTML(p.department)}</div>
               <div class="text-[10px] text-slate-400 truncate">${escapeHTML([...new Set(Object.values(t.weeks || {}).flatMap(w => Object.values(w).flatMap(d => (d.pairs || []).flatMap(p => (p.lessons || []).map(l => l.subject)))))].join(', '))}</div>
             </div>
           </button>
         `;
       }).join('');
 
-      const deptsHtml = departmentsHierarchy.map((inst) => `
+      const deptsHtml = departmentsHierarchy.map((inst, instituteIndex) => `
         <div class="p-3 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-1.5">
-          <div class="text-xs font-extrabold text-teal-600 dark:text-teal-400">${inst.institute}</div>
+          <div class="text-xs font-extrabold text-teal-600 dark:text-teal-400">${escapeHTML(inst.institute)}</div>
           <div class="flex flex-wrap gap-1.5">
-            ${(inst.departments || []).map((d) => `
+            ${(inst.departments || []).map((d, departmentIndex) => `
               <button
-                onclick="filterByCaf('${d.caf_id.replace(/'/g, "\\'")}')"
+                onclick="filterCafByIndex(${instituteIndex},${departmentIndex})"
                 class="px-2.5 py-1 rounded-xl text-[11px] font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500 transition"
               >
-                🏛 ${d.name} <span class="opacity-60">(${escapeHTML(d.caf_id)})</span>
+                🏛 ${escapeHTML(d.name)} <span class="opacity-60">(${escapeHTML(d.caf_id)})</span>
               </button>
             `).join('')}
           </div>
@@ -797,40 +773,6 @@
     function chooseTeacher(teacherKey, cafId) {
       toggleTeacherModal(false);
       loadTeacherSchedule(teacherKey, cafId);
-    }
-
-    function openPhotoModal() {
-      if (!currentSchedule || !currentSchedule.profile) return;
-      const p = currentSchedule.profile;
-      document.getElementById('photoUrlInput').value = p.photo || '';
-      document.getElementById('photoFullNameInput').value = p.full_name || '';
-      document.getElementById('photoDegreeInput').value = p.degree || '';
-      document.getElementById('photoModal').classList.remove('hidden');
-    }
-
-    function closePhotoModal() {
-      document.getElementById('photoModal').classList.add('hidden');
-    }
-
-    async function saveTeacherPhotoMeta() {
-      if (!currentSchedule || !currentSchedule.profile) return;
-      const photo = document.getElementById('photoUrlInput').value.trim();
-      const full_name = document.getElementById('photoFullNameInput').value.trim();
-      const degree = document.getElementById('photoDegreeInput').value.trim();
-
-      try {
-        await fetch('/api/teacher/meta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ teacher_key: currentSchedule.teacher_key, photo, full_name, degree }),
-        });
-        closePhotoModal();
-        allTeachersDirectory = [];
-        await loadDepartmentsAndTeachers();
-        await loadTeacherSchedule(currentSchedule.teacher_key, currentSchedule.caf_id);
-      } catch (e) {
-        console.error('Ошибка сохранения:', e);
-      }
     }
 
     function selectWeek(w) { selectedWeek = w; renderAll(); }
@@ -941,6 +883,7 @@
 </div></div>
 </div></div><div aria-labelledby="moreTitle" aria-modal="true" class="simple-overlay hidden" id="moreMenuModal" role="dialog"><div class="simple-sheet"><div class="flex items-center justify-between"><h2 class="font-bold" id="moreTitle">Ещё</h2><button aria-label="Закрыть меню" class="w-10 text-xl" onclick="closeSimpleDialog('moreMenuModal')">×</button></div><div class="grid gap-1 mt-2" id="moreActions">
 <button class="menu-action" onclick="setScheduleTab('semester')">Расписание семестра</button>
+<button id="datedViewBtn" class="menu-action hidden" onclick="setViewMode('dates');closeSimpleDialog('moreMenuModal')">Занятия по отдельным датам</button>
 <button class="menu-action" onclick="setScheduleTab('session')">Сессия и зачёты</button>
 <button class="menu-action" onclick="openCampusMapModal()">Корпуса кампуса</button>
 <div id="subgroupFilterWrap" class="py-2 border-y border-slate-200 dark:border-slate-800"><p class="text-xs text-slate-500 mb-2">Моя подгруппа · сохраняется для этой группы</p><div class="flex gap-2" role="group" aria-label="Подгруппа"><button id="subgroupBtn_all" onclick="setSubgroupFilter('all')">Все</button><button id="subgroupBtn_1" onclick="setSubgroupFilter('1')">1 п/г</button><button id="subgroupBtn_2" onclick="setSubgroupFilter('2')">2 п/г</button></div></div>
@@ -958,9 +901,7 @@
 <div class="flex items-center gap-3.5">
 <div class="relative shrink-0">
 <img alt="Фото преподавателя" class="w-16 h-16 rounded-2xl object-cover border-2 border-teal-500/50 shadow-md bg-slate-800" id="teacherAvatarImg" src="shortcut-now.svg"/>
-<button class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 text-slate-950 text-xs flex items-center justify-center shadow hover:bg-amber-400 font-bold" onclick="openPhotoModal()" title="Изменить фото или данные преподавателя">
-            📷
-          </button>
+
 </div>
 <div class="flex-1 min-w-0">
 <div class="flex items-center gap-1.5 flex-wrap">

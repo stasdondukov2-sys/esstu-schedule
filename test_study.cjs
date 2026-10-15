@@ -44,3 +44,7 @@ for(const shortcut of manifest.shortcuts){
   assert(fs.existsSync('static/'+shortcut.icons[0].src));
 }
 console.log('Subgroups, owner isolation, hero filtering, exams, dates, calendar export and scoped shortcuts OK');
+context.mixed={weeks:{1:{monday:{pairs:[{lessons:[{subject:'Weekly'}]}]},date_A:{session_date:'20.01',pairs:[]}}}};
+assert.equal(run('hasDatedRows(mixed)'),true);
+assert.equal(run('hasDatedSchedule(mixed)'),false,'dated supplements must not replace the weekly teacher view');
+assert.equal(run('hasDatedSchedule({weeks:{1:{date_A:{session_date:"20.01",pairs:[]}}}})'),true);

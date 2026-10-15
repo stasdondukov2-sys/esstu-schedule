@@ -5,8 +5,7 @@
     "degree": "к.ф.-м.н., доцент",
     "department": "Кафедра «Физика» (Институт энергетики)",
     "caf_id": "Caf5",
-    "building": "Корпус 4, ауд. 0410",
-    "photo": "https://ui-avatars.com/api/?name=%D0%AD+%D0%94&background=1d4ed8&color=fff&size=256&bold=true"
+    "building": "Корпус 4, ауд. 0410"
   },
   "ваганова в.и.": {
     "full_name": "Ваганова Валентина Ивановна",
@@ -14,8 +13,7 @@
     "degree": "д.п.н., профессор",
     "department": "Кафедра «Физика» (Институт энергетики)",
     "caf_id": "Caf5",
-    "building": "Корпус 4, ауд. 0415",
-    "photo": "https://ui-avatars.com/api/?name=%D0%92+%D0%92&background=7c3aed&color=fff&size=256&bold=true"
+    "building": "Корпус 4, ауд. 0415"
   },
   "жигжитова с.б.": {
     "full_name": "Жигжитова Светлана Баировна",
@@ -23,8 +21,7 @@
     "degree": "ст. преподаватель",
     "department": "Кафедра «Физика» (Институт энергетики)",
     "caf_id": "Caf5",
-    "building": "Корпус 4, ауд. 0422",
-    "photo": "https://ui-avatars.com/api/?name=%D0%A1+%D0%96&background=059669&color=fff&size=256&bold=true"
+    "building": "Корпус 4, ауд. 0422"
   },
   "пушкарева ю.г.": {
     "full_name": "Пушкарева Юлия Георгиевна",
@@ -32,8 +29,7 @@
     "degree": "к.филол.н., доцент",
     "department": "Кафедра «Иностранные языки»",
     "caf_id": "Caf21",
-    "building": "Корпус 15, ауд. 15-572",
-    "photo": "https://ui-avatars.com/api/?name=%D0%AE+%D0%9F&background=db2777&color=fff&size=256&bold=true"
+    "building": "Корпус 15, ауд. 15-572"
   },
   "иванова а.в.": {
     "full_name": "Иванова Анна Викторовна",
@@ -41,8 +37,7 @@
     "degree": "ст. преподаватель",
     "department": "Кафедра «Иностранные языки»",
     "caf_id": "Caf21",
-    "building": "Корпус 15, ауд. 15-504",
-    "photo": "https://ui-avatars.com/api/?name=%D0%90+%D0%98&background=2563eb&color=fff&size=256&bold=true"
+    "building": "Корпус 15, ауд. 15-504"
   },
   "хамаганова в.м.": {
     "full_name": "Хамаганова Валентина Михайловна",
@@ -50,8 +45,7 @@
     "degree": "к.филол.н., доцент",
     "department": "Кафедра «Иностранные языки»",
     "caf_id": "Caf21",
-    "building": "Корпус 15, ауд. 15-568",
-    "photo": "https://ui-avatars.com/api/?name=%D0%92+%D0%A5&background=d97706&color=fff&size=256&bold=true"
+    "building": "Корпус 15, ауд. 15-568"
   },
   "смирнова е.к.": {
     "full_name": "Смирнова Елена Константиновна",
@@ -59,8 +53,7 @@
     "degree": "преподаватель",
     "department": "Кафедра «Иностранные языки»",
     "caf_id": "Caf21",
-    "building": "Корпус 15, ауд. 15-506",
-    "photo": "https://ui-avatars.com/api/?name=%D0%95+%D0%A1&background=0891b2&color=fff&size=256&bold=true"
+    "building": "Корпус 15, ауд. 15-506"
   },
   "цыренова в.б.": {
     "full_name": "Цыренова Валентина Бабасановна",
@@ -68,8 +61,7 @@
     "degree": "к.ф.-м.н., доцент",
     "department": "Кафедра «Высшая математика» (ИКНТ)",
     "caf_id": "Caf8",
-    "building": "Корпус 8, ауд. 8305",
-    "photo": "https://ui-avatars.com/api/?name=%D0%92+%D0%A6&background=4f46e5&color=fff&size=256&bold=true"
+    "building": "Корпус 8, ауд. 8305"
   },
   "базарова ж.г.": {
     "full_name": "Базарова Жанна Гармаевна",
@@ -77,8 +69,7 @@
     "degree": "д.х.н., профессор, академик РАН",
     "department": "Кафедра «Неорганическая и аналитическая химия»",
     "caf_id": "Caf30",
-    "building": "Корпус 2, ауд. 0215",
-    "photo": "https://ui-avatars.com/api/?name=%D0%96+%D0%91&background=0d9488&color=fff&size=256&bold=true"
+    "building": "Корпус 2, ауд. 0215"
   },
   "доржиев б.ц.": {
     "full_name": "Доржиев Баир Цыденович",
@@ -86,8 +77,7 @@
     "degree": "к.т.н., доцент",
     "department": "Кафедра «Программная инженерия и ИИ» (ИКНТ)",
     "caf_id": "Caf12",
-    "building": "Корпус 1, ауд. 0110",
-    "photo": "https://ui-avatars.com/api/?name=%D0%91+%D0%94&background=2563eb&color=fff&size=256&bold=true"
+    "building": "Корпус 1, ауд. 0110"
   },
   "соколов с.м.": {
     "full_name": "Соколов Сергей Михайлович",
@@ -95,7 +85,6 @@
     "degree": "к.и.н., доцент",
     "department": "Кафедра «История и право»",
     "caf_id": "Caf25",
-    "building": "Корпус 8, ауд. 8100а",
-    "photo": "https://ui-avatars.com/api/?name=%D0%A1+%D0%A1&background=b45309&color=fff&size=256&bold=true"
+    "building": "Корпус 8, ауд. 8100а"
   }
 }

@@ -61,6 +61,14 @@ DEFAULT_BELLS = [
 TEACHERS_META_PATH = Path(__file__).parent / "teachers_meta.json"
 LOGGER = logging.getLogger(__name__)
 META_LOCK = RLock()
+AVATAR_ROOT = Path(__file__).parent / 'static'
+
+
+def local_teacher_photo(value: str) -> str:
+    if not isinstance(value, str) or len(value) > 128 or not re.fullmatch(r'avatars/[A-Za-z0-9_-]+\.(?:png|jpe?g|webp)', value, re.I):
+        return ''
+    path = (AVATAR_ROOT / value).resolve()
+    return value if path.is_relative_to(AVATAR_ROOT.resolve()) and path.is_file() else ''
 
 
 def clean_text(text: str) -> str:
@@ -90,6 +98,8 @@ def load_teachers_meta() -> Dict[str, Dict[str, Any]]:
 
 
 def save_teacher_meta_entry(teacher_key: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+    if entry.get('photo') and not local_teacher_photo(entry['photo']):
+        raise ValueError('Фото должно быть существующим локальным файлом avatars/*.png, *.jpg или *.webp')
     with META_LOCK:
         meta = load_teachers_meta()
         norm_key = normalize_teacher_key(teacher_key)
@@ -124,7 +134,6 @@ def build_teacher_profile(raw_name: str, caf_id: str = "", department_name: str 
     meta = load_teachers_meta().get(norm_key, {})
     parts = display_name.replace(".", " ").split()
     initials = "".join(p[0].upper() for p in parts[:2]) if parts else "П"
-    default_avatar = f"https://ui-avatars.com/api/?name={initials}&background=2563eb&color=fff&size=256&bold=true"
     return {
         "key": norm_key,
         "raw_name": clean_text(raw_name),
@@ -134,7 +143,8 @@ def build_teacher_profile(raw_name: str, caf_id: str = "", department_name: str 
         "department": meta.get("department") or department_name or "Кафедра ВСГУТУ",
         "caf_id": caf_id or meta.get("caf_id") or "",
         "building": meta.get("building") or "",
-        "photo": meta.get("photo") or default_avatar,
+        "photo": local_teacher_photo(meta.get('photo')),
+        "initials": initials,
     }
 
 

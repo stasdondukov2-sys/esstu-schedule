@@ -30,7 +30,6 @@ from parser import (
     parse_department_teachers_html,
     merge_teacher_schedules,
     normalize_teacher_key,
-    save_teacher_meta_entry,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -411,31 +410,27 @@ def service_rooms_index() -> Dict[str, Any]:
     return payload
 
 
-def service_update_teacher_meta(data: Dict[str, Any]) -> Dict[str, Any]:
-    t_key = data.get("teacher_key", "")
-    upd = {k: str(data[k]).strip() for k in ("photo", "full_name", "degree", "building") if data.get(k)}
-    saved = save_teacher_meta_entry(t_key, upd)
-    CACHE.clear()
-    return {"status": "ok", "teacher_key": normalize_teacher_key(t_key), "meta": saved}
-
-
 class ESSTURequestHandler(BaseHTTPRequestHandler):
     def _send_json(self, payload: Any, status: int = 200):
         raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        if self.command == 'GET':
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        if status == 405:
+            self.send_header('Allow', 'GET, OPTIONS')
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
         self.wfile.write(raw)
 
     def do_OPTIONS(self):
+        if self.headers.get('Access-Control-Request-Method', 'GET') not in ('GET', 'OPTIONS'):
+            return self._send_json({'error':'Публичный сервер доступен только для чтения'}, status=405)
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header('Allow', 'GET, OPTIONS')
         self.end_headers()
 
     def do_GET(self):
@@ -497,18 +492,23 @@ class ESSTURequestHandler(BaseHTTPRequestHandler):
             self._send_json({'error':'Источник временно недоступен'}, status=503)
 
     def do_POST(self):
-        if urlparse(self.path).path == "/api/teacher/meta":
-            try:
-                length = int(self.headers.get("Content-Length", "0"))
-                if length < 1 or length > 8192:
-                    return self._send_json({'error':'Недопустимый размер запроса'}, status=400)
-                data = json.loads(self.rfile.read(length).decode('utf-8'))
-                if not isinstance(data, dict) or not isinstance(data.get('teacher_key'), str) or not data['teacher_key'].strip():
-                    raise ValueError('Требуется teacher_key')
-                return self._send_json(service_update_teacher_meta(data))
-            except (ValueError, UnicodeError) as error:
-                return self._send_json({'error':str(error)}, status=400)
-        self._send_json({"error": "Not found"}, status=404)
+        # Public service is read-only. Never read/parse/write an incoming body.
+        self.close_connection = True
+        try:
+            lengths = self.headers.get_all('Content-Length', [])
+            if len(lengths) > 1 or self.headers.get('Transfer-Encoding'):
+                raise ValueError('Неоднозначная длина запроса')
+            if lengths and not re.fullmatch(r'[0-9]+', lengths[0]):
+                raise ValueError('Недопустимая длина запроса')
+            length = int(lengths[0]) if lengths else 0
+            if length < 0 or length > 8192:
+                raise ValueError('Недопустимый размер запроса')
+            return self._send_json({'error':'Публичный сервер доступен только для чтения'}, status=405)
+        except ValueError:
+            return self._send_json({'error':'Недопустимая длина запроса'}, status=400)
+        except Exception:
+            LOGGER.exception('POST rejection failed')
+            return self._send_json({'error':'Не удалось обработать запрос'}, status=500)
 
 
 if __name__ == "__main__":
