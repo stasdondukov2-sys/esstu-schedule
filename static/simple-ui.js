@@ -26,13 +26,14 @@ function renderCalendarDays() {
   document.getElementById('dayTabs').innerHTML=DAY_NAMES.map(day=>{
     const meta=dayDateMeta(week[day.key],day.key,dates),active=day.key===selectedDayKey;
     const count=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length).length;
-    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="flex-1 min-w-[58px] px-1 py-2 rounded-xl border text-center ${active?'bg-teal-600 border-teal-600 text-white':'bg-white dark:bg-[#101c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'}"><div class="text-xs font-bold">${day.short}${meta.isToday?' <span class="text-amber-400" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?' ⚡':''}</div><div class="text-[10px] mt-1 whitespace-nowrap">${escapeHTML(meta.shortLabel)}</div><div class="text-[9px] mt-1 ${active?'text-teal-100':'text-slate-400'}">${count?count+' '+pairWord(count):'нет пар'}</div></button>`;
+    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="flex-1 min-w-[58px] px-1 py-2 rounded-xl border text-center ${active?'bg-teal-600 border-teal-600 text-white':'bg-white dark:bg-[#101c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'}"><div class="text-xs font-bold">${day.short}${meta.isToday?' <span class="text-amber-400" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?' ⚡':''}</div><div class="text-[10px] mt-1 whitespace-nowrap">${escapeHTML(meta.shortLabel)}</div><div class="text-[9px] mt-1 ${active?'text-teal-100':'text-slate-400'}">${currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар'}</div></button>`;
   }).join('');
   const day=DAY_NAMES.find(day=>day.key===selectedDayKey),meta=dayDateMeta(week[selectedDayKey],selectedDayKey,dates);
   document.getElementById('selectedDaySummary').textContent=day?`${day.full}, ${meta.shortLabel}${meta.isToday?' · Сегодня':''}`:'';
 }
 function pairWord(count) {return count%100>=11 && count%100<=14?'пар':count%10===1?'пара':count%10>=2 && count%10<=4?'пары':'пар';}
 function heroState(schedule,now) {
+  if(schedule?.is_incomplete)return {kind:'incomplete'};
   if(hasDatedSchedule(schedule))return {kind:'dated'};
   const dayIndex=(now.getDay()+6)%7,minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
   if(dayIndex===6)return {kind:'empty'};
@@ -61,7 +62,7 @@ function updateCampusHero() {
   updateCurrentCards(now);
   if(!pair){
     label.textContent=state.kind==='finished'?'Занятия завершены':'Сегодня';remaining.textContent='';
-    lessons.innerHTML=`<p class="font-semibold text-sm">${state.kind==='finished'?'Все пары на сегодня закончились':state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>`;
+    lessons.innerHTML=`<p class="font-semibold text-sm">${state.kind==='finished'?'Все пары на сегодня закончились':currentSchedule.is_incomplete?'Данные неполные — проверьте источник':state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>`;
     delete lessons.dataset.content;
     return;
   }
@@ -183,7 +184,7 @@ function updateCompactUI() {
   const checked=currentSchedule.source_checked_at,offline=lastDelivery?.cached || !navigator.onLine;
   const fallback=currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode);
   const text=checked?`Проверено ${displayDate(checked)}`:`Сборка ${displayDate(currentSchedule.generated_at)}`;
-  document.getElementById('compactFreshnessText').textContent=(offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
+  document.getElementById('compactFreshnessText').textContent=(currentSchedule.is_incomplete?'Данные неполные · ':offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }

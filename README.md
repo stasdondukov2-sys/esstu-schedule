@@ -36,11 +36,12 @@
 
 ### Установка зависимостей
 ```bash
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.txt
 ```
 
 ### Запуск сервера
 ```bash
+python -m scripts.build_static_site
 python app.py
 ```
 После запуска откройте в браузере: **`http://localhost:8000`**
@@ -53,19 +54,18 @@ python app.py
 
 ```text
 esstu-schedule/
-├── app.py, cache_tools.py  # Необязательный динамический сервер и кэш
-├── parser.py              # Общий разбор источников
-├── catalog.py, teachers.py, rooms.py # Общие каталоги и индекс аудиторий
-├── build_static_site.py   # Сборка GitHub Pages с API JSON
-├── sync_esstu.py          # Полная синхронизация (кафедры + группы)
-├── sync_departments.py    # Синхронизация только кафедр
-├── sync_all_esstu.py      # Альтернативный массовый загрузчик; не используется в Pages CI
-├── static/                # HTML, JS, локальный app.css, PWA и иконки
-├── styles/, package*.json, tailwind.config.cjs # Воспроизводимая сборка CSS
-├── demo_data/             # Сохранённые источники и даты их проверки
-├── test_*.py, test_*.cjs   # Проверки данных, сервера, интерфейса и Service Worker
-├── .github/workflows/     # Обновление и публикация
-└── docs/AUDIT.md           # Результаты проверки замечаний и остающиеся ограничения
+├── esstu_schedule/         # Парсер, HTTP-сервер, каталоги, кэш
+│   └── data/              # Dataclass-модели, общий repository, диагностика, JSON snapshots
+├── scripts/               # Синхронизация и статическая сборка (python -m scripts.…)
+├── tests/                 # Python-тесты и fixtures/ с замороженными HTML/JSON
+├── e2e/                   # Настоящие Playwright-тесты: desktop + mobile
+│   └── unit/              # Быстрые проверки JS и Service Worker
+├── static/, styles/       # Интерфейс, CSS, PWA и иконки
+├── demo_data/             # Сохранённые официальные источники
+├── requirements.in, requirements.txt # uv lock с точными версиями и хешами
+├── app.py, parser.py, …   # Совместимые прежние точки входа
+├── .github/workflows/     # Синхронизация, тесты, публикация
+└── docs/                  # Ограничения и результаты проверки
 ```
 
 ---
@@ -99,8 +99,15 @@ esstu-schedule/
 
 `app.py` хранит снимки в `cache_store/`, либо в каталоге `ESSTU_SNAPSHOT_DIR`. На эфемерном хостинге укажите подключённый постоянный диск; файловый кэш сам по себе не переживает удаление диска. Режим источника, дата проверки и HTTP Last-Modified — отдельные поля. Сохранённая копия не считается новой проверкой портала. Проверка TLS-сертификатов включена.
 
-Проверки: `python -m unittest test_rooms test_teachers test_sync test_study test_audit test_p0`; затем `node test_teacher_search.cjs`, `node test_experience.cjs`, `node test_sw.cjs`, `node test_campus.cjs`, `node test_study.cjs`, `node test_reference.cjs`, `node test_assets.cjs`, `node test_avatars.cjs`. Для поиска преподавателей сначала нужна статическая сборка.
+Проверки: `python -m unittest discover -s tests -t .`, `npm run test:unit`, `npm run test:e2e`. Для JS-проверок поиска и браузерных тестов сначала нужна статическая сборка; Chromium устанавливается командой `npx playwright install chromium`.
 
 ## Публичные профили и фотографии
 
 Публичный `app.py` работает только на чтение: изменение профилей через POST отключено (405), CORS не разрешает POST. Неверные/большие Content-Length возвращают 400, предел — 8 КБ. Форма редактирования удалена. Инициалы преподавателей генерируются в браузере без внешних сервисов. Для настоящей фотографии владелец помещает проверенный PNG/JPG/WebP в `static/avatars/` и указывает `photo: "avatars/name.webp"` в `teachers_meta.json`. Внешние URL и SVG для photo запрещены, файл должен существовать. Подробнее: [проверки P0](docs/P0.md).
+
+
+## Корректность данных и архитектура P1/P2
+
+См. [docs/DATA.md](docs/DATA.md): правила структуры недель, golden-фикстуры,
+явные неполные данные, фоновый индекс аудиторий, stale-while-revalidate,
+проверки в настоящем браузере и обновление зафиксированных зависимостей.

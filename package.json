@@ -1,6 +1,14 @@
 {
   "name": "esstu-schedule",
   "private": true,
-  "scripts": {"build:css": "tailwindcss -i styles/input.css -o static/app.css --minify"},
-  "devDependencies": {"tailwindcss": "4.3.3", "@tailwindcss/cli": "4.3.3"}
+  "scripts": {
+    "build:css": "tailwindcss -i styles/input.css -o static/app.css --minify",
+    "test:unit": "node e2e/unit/run.cjs",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
 }

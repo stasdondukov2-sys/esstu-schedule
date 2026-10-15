@@ -1,0 +1,1334 @@
+{
+  "mode": "student",
+  "source_file": "zo1/401.htm",
+  "source_type": "group_table",
+  "group_id": "401",
+  "group_name": "ЗБ-1146 тпуп",
+  "norm_group_name": "зб-1146 тпуп",
+  "section": "zo1",
+  "section_title": "Заочное 1",
+  "is_incomplete": false,
+  "parse_errors": [],
+  "bells": [
+    {
+      "number": 1,
+      "label": "1-я",
+      "start": "09:00",
+      "end": "10:35"
+    },
+    {
+      "number": 2,
+      "label": "2-я",
+      "start": "10:45",
+      "end": "12:20"
+    },
+    {
+      "number": 3,
+      "label": "3-я",
+      "start": "13:00",
+      "end": "14:35"
+    },
+    {
+      "number": 4,
+      "label": "4-я",
+      "start": "14:45",
+      "end": "16:20"
+    },
+    {
+      "number": 5,
+      "label": "5-я",
+      "start": "16:25",
+      "end": "18:00"
+    },
+    {
+      "number": 6,
+      "label": "6-я",
+      "start": "18:05",
+      "end": "19:40"
+    },
+    {
+      "number": 7,
+      "label": "7-я",
+      "start": "19:45",
+      "end": "21:20"
+    }
+  ],
+  "weeks": {
+    "1": {
+      "date_15.01": {
+        "day_key": "date_15.01",
+        "day_title": "15.01",
+        "day_short": "15.01",
+        "day_index": -1,
+        "session_date": "15.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Высшая математика ЦЫРЕНОВА В.Б. а.8305",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Высшая математика",
+                "teacher": "Цыренова В.Б.",
+                "teacher_key": "цыренова в.б.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8305",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "пр.Высшая математика ЦЫРЕНОВА В.Б. а.8204",
+                "type": "Практика",
+                "type_code": "practice",
+                "subject": "Высшая математика",
+                "teacher": "Цыренова В.Б.",
+                "teacher_key": "цыренова в.б.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8204",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "конс.Высшая математика ЦЫРЕНОВА В.Б. а.8204",
+                "type": "Консультация",
+                "type_code": "consultation",
+                "subject": "Высшая математика",
+                "teacher": "Цыренова В.Б.",
+                "teacher_key": "цыренова в.б.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8204",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          }
+        ]
+      },
+      "date_16.01": {
+        "day_key": "date_16.01",
+        "day_title": "16.01",
+        "day_short": "16.01",
+        "day_index": -1,
+        "session_date": "16.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Информатика ДОРЖИЕВ Б.Ц. а.0110",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Информатика",
+                "teacher": "Доржиев Б.Ц.",
+                "teacher_key": "доржиев б.ц.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0110",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лаб.Информатика (1 п/г) ДОРЖИЕВ Б.Ц. а.0114",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Информатика (1 п/г)",
+                "teacher": "Доржиев Б.Ц.",
+                "teacher_key": "доржиев б.ц.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0114",
+                "tag": "1 п/г",
+                "tags": [
+                  "1 п/г"
+                ],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              },
+              {
+                "raw": "лаб.Информатика (2 п/г) АЮШЕЕВ Т.В. а.0116",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Информатика (2 п/г)",
+                "teacher": "Аюшеев Т.В.",
+                "teacher_key": "аюшеев т.в.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0116",
+                "tag": "2 п/г",
+                "tags": [
+                  "2 п/г"
+                ],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_17.01": {
+        "day_key": "date_17.01",
+        "day_title": "17.01",
+        "day_short": "17.01",
+        "day_index": -1,
+        "session_date": "17.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Физика ДАРИБАЗАРОН Э.Ч.ФИЗ. а.0410 и/д",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Физика",
+                "teacher": "Дарибазарон Э.Ч.",
+                "teacher_key": "дарибазарон э.ч.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0410 и/д",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лаб.Физика ВАГАНОВА В.И. а.0415",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Физика",
+                "teacher": "Ваганова В.И.",
+                "teacher_key": "ваганова в.и.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0415",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "зач.Физика ДАРИБАЗАРОН Э.Ч.ФИЗ. а.0410 и/д",
+                "type": "Зачёт",
+                "type_code": "test",
+                "subject": "Физика",
+                "teacher": "Дарибазарон Э.Ч.",
+                "teacher_key": "дарибазарон э.ч.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0410 и/д",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          }
+        ]
+      },
+      "date_18.01": {
+        "day_key": "date_18.01",
+        "day_title": "18.01",
+        "day_short": "18.01",
+        "day_index": -1,
+        "session_date": "18.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.История России СОКОЛОВ С.М. а.0302",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "История России",
+                "teacher": "Соколов С.М.",
+                "teacher_key": "соколов с.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0302",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "пр.История России СОКОЛОВ С.М. а.8100а",
+                "type": "Практика",
+                "type_code": "practice",
+                "subject": "История России",
+                "teacher": "Соколов С.М.",
+                "teacher_key": "соколов с.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8100а",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "зач.История России СОКОЛОВ С.М. а.8100а",
+                "type": "Зачёт",
+                "type_code": "test",
+                "subject": "История России",
+                "teacher": "Соколов С.М.",
+                "teacher_key": "соколов с.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8100а",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          }
+        ]
+      },
+      "date_19.01": {
+        "day_key": "date_19.01",
+        "day_title": "19.01",
+        "day_short": "19.01",
+        "day_index": -1,
+        "session_date": "19.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Автоматизированные системы НАЙДАНОВ Ч.А. а.3105",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Автоматизированные системы",
+                "teacher": "Найданов Ч.А.",
+                "teacher_key": "найданов ч.а.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3105",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "пр.Автоматизированные системы НАЙДАНОВ Ч.А. а.3105",
+                "type": "Практика",
+                "type_code": "practice",
+                "subject": "Автоматизированные системы",
+                "teacher": "Найданов Ч.А.",
+                "teacher_key": "найданов ч.а.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3105",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_20.01": {
+        "day_key": "date_20.01",
+        "day_title": "20.01",
+        "day_short": "20.01",
+        "day_index": -1,
+        "session_date": "20.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "экз.Высшая математика ЦЫРЕНОВА В.Б. а.8305",
+                "type": "Экзамен",
+                "type_code": "exam",
+                "subject": "Высшая математика",
+                "teacher": "Цыренова В.Б.",
+                "teacher_key": "цыренова в.б.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8305",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "экз.Информатика ДОРЖИЕВ Б.Ц. а.0110",
+                "type": "Экзамен",
+                "type_code": "exam",
+                "subject": "Информатика",
+                "teacher": "Доржиев Б.Ц.",
+                "teacher_key": "доржиев б.ц.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0110",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_22.01": {
+        "day_key": "date_22.01",
+        "day_title": "22.01",
+        "day_short": "22.01",
+        "day_index": -1,
+        "session_date": "22.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Теоретические основы электротехники БАИРОВ А.М. а.3204",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Теоретические основы электротехники",
+                "teacher": "Баиров А.М.",
+                "teacher_key": "баиров а.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3204",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лаб.Теоретические основы электротехники БАИРОВ А.М. а.3208",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Теоретические основы электротехники",
+                "teacher": "Баиров А.М.",
+                "teacher_key": "баиров а.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3208",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_23.01": {
+        "day_key": "date_23.01",
+        "day_title": "23.01",
+        "day_short": "23.01",
+        "day_index": -1,
+        "session_date": "23.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Инженерная графика АЮШЕЕВ Т.В. а.8402",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Инженерная графика",
+                "teacher": "Аюшеев Т.В.",
+                "teacher_key": "аюшеев т.в.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8402",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "пр.Инженерная графика АЮШЕЕВ Т.В. а.8402",
+                "type": "Практика",
+                "type_code": "practice",
+                "subject": "Инженерная графика",
+                "teacher": "Аюшеев Т.В.",
+                "teacher_key": "аюшеев т.в.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "8402",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_24.01": {
+        "day_key": "date_24.01",
+        "day_title": "24.01",
+        "day_short": "24.01",
+        "day_index": -1,
+        "session_date": "24.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лаб.Иностранный язык (англ.) ИВАНОВА А.В. а.15-504",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Иностранный язык (англ.)",
+                "teacher": "Иванова А.В.",
+                "teacher_key": "иванова а.в.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "15-504",
+                "tag": "англ",
+                "tags": [
+                  "англ"
+                ],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              },
+              {
+                "raw": "лаб.Иностранный язык (франц.) ПУШКАРЕВА Ю.Г. а.15-572",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Иностранный язык (франц.)",
+                "teacher": "Пушкарева Ю.Г.",
+                "teacher_key": "пушкарева ю.г.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "15-572",
+                "tag": "франц",
+                "tags": [
+                  "франц"
+                ],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "зач.Иностранный язык ИВАНОВА А.В. а.15-504",
+                "type": "Зачёт",
+                "type_code": "test",
+                "subject": "Иностранный язык",
+                "teacher": "Иванова А.В.",
+                "teacher_key": "иванова а.в.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "15-504",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_25.01": {
+        "day_key": "date_25.01",
+        "day_title": "25.01",
+        "day_short": "25.01",
+        "day_index": -1,
+        "session_date": "25.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лек.Неорганическая химия БАЗАРОВА Ж.Г. а.0215",
+                "type": "Лекция",
+                "type_code": "lecture",
+                "subject": "Неорганическая химия",
+                "teacher": "Базарова Ж.Г.",
+                "teacher_key": "базарова ж.г.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0215",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "лаб.Неорганическая химия БАЗАРОВА Ж.Г. а.0218",
+                "type": "Лабораторная",
+                "type_code": "lab",
+                "subject": "Неорганическая химия",
+                "teacher": "Базарова Ж.Г.",
+                "teacher_key": "базарова ж.г.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "0218",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_26.01": {
+        "day_key": "date_26.01",
+        "day_title": "26.01",
+        "day_short": "26.01",
+        "day_index": -1,
+        "session_date": "26.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "конс.Теоретические основы электротехники БАИРОВ А.М. а.3204",
+                "type": "Консультация",
+                "type_code": "consultation",
+                "subject": "Теоретические основы электротехники",
+                "teacher": "Баиров А.М.",
+                "teacher_key": "баиров а.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3204",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      },
+      "date_27.01": {
+        "day_key": "date_27.01",
+        "day_title": "27.01",
+        "day_short": "27.01",
+        "day_index": -1,
+        "session_date": "27.01",
+        "pairs": [
+          {
+            "number": 1,
+            "label": "1-я",
+            "start": "09:00",
+            "end": "10:35",
+            "is_empty": false,
+            "lessons": [
+              {
+                "raw": "экз.Теоретические основы электротехники БАИРОВ А.М. а.3204",
+                "type": "Экзамен",
+                "type_code": "exam",
+                "subject": "Теоретические основы электротехники",
+                "teacher": "Баиров А.М.",
+                "teacher_key": "баиров а.м.",
+                "teacher_photo": "",
+                "teacher_caf_id": "",
+                "room": "3204",
+                "tag": "",
+                "tags": [],
+                "groups": "",
+                "parse_warning": "",
+                "source_type": "group_table",
+                "source_file": "zo1/401.htm"
+              }
+            ]
+          },
+          {
+            "number": 2,
+            "label": "2-я",
+            "start": "10:45",
+            "end": "12:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 3,
+            "label": "3-я",
+            "start": "13:00",
+            "end": "14:35",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 4,
+            "label": "4-я",
+            "start": "14:45",
+            "end": "16:20",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 5,
+            "label": "5-я",
+            "start": "16:25",
+            "end": "18:00",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 6,
+            "label": "6-я",
+            "start": "18:05",
+            "end": "19:40",
+            "is_empty": true,
+            "lessons": []
+          },
+          {
+            "number": 7,
+            "label": "7-я",
+            "start": "19:45",
+            "end": "21:20",
+            "is_empty": true,
+            "lessons": []
+          }
+        ]
+      }
+    },
+    "2": {}
+  },
+  "total_lessons": 27
+}
