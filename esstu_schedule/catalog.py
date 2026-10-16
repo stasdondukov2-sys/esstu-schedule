@@ -5,6 +5,7 @@ from .data.repository import department_schedules as parse_department_teachers_h
 from .parser import parse_departments_list_html
 from .teachers import combine_teacher_catalog
 from .data.provenance import source_manifest
+from .data.diagnostics import record_error
 
 
 def source_metadata(root, with_hashes=False):
@@ -39,6 +40,8 @@ def build_catalog(root, derived):
     official, institutes_by_section, departments = [], {}, []
     for section in ("bakalavriat", "spezialitet"):
         index = root / section / "craspisanEdt.htm"
+        if not index.exists():
+            record_error(f"{section}/craspisanEdt.htm", "Отсутствует каталог кафедр")
         institutes = (
             parse_departments_list_html(index.read_bytes().decode("cp1251"), section)
             if index.exists()
@@ -50,6 +53,9 @@ def build_catalog(root, derived):
                 caf = department["caf_id"]
                 path = root / section / f"{caf}.htm"
                 if not path.exists():
+                    record_error(
+                        f"{section}/{caf}.htm", "Отсутствует расписание кафедры"
+                    )
                     continue
                 parsed = parse_department_teachers_html(
                     path.read_bytes().decode("cp1251"),

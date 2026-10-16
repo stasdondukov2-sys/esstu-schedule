@@ -18,6 +18,22 @@ async function notification(result,exists){
   return calls;
 }
 (async()=>{
+  const ci=fs.readFileSync('.github/workflows/ci.yml','utf8').replace(/\r\n/g,'\n');
+  const restore=ci.split('          script: |\n')[1].split('\n      - uses:')[0].split('\n').map(line=>line.slice(12)).join('\n');
+  async function snapshot(count,hasArtifact){
+    const outputs={},warnings=[];
+    const github={
+      paginate:async()=>Array.from({length:count},(_,id)=>({id})),
+      rest:{actions:{
+        listWorkflowRuns(){},
+        listWorkflowRunArtifacts:async({run_id})=>({data:{artifacts:hasArtifact&&run_id===count-1?[{name:'source-snapshot',expired:false}]:[]}})
+      }}
+    };
+    await new Function('github','context','core',`return (async()=>{${restore}})()`)(github,{repo:{owner:'test',repo:'test'}},{setOutput:(name,value)=>outputs[name]=value,warning:text=>warnings.push(text)});
+    return {outputs,warnings};
+  }
+  assert.equal((await snapshot(12,true)).outputs.run_id,'11','retained snapshots beyond ten runs are found');
+  assert.equal((await snapshot(12,false)).warnings.length,1,'fallback to repository data is visible');
   assert.equal((await notification('failure',false))[0].action,'create');
   assert.equal((await notification('failure',true))[0].action,'update');
   assert.equal((await notification('success',true))[0].state,'closed');

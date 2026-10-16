@@ -145,10 +145,11 @@ def combine_teacher_catalog(official, derived):
                         if any(
                             existing_lesson.get("subject") == lesson.get("subject")
                             and existing_lesson.get("room") == lesson.get("room")
-                            and (
-                                existing_lesson.get("source_type") == "official_caf"
-                                or existing_lesson.get("groups") == lesson.get("groups")
-                            )
+                            and group_key(existing_lesson.get("groups"))
+                            == group_key(lesson.get("groups"))
+                            and existing_lesson.get("type_code")
+                            == lesson.get("type_code")
+                            and existing_lesson.get("tag") == lesson.get("tag")
                             for existing_lesson in existing
                         ):
                             continue

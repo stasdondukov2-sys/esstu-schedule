@@ -92,6 +92,7 @@ def build():
     for section in SECTIONS.keys():
         rasp_file = DEMO_DIR / section / "raspisan.htm"
         if not rasp_file.exists():
+            record_error(f"{section}/raspisan.htm", "Отсутствует каталог групп")
             continue
         html = rasp_file.read_bytes().decode("cp1251", errors="replace")
         groups = parse_groups_list_html(html, section=section)
@@ -108,6 +109,8 @@ def build():
         for group in groups:
             gid = group["id"]
             htm_file = DEMO_DIR / section / f"{gid}.htm"
+            if not htm_file.exists():
+                record_error(f"{section}/{gid}.htm", "Отсутствует расписание группы")
             if htm_file.exists():
                 try:
                     g_html = htm_file.read_bytes().decode("cp1251", errors="replace")
