@@ -1,0 +1,16 @@
+name: Предложение улучшения
+description: Описать задачу пользователя и желаемое изменение
+title: '[Предложение] '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу сейчас сложно выполнить
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Какое поведение вы предлагаете
+    validations:
+      required: true

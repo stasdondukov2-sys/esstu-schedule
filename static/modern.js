@@ -87,14 +87,14 @@ async function openRoomsModal(prefill = '') {
     modal.innerHTML = `<div role="dialog" aria-modal="true" aria-label="Радар аудиторий" class="w-full max-w-lg rounded-3xl p-4 bg-white dark:bg-[#101c2e] max-h-[88vh] overflow-auto"><button onclick="closeRoomsModal()" class="float-right" aria-label="Закрыть">✕</button><h2 class="font-bold">🚪 Радар аудиторий</h2><p class="text-xs my-2">Занятость по известным расписаниям. Отсутствие пары не гарантирует доступ в аудиторию.</p><input id="roomSearchInput" aria-label="Поиск аудитории" placeholder="Аудитория или корпус" class="w-full rounded-xl p-2 bg-slate-100 dark:bg-slate-800" oninput="renderRoomsModalList()"><div class="flex gap-3 my-3 text-xs"><button onclick="roomFilter='all';renderRoomsModalList()">Все</button><button onclick="roomFilter='free';renderRoomsModalList()">🟢 Нет пар</button><button onclick="roomFilter='busy';renderRoomsModalList()">🔴 Есть пары</button></div><div id="roomsListContainer"></div></div>`;
     document.body.append(modal);
   }
-  modal.classList.remove('hidden'); document.getElementById('roomSearchInput').value = prefill;
+  openSimpleDialog('roomsModal'); document.getElementById('roomSearchInput').value = prefill;
   document.getElementById('roomsListContainer').textContent = 'Загрузка индекса аудиторий…';
   try {
     if (!roomDirectory) { const res = await fetch(getApiUrl('/api/rooms')); if (!res.ok) throw Error(); roomDirectory = await res.json(); }
     renderRoomsModalList(); clearInterval(roomTimer); roomTimer = setInterval(renderRoomsModalList, 15000);
   } catch { document.getElementById('roomsListContainer').textContent = 'Не удалось загрузить индекс. Закройте окно и попробуйте снова.'; }
 }
-function closeRoomsModal() { document.getElementById('roomsModal').classList.add('hidden'); clearInterval(roomTimer); }
+function closeRoomsModal() { closeSimpleDialog('roomsModal'); clearInterval(roomTimer); }
 function renderRoomsModalList() {
   const context = roomContext();
   let controls=document.getElementById('roomTimeControls');

@@ -53,7 +53,7 @@ function updateCampusHero() {
   document.getElementById('clockDisplay').textContent=now.toLocaleString('ru-RU')+' · Улан-Удэ'+(simOverride?' · ТЕСТ':'');
   const stamp=now.toDateString();
   if(stamp!==campusDayStamp){campusDayStamp=stamp;renderCalendarDays();if(currentSchedule && scheduleTab==='session')renderPairsList();}
-  if(!currentSchedule)return;
+  if(!currentSchedule || document.getElementById('pairsContainer').getAttribute('aria-busy')==='true')return;
   const state=heroState(currentSchedule,now),pair=state.pair;
   const label=document.getElementById('heroStatusLabel'),remaining=document.getElementById('heroRemainingTime'),lessons=document.getElementById('heroLessons'),next=document.getElementById('heroNextPairRow');
   document.getElementById('heroProgressWrap').classList.toggle('hidden',state.kind!=='current');
@@ -92,19 +92,8 @@ function updateCurrentCards(now) {
     card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
   }
 }
-const dialogFocus = new Map();
-function openSimpleDialog(id) {
-  const dialog=document.getElementById(id);
-  if(dialog.classList.contains('hidden'))dialogFocus.set(id,document.activeElement);
-  dialog.classList.remove('hidden');
-  document.body.style.overflow='hidden';
-  dialog.querySelector('button')?.focus();
-}
-function closeSimpleDialog(id) {
-  document.getElementById(id)?.classList.add('hidden');
-  if (!document.querySelector('.simple-overlay:not(.hidden)')) document.body.style.overflow='';
-  dialogFocus.get(id)?.focus();
-}
+function openSimpleDialog(id) { presentDialog(id); }
+function closeSimpleDialog(id) { dismissDialog(id); }
 function closeSearchModal() { closeSimpleDialog('searchModal'); }
 function openSearchModal(mode = appMode) {
   searchMode=mode==='teacher'?'teacher':'student';
@@ -185,6 +174,7 @@ function updateCompactUI() {
   const fallback=currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode);
   const text=checked?`Проверено ${displayDate(checked)}`:`Сборка ${displayDate(currentSchedule.generated_at)}`;
   document.getElementById('compactFreshnessText').textContent=(currentSchedule.is_incomplete?'Данные неполные · ':offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
+  renderDaySource();
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }
@@ -194,16 +184,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
   document.getElementById('debugTools').hidden=new URLSearchParams(location.search).get('debug')!=='1';
   for(const overlay of document.querySelectorAll('.simple-overlay'))overlay.addEventListener('click',event=>{if(event.target===overlay)closeSimpleDialog(overlay.id);});
-  document.addEventListener('keydown',event=>{
-    if(event.key==='Escape')document.querySelectorAll('.simple-overlay:not(.hidden)').forEach(dialog=>closeSimpleDialog(dialog.id));
-    if(event.key==='Tab'){
-      const dialog=document.querySelector('.simple-overlay:not(.hidden)');
-      if(!dialog)return;
-      const items=[...dialog.querySelectorAll('button,input,select,textarea,a[href],summary')].filter(item=>!item.disabled && item.getClientRects().length);
-      const first=items[0],last=items.at(-1);
-      if(event.shiftKey && document.activeElement===first){event.preventDefault();last?.focus();}
-      else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first?.focus();}
-    }
-  });
   for(const id of ['btnViewDay','btnViewWeek'])document.getElementById(id).addEventListener('click',()=>closeSimpleDialog('moreMenuModal'));
 });

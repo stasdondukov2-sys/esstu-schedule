@@ -1,0 +1,50 @@
+name: Scheduled source synchronization
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-synchronization
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    uses: ./.github/workflows/ci.yml
+    with:
+      sync_sources: true
+      publish: true
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+
+  notify:
+    needs: synchronize
+    if: always() && (needs.synchronize.result == 'failure' || needs.synchronize.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          SYNC_RESULT: ${{ needs.synchronize.result }}
+        with:
+          script: |
+            const title = 'Автоматическая синхронизация расписания: ошибка';
+            const {owner,repo} = context.repo;
+            const issues = await github.paginate(github.rest.issues.listForRepo,{owner,repo,state:'open',creator:'github-actions[bot]'});
+            const existing = issues.find(issue => !issue.pull_request && issue.title === title);
+            const run = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            if (process.env.SYNC_RESULT === 'failure') {
+              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
+              if (existing) await github.rest.issues.update({owner,repo,issue_number:existing.number,body});
+              else await github.rest.issues.create({owner,repo,title,body});
+            } else if (existing) {
+              await github.rest.issues.update({owner,repo,issue_number:existing.number,state:'closed',body:`Синхронизация и публикация восстановились. [Успешный запуск](${run}).`});
+            }

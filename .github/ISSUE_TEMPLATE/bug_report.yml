@@ -1,0 +1,38 @@
+name: Ошибка сайта или расписания
+description: Сообщить о проблеме интерфейса, установки или данных
+title: '[Ошибка] '
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Тип проблемы
+      options:
+        - Неверные данные расписания
+        - Интерфейс или доступность
+        - Установка PWA или офлайн
+    validations:
+      required: true
+  - type: input
+    id: schedule
+    attributes:
+      label: Ссылка на расписание или группа/преподаватель
+      description: Не добавляйте пароли, телефоны и другие личные данные.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Что произошло и как повторить
+      placeholder: Открыл ссылку → выбрал день → увидел…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось
+      description: Для ошибки данных приложите ссылку на соответствующую страницу portal.esstu.ru.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Устройство, браузер и режим
+      placeholder: Android / Chrome / установленное приложение или обычная вкладка
