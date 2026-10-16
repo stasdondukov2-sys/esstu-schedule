@@ -26,7 +26,7 @@ function renderCalendarDays() {
   document.getElementById('dayTabs').innerHTML=DAY_NAMES.map(day=>{
     const meta=dayDateMeta(week[day.key],day.key,dates),active=day.key===selectedDayKey;
     const count=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length).length;
-    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="flex-1 min-w-[58px] px-1 py-2 rounded-xl border text-center ${active?'bg-teal-600 border-teal-600 text-white':'bg-white dark:bg-[#101c2e] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'}"><div class="text-xs font-bold">${day.short}${meta.isToday?' <span class="text-amber-400" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?' ⚡':''}</div><div class="text-[10px] mt-1 whitespace-nowrap">${escapeHTML(meta.shortLabel)}</div><div class="text-[9px] mt-1 ${active?'text-teal-100':'text-slate-400'}">${currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар'}</div></button>`;
+    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="calendar-day"><span class="calendar-weekday">${day.short}${meta.isToday?' <span class="calendar-today" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?`<span class="calendar-changed" aria-label="Есть изменения в расписании">${uiIcon('refresh')}</span>`:''}</span><span class="calendar-date">${escapeHTML(meta.shortLabel)}</span><span class="calendar-count">${currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар'}</span></button>`;
   }).join('');
   const day=DAY_NAMES.find(day=>day.key===selectedDayKey),meta=dayDateMeta(week[selectedDayKey],selectedDayKey,dates);
   document.getElementById('selectedDaySummary').textContent=day?`${day.full}, ${meta.shortLabel}${meta.isToday?' · Сегодня':''}`:'';
@@ -49,12 +49,14 @@ function heroState(schedule,now) {
 let campusDayStamp='';
 function updateCampusHero() {
   const now=getUlanUdeNow(),week=getWeekNum(now);
+  document.getElementById('campusDate').textContent=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+(simOverride?' · Тест времени':'');
   document.getElementById('weekBadge').textContent=week===1?'I неделя':'II неделя';
   document.getElementById('clockDisplay').textContent=now.toLocaleString('ru-RU')+' · Улан-Удэ'+(simOverride?' · ТЕСТ':'');
   const stamp=now.toDateString();
   if(stamp!==campusDayStamp){campusDayStamp=stamp;renderCalendarDays();if(currentSchedule && scheduleTab==='session')renderPairsList();}
   if(!currentSchedule || document.getElementById('pairsContainer').getAttribute('aria-busy')==='true')return;
   const state=heroState(currentSchedule,now),pair=state.pair;
+  document.getElementById('liveHeroCard').dataset.state=state.kind;
   const label=document.getElementById('heroStatusLabel'),remaining=document.getElementById('heroRemainingTime'),lessons=document.getElementById('heroLessons'),next=document.getElementById('heroNextPairRow');
   document.getElementById('heroProgressWrap').classList.toggle('hidden',state.kind!=='current');
   next.classList.toggle('hidden',!state.next);
@@ -71,12 +73,12 @@ function updateCampusHero() {
   // Build only when the pair changes, so keyboard focus on room actions survives clock ticks.
   const html=pair.lessons.map((lesson,index)=>{
     const room=decodeEsstuRoom(lesson.room),subtitle=appMode==='student'?lesson.teacher:lesson.groups;
-    return `<div class="flex items-start justify-between gap-3 ${index?'pt-3 border-t border-slate-100 dark:border-slate-800':''}"><div class="min-w-0 flex-1"><div class="text-[11px] text-slate-500 dark:text-slate-400">${escapeHTML(pair.start)}–${escapeHTML(pair.end)} · ${escapeHTML(lesson.type || 'Занятие')}${lesson.tag?' · '+escapeHTML(lesson.tag):''}</div><div class="text-base font-bold leading-snug mt-1">${escapeHTML(lesson.subject)}</div><div class="text-xs text-slate-500 dark:text-slate-400 mt-1">${escapeHTML(subtitle || '')}</div></div>${room?`<div class="shrink-0 text-right"><button onclick="heroRoomAction(${index})" class="px-2.5 rounded-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-xs font-bold">${escapeHTML(room.badge)}</button>${room.building?`<p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1" title="По обозначению аудитории">${escapeHTML(room.building)}</p>`:''}</div>`:''}</div>`;
+    return `<div class="hero-lesson ${index?'hero-parallel':''}"><p class="hero-lesson-meta">${escapeHTML(pair.start)}–${escapeHTML(pair.end)} · ${escapeHTML(lesson.type || 'Занятие')}${lesson.tag?' · '+escapeHTML(lesson.tag):''}</p><h3 class="hero-subject">${escapeHTML(lesson.subject)}</h3><p class="hero-teacher">${escapeHTML(subtitle || '')}</p>${room?`<div class="hero-location"><button onclick="heroRoomAction(${index})" class="hero-room" aria-label="Аудитория ${escapeHTML(room.raw)}"><span>Аудитория</span><strong>${escapeHTML(room.raw)}</strong></button>${room.building?`<span class="hero-building" title="По обозначению аудитории">${escapeHTML(room.building)}<span aria-hidden="true">${uiIcon('arrowUpRight')}</span></span>`:''}</div>`:''}</div>`;
   }).join('');
   if(lessons.dataset.content!==html){lessons.innerHTML=html;lessons.dataset.content=html;}
   if(state.kind==='current'){
     document.getElementById('heroProgress').setAttribute('aria-valuenow',Math.round(state.progress));
-    document.getElementById('heroProgressFill').style.width=state.progress+'%';
+    document.getElementById('heroProgressFill').style.transform=`scaleX(${state.progress/100})`;
   }
   if(state.next)next.textContent=`Далее: ${state.next.start} · `+state.next.lessons.map(lesson=>`${lesson.subject}${lesson.room?' · ауд. '+lesson.room:''}`).join(' / ');
 }
@@ -137,17 +139,17 @@ function renderCompactDay(container) {
     if(previous){
       const duration=timeToMinutes(pair.start)-timeToMinutes(previous.end);
       const before=singleBuilding(previous),after=singleBuilding({...pair,lessons:visible});
-      if(duration>0)gap=`<p class="pl-3 py-1 text-[11px] text-slate-500 dark:text-slate-400">Перерыв ${duration} мин${before && after && before!==after ? ` · <span class="text-amber-700 dark:text-amber-300">Смена корпуса по расписанию: ${escapeHTML(before)} → ${escapeHTML(after)}</span>`:''}</p>`;
+      if(duration>0)gap=`<p class="lesson-break">Перерыв ${duration} мин${before && after && before!==after ? ` · <span class="text-amber-700 dark:text-amber-300">Смена корпуса по расписанию: ${escapeHTML(before)} → ${escapeHTML(after)}</span>`:''}</p>`;
     }
     previous={...pair,lessons:visible};
     const lessons=pair.lessons.map((lesson,index)=>{
       if(!visible.includes(lesson))return '';
       const room=decodeEsstuRoom(lesson.room),note=notes[makeNoteKey(lesson.subject,pair.number)];
       const subtitle=appMode==='student'?lesson.teacher:lesson.groups;
-      return `<details class="lesson-detail group py-1 pl-3 border-l-[3px] ${getTypeBorderClass(lesson.type_code)} ${index?'mt-3':''}">
-        <summary class="min-h-[60px] rounded-lg focus-visible:outline focus-visible:outline-teal-500">
-          <div class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">${escapeHTML(lesson.type || 'Занятие')}${lesson.tag ? ' · '+escapeHTML(lesson.tag):''}</div>
-          <div class="flex justify-between items-start gap-2"><span class="font-bold text-sm leading-snug">${escapeHTML(lesson.subject)}</span><span class="shrink-0 text-xs font-semibold text-teal-600 dark:text-teal-300">${lesson.room?'ауд. '+escapeHTML(lesson.room):''}</span></div>
+      return `<details class="lesson-detail ${index?'lesson-parallel':''}" data-type="${escapeHTML(lesson.type_code)}">
+        <summary class="lesson-summary">
+          <div class="lesson-kind">${escapeHTML(lesson.type || 'Занятие')}${lesson.tag ? ' · '+escapeHTML(lesson.tag):''}</div>
+          <div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(lesson.subject)}</span><span class="lesson-room">${lesson.room?'ауд. '+escapeHTML(lesson.room):''}</span></div>
           <div class="flex justify-between items-center gap-2 mt-1"><span class="text-xs text-slate-500 dark:text-slate-400">${escapeHTML(subtitle || (appMode==='student'?'Преподаватель не указан':'Группы не указаны'))}${note?' · 📝':''}</span><span aria-hidden="true" class="detail-chevron text-slate-400 text-xs">⌄</span></div>
         </summary>
         <div class="pt-1 pb-2 space-y-2 text-xs"><p class="text-slate-500">${escapeHTML([lesson.type,lesson.tag].filter(Boolean).join(' · '))}</p>
@@ -162,8 +164,8 @@ function renderCompactDay(container) {
           </div>
         </div></details>`;
     }).join('');
-    return `${gap}<article data-pair-index="${pairIndex}" class="rounded-2xl p-3.5 bg-white dark:bg-[#101c2e] border ${current?'border-teal-500':'border-slate-200 dark:border-slate-800'} flex gap-3">
-      <div class="w-12 shrink-0 text-center pt-1"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="${current?'':'hidden'} text-[9px] text-teal-500 font-bold">СЕЙЧАС</span></div><div class="min-w-0 flex-1">${lessons}</div></article>`;
+    return `${gap}<article data-pair-index="${pairIndex}" class="schedule-pair ${current?'border-teal-500':'border-slate-200 dark:border-slate-800'}">
+      <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="${current?'':'hidden'} text-[9px] text-teal-500 font-bold">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div></article>`;
   }).filter(Boolean);
   container.innerHTML=rows.join('') || '<div class="text-center py-10"><p class="font-semibold">В этот день занятий нет</p><p class="text-xs text-slate-500 mt-2">Выберите другой день</p></div>';
 }
@@ -176,11 +178,12 @@ function updateCompactUI() {
   const text=checked?`Проверено ${displayDate(checked)}`:`Сборка ${displayDate(currentSchedule.generated_at)}`;
   document.getElementById('compactFreshnessText').textContent=(currentSchedule.is_incomplete?'Данные неполные · ':offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
   renderDaySource();
+  for(const n of [1,2])document.getElementById('btnWeek'+n).setAttribute('aria-pressed',String(selectedWeek===n));
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }
 const simpleApplyTheme=applyTheme;
-applyTheme=function(){simpleApplyTheme();const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
+applyTheme=function(){simpleApplyTheme();document.querySelector('meta[name="theme-color"]').content=document.documentElement.classList.contains('dark')?'#10131d':'#eef0f6';const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
 document.addEventListener('DOMContentLoaded',()=>{
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
   document.getElementById('debugTools').hidden=new URLSearchParams(location.search).get('debug')!=='1';

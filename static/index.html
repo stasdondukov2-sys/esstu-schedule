@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="2.4.0" name="app-version"/>
-<meta content="#0f2942" name="theme-color"/>
+<meta content="#10131d" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="manifest.json" rel="manifest"/>
@@ -17,72 +17,39 @@
 <meta property="og:description" content="Расписание групп, преподавателей и аудиторий ВСГУТУ."/>
 <meta property="og:url" content="https://stasdondukov2-sys.github.io/esstu-schedule/"/>
 <link href="app.css" rel="stylesheet"/>
-<style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      button { min-height: 40px; }
-    @media(max-width: 480px) {
-      header > div { flex-wrap: wrap; }
-      header h1 { font-size: 14px; }
-      #favoritesBar button { min-height: 44px; }
-    }
 
-    .simple-overlay { position:fixed;inset:0;z-index:50;background:rgba(2,6,23,.72);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:12px; }
-    .simple-overlay.hidden { display:none; }
-    .simple-sheet { width:100%;max-width:560px;max-height:88dvh;overflow:auto;border-radius:24px;background:#fff;padding:16px;display:flex;flex-direction:column; }
-    .dark .simple-sheet { background:#101c2e; }
-    .dark { color-scheme:dark; }
-    .search-pane.hidden { display:none; }
-    .menu-action { text-align:left;padding:10px 12px;border-radius:12px;font-size:14px; }
-    .menu-action:hover { background:rgba(13,148,136,.12); }
-    .lesson-detail summary { list-style:none;cursor:pointer; }
-    .lesson-detail summary::-webkit-details-marker { display:none; }
-    .lesson-detail[open] .detail-chevron { transform:rotate(180deg); }
-    #liveHeroCard { box-shadow:none; }
-    @media(min-width:640px){ .simple-overlay {align-items:center;} }
-</style>
 </head>
-<body class="min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
+<body class="campus-app min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
 <!-- ===================================================================== -->
 <!-- ВЕРХНЯЯ ФИРМЕННАЯ ШАПКА ВСГУТУ MODERN                                  -->
 <!-- ===================================================================== -->
-<header class="sticky top-0 z-30 backdrop-blur-xl bg-white/95 dark:bg-[#0b1524]/95 border-b border-slate-200 dark:border-slate-800 px-4 py-3">
-<div class="max-w-xl mx-auto flex items-center justify-between gap-3">
-<button aria-label="Сменить расписание" class="min-w-0 text-left flex-1" onclick="openSearchModal()">
+<header class="campus-header">
+<div class="campus-header-inner">
+<div class="campus-brand"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9l12-5 12 5-12 5L4 9Zm5 3v10c5 5 9 5 14 0V12M28 9v12"/></svg><span>ВСГУТУ<span>Расписание</span></span></div><button aria-label="Сменить расписание" class="min-w-0 text-left flex-1" onclick="openSearchModal()">
 <h1 class="font-extrabold text-lg truncate" id="currentEntityBtnText">Выберите расписание</h1>
 <p class="text-[11px] text-slate-500 mt-0.5">ВСГУТУ · <span id="weekBadge">I неделя</span></p>
 </button>
-<button class="px-3 rounded-xl bg-teal-600 text-white text-xs font-semibold" onclick="openSearchModal()">Выбрать</button>
-<button aria-label="Ещё" class="w-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-xl" onclick="openSimpleDialog('moreMenuModal')">⋯</button>
+<button class="campus-change" onclick="openSearchModal()">Выбрать</button>
+<button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h1m6 0h1m6 0h1"/></svg></button>
 </div></header>
 <div class="hidden sticky top-16 z-40 mx-4 p-3 rounded-2xl bg-teal-600 text-white text-sm shadow-xl" id="appUpdateBanner">
     🚀 Доступна новая версия расписания
     <button class="font-bold underline ml-2" onclick="applyAppUpdate()">Обновить сейчас</button>
 </div>
 <!-- ОСНОВНОЙ КОНТЕНТ -->
-<main class="max-w-xl mx-auto px-4 pt-3.5 space-y-3.5"><button class="block text-[11px] text-slate-500 text-left" id="compactFreshnessText" onclick="openSimpleDialog('freshnessModal')">Обновление данных…</button>
-<p id="teacherIdentityWarning" hidden role="status" class="text-xs text-amber-700 dark:text-amber-300">Возможны данные нескольких преподавателей: одинаковые фамилия и инициалы встречаются в разных кафедрах. Сверьте занятия с источником.</p>
-
-
-
-<!-- КАРТОЧКА ПРОФИЛЯ ПРЕПОДАВАТЕЛЯ (показывается в режиме Преподавателя) -->
-
-<!-- =================================================================== -->
-<!-- BENTO HERO: ЖИВОЙ РАДАР ПАР С КРУГОВЫМ SVG-ТАЙМЕРОМ                  -->
-<!-- =================================================================== -->
-<section id="liveHeroCard" class="rounded-2xl p-4 bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800">
+<main class="campus-shell">
+<div class="campus-page-heading"><div><h2>Мой день</h2><p id="campusDate">Расписание занятий</p></div><span class="campus-city">Улан-Удэ · UTC+8</span></div>
+<p id="teacherIdentityWarning" hidden role="status" class="campus-warning">Возможны данные нескольких преподавателей: одинаковые фамилия и инициалы встречаются в разных кафедрах. Сверьте занятия с источником.</p>
+<div class="campus-layout"><aside class="campus-overview" aria-label="Ближайшее занятие">
+<section id="liveHeroCard" class="glass-panel campus-hero">
 <div class="flex justify-between items-center gap-2"><span id="heroStatusLabel" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Загрузка расписания…</span><span id="heroRemainingTime" class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800"></span></div>
 <div id="heroLessons" class="mt-3 space-y-3"></div>
 <div id="heroProgressWrap" class="hidden mt-3"><div id="heroProgress" role="progressbar" aria-label="Прошло времени занятия" aria-valuemin="0" aria-valuemax="100" class="h-1 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div id="heroProgressFill" class="h-full bg-teal-500 rounded-full"></div></div></div>
 <div id="heroNextPairRow" class="hidden mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400"></div>
 </section>
-<!-- =================================================================== -->
-<!-- ПАНЕЛЬ УПРАВЛЕНИЯ: НЕДЕЛЯ I/II + ВИД (ДЕНЬ/НЕДЕЛЯ) + ПОДГРУППЫ       -->
-<!-- =================================================================== -->
+<button class="campus-freshness" id="compactFreshnessText" onclick="openSimpleDialog('freshnessModal')">Обновление данных…</button>
+
+</aside><section class="campus-agenda glass-panel" aria-label="Расписание на выбранный день">
 <section id="weekControls" class="flex items-center justify-between gap-2"><div class="inline-flex rounded-xl bg-slate-200/60 dark:bg-slate-800/60 p-1"><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek1" onclick="selectWeek(1)">I неделя</button><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek2" onclick="selectWeek(2)">II неделя</button></div><button class="px-3 text-xs font-semibold text-teal-600 dark:text-teal-400" onclick="bottomNavToday()">Сегодня</button></section>
 <!-- ТАБЫ ДНЕЙ НЕДЕЛИ (в режиме "День") -->
 <nav class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5" id="dayTabs"></nav>
@@ -93,11 +60,13 @@
 <p id="daySourceStatus" class="text-[11px] text-slate-500 dark:text-slate-400"></p>
 <section class="space-y-2.5" id="pairsContainer" aria-busy="true"><div class="schedule-skeleton" role="status" aria-label="Загрузка расписания"><span class="sr-only">Загрузка расписания…</span><div class="skeleton-card" aria-hidden="true"><i></i><i></i><i></i></div></div></section>
 <footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
+
+</section></div>
 </main>
 <!-- ===================================================================== -->
 <!-- НИЖНЯЯ НАВИГАЦИОННАЯ ПАНЕЛЬ (BOTTOM BAR ПОД БОЛЬШОЙ ПАЛЕЦ)            -->
 <!-- ===================================================================== -->
-<nav class="fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-white/95 dark:bg-[#0b1524]/95 border-t border-slate-200 dark:border-slate-800 px-2 py-1.5"><div class="max-w-xl mx-auto grid grid-cols-3 gap-2">
+<nav class="campus-nav" aria-label="Основная навигация"><div class="grid grid-cols-3 gap-2">
 <button class="flex flex-col items-center gap-1 py-1 text-teal-600 dark:text-teal-400" onclick="closeSearchModal();bottomNavToday()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z M4 9h16 M9 9v11"/></svg><span class="text-[11px] font-semibold">Расписание</span></button>
 <button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openSearchModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 15l6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0"/></svg><span class="text-[11px] font-semibold">Поиск</span></button>
 <button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openRoomsModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 21V3h12v18 M3 21h18 M14 12h1"/></svg><span class="text-[11px] font-semibold">Аудитории</span></button>
@@ -111,11 +80,11 @@
 <!-- ===================================================================== -->
 
 <!-- МОДАЛЬНОЕ ОКНО 3: ЗАМЕТКА К ПАРЕ -->
-<div class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4" id="noteModal">
-<div class="w-full max-w-md bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-2xl">
+<div class="simple-overlay hidden" id="noteModal">
+<div class="simple-sheet space-y-3">
 <div class="flex items-center justify-between">
 <h3 class="font-bold text-sm" id="noteModalTitle">Заметка к предмету</h3>
-<button class="text-slate-400 hover:text-teal-700 dark:hover:text-teal-200" onclick="closeNoteModal()">✕</button>
+<button aria-label="Закрыть заметку" class="text-slate-400 hover:text-teal-700 dark:hover:text-teal-200" onclick="closeNoteModal()"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
 </div>
 <textarea class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-teal-500" id="noteTextarea" placeholder="Например: Сдать реферат, принести лабораторную тетрадь..." rows="3"></textarea>
 <div class="flex items-center justify-between gap-2">
@@ -203,9 +172,9 @@
       const root = document.documentElement;
       const btn = document.getElementById('themeToggleBtn');
       let effectiveDark = true;
-      if (themeMode === 'dark') { effectiveDark = true; btn.textContent = '🌙'; }
-      else if (themeMode === 'light') { effectiveDark = false; btn.textContent = '☀️'; }
-      else { effectiveDark = window.matchMedia('(prefers-color-scheme: dark)').matches; btn.textContent = '💻'; }
+      if (themeMode === 'dark') { effectiveDark = true; btn.textContent = 'Тёмная тема'; }
+      else if (themeMode === 'light') { effectiveDark = false; btn.textContent = 'Светлая тема'; }
+      else { effectiveDark = window.matchMedia('(prefers-color-scheme: dark)').matches; btn.textContent = 'Системная тема'; }
       root.classList.toggle('dark', effectiveDark);
     }
 
