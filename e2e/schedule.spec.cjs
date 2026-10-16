@@ -1,4 +1,6 @@
 const {test,expect}=require('@playwright/test');
+// Mocked network responses must not be bypassed by service-worker fetches.
+const routedTest=test.extend({serviceWorkers:'block'});
 
 test('schedule, source status and teacher navigation work under the Pages prefix',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -18,7 +20,7 @@ test('schedule, source status and teacher navigation work under the Pages prefix
   expect(errors).toEqual([]);
 });
 
-test('unreadable data is marked incomplete, not as a free day',async({page})=>{
+routedTest('unreadable data is marked incomplete, not as a free day',async({page})=>{
   await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:{
     mode:'student',group_name:'1146 тпуп',group_id:'1',section:'bakalavriat',
     weeks:{1:{},2:{}},is_incomplete:true,parse_errors:['Unexpected table structure']
