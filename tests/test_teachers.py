@@ -93,6 +93,18 @@ class TeacherIndexTest(unittest.TestCase):
         self.assertEqual(lessons[0]["source_type"], "official_caf")
         self.assertEqual(result["caf_ids"], ["Caf5"])
 
+        # The same subject and room do not imply the same group or lesson type.
+        parallel = deepcopy(official)
+        parallel_lesson = parallel["weeks"]["1"]["monday"]["pairs"][0]["lessons"][0]
+        parallel_lesson["groups"] = "B"
+        result = combine_teacher_catalog([official, parallel], [])[0]
+        lessons = result["weeks"]["1"]["monday"]["pairs"][0]["lessons"]
+        self.assertEqual([item["groups"] for item in lessons], ["A", "B"])
+        parallel_lesson["groups"] = "A"
+        parallel_lesson["type_code"] = "lab"
+        result = combine_teacher_catalog([official, parallel], [])[0]
+        self.assertEqual(len(result["weeks"]["1"]["monday"]["pairs"][0]["lessons"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
