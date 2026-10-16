@@ -545,9 +545,18 @@
     async function loadStudentSchedule(section, groupId, groupName = null, forceFresh = false) {
       const version=beginScheduleLoad(),previous=currentSchedule;
       try {
+        if(groupName){
+          const catalogResponse=await fetch(getApiUrl(`/api/groups?section=${section}`),{cache:forceFresh?'reload':'default'});
+          if(!catalogResponse.ok)throw Error('Каталог групп недоступен');
+          const catalog=(await catalogResponse.json()).groups || [];
+          const actual=catalog.find(group=>normSearch(group.name)===normSearch(groupName));
+          if(!actual)throw Error('Выбранная группа не найдена в каталоге');
+          groupId=actual.id;
+        }
         const nameParam = groupName ? `?group_name=${encodeURIComponent(groupName)}` : '';
         const res = await fetch(getApiUrl(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`), {cache:forceFresh ? 'reload' : 'default'});
         const data = await scheduleJSON(res);
+        if(groupName && normSearch(data.group_name)!==normSearch(groupName))throw Error('Название группы не совпало с источником');
         if(version!==scheduleLoadVersion)return false;
         finishScheduleLoad(version);
         appMode = 'student';

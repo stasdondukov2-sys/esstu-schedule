@@ -60,3 +60,15 @@ test('loading skeleton becomes an explicit unavailable state on failure',async({
   release();await expect(page.locator('#pairsContainer')).toContainText('Источник расписания недоступен');
   await expect(page.getByRole('button',{name:'Повторить',exact:true})).toBeVisible();
 });
+
+
+test('restoring a saved group resolves its name when the file number changes',async({page})=>{
+  const groups=JSON.parse(fs.readFileSync('dist/api/groups/bakalavriat.json','utf8')).groups;
+  const target=groups[1];
+  await page.addInitScript(({target,oldId})=>{
+    localStorage.setItem('esstu_mode','student');localStorage.setItem('esstu_section','bakalavriat');
+    localStorage.setItem('esstu_group_id',oldId);localStorage.setItem('esstu_group_name',target.name);
+  },{target,oldId:groups[0].id});
+  await page.goto('./');await expect(page.getByRole('heading',{level:1})).toHaveText(target.name);
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+});
