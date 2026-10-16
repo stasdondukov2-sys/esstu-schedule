@@ -1,0 +1,389 @@
+ESSTU Schedule 2.5.0 verification inputs
+Code revision: 4162ab60bac66133e63a3f36ababeaa8b06fd406
+Captured: 2026-10-16; local pytest: 56 passed + 36 subtests; Playwright: 37 passed + 1 desktop touch skip.
+
+===== static/sw.js =====
+
+const CACHE_NAME = 'esstu-live-v2.5.0';
+const CACHE_PREFIX = `esstu-pwa:${self.registration.scope}:`;
+const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_NAME}`;
+const DATA_CACHE = `${CACHE_PREFIX}data-v1`;
+const SHELL = ['./', './index.html', './app.css', './shortcut-now.svg', './modern.js', './experience.js', './simple-ui.js', './study-tools.js', './accessibility.js', './manifest.json', './icons/app-icon.svg', './icons/app-icon-192.png', './icons/app-icon-512.png', './shortcut-now.png', './shortcut-rooms.png', './shortcut-session.png', './shortcut-campus.png'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL)));
+});
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const data = await caches.open(DATA_CACHE);
+    const apiURL = new URL('api/', self.registration.scope).href;
+    // Migrate this scope's data from the previous, combined shell/data caches.
+    for (const key of keys.filter(key => key.startsWith('esstu-live-')).reverse()) {
+      const legacy = await caches.open(key);
+      for (const request of await legacy.keys()) {
+        if (request.url.startsWith(apiURL) && !(await data.match(request))) {
+          try { await data.put(request, await legacy.match(request)); }
+          catch (error) { console.warn('ESSTU cache migration failed', error); }
+        }
+      }
+    }
+    // Retain data across shell updates. Never delete another application's caches.
+    await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE && key !== DATA_CACHE).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', event => {
+  const request = event.request, url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
+  event.respondWith((async () => {
+    const isData = url.pathname.startsWith(new URL('api/', self.registration.scope).pathname);
+    const cache = await caches.open(isData ? DATA_CACHE : SHELL_CACHE);
+    // A controlled page uses one installed shell until the user accepts its update.
+    // Search parameters select schedules, but do not change the HTML shell.
+    const shellURL = request.mode === 'navigate' ? new URL('./', self.registration.scope).href : url.href;
+    if (!isData) {
+      const shell = await cache.match(shellURL, {ignoreSearch: true});
+      if (shell) return shell;
+    }
+    try {
+      const response = await fetch(request, {cache: 'no-cache', signal: AbortSignal.timeout(12000)});
+      if (!response.ok) {
+        const saved = response.status >= 500 ? await cache.match(request) : null;
+        if (saved) return cachedResponse(saved);
+        return response;
+      }
+      // Storage quota failures must not hide a successful network response.
+      try { await cache.put(request, response.clone()); } catch (error) { console.warn('ESSTU cache write failed', error); }
+      return response;
+    } catch {
+      const saved = await cache.match(request) ||
+        (request.mode === 'navigate' ? await cache.match(new URL('./', self.registration.scope)) : null);
+      return saved ? cachedResponse(saved) : new Response('Нет сохранённой копии. Подключитесь к интернету.', {status:503});
+    }
+  })());
+});
+function cachedResponse(saved) {
+  const headers = new Headers(saved.headers); headers.set('X-ESSTU-Cache', 'offline');
+  return new Response(saved.body, {status:saved.status,statusText:saved.statusText,headers});
+}
+
+
+===== .github/workflows/ci.yml =====
+
+name: CI and Pages
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      sync_sources:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && 'main-data-and-code' || format('ci-{0}-{1}', github.workflow, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'pull_request') }}
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24)
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0 (Node 24)
+        with:
+          python-version: '3.11'
+      - name: Install locked Python dependencies
+        run: pip install --require-hashes -r requirements-dev.txt
+      - name: Ruff and pytest
+        run: |
+          ruff check .
+          ruff format --check .
+          pytest
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node 24)
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build local stylesheet
+        run: |
+          npm ci --ignore-scripts
+          npm run build:css
+      - name: Find latest synchronized snapshots
+        if: inputs.sync_sources != true && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: snapshot
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0 (Node 24)
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            let runs;
+            try{runs=await github.paginate(github.rest.actions.listWorkflowRuns,{owner,repo,workflow_id:'sync.yml',branch:'main',per_page:100});}
+            catch(error){if(error.status===404){core.info('No synchronization history yet; using repository snapshots.');return;}throw error;}
+            for(const run of runs){
+              const result=await github.rest.actions.listWorkflowRunArtifacts({owner,repo,run_id:run.id});
+              if(result.data.artifacts.some(artifact=>artifact.name==='source-snapshot' && !artifact.expired)){
+                core.setOutput('run_id',String(run.id));return;
+              }
+            }
+            core.warning('No retained source snapshot found; using repository data with its original freshness dates.');
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2 (Node 24)
+        if: steps.snapshot.outputs.run_id != ''
+        with:
+          name: source-snapshot
+          path: demo_data
+          run-id: ${{ steps.snapshot.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Synchronize sources
+        if: inputs.sync_sources == true
+        run: |
+          python -u -m scripts.sync_esstu
+          python -m scripts.check_sync
+      - name: Static build and JS checks
+        run: |
+          python -m scripts.build_static_site
+          npm run test:unit
+      - name: Browser and accessibility regressions
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node 24)
+        with:
+          name: diagnostics-${{ github.run_id }}
+          path: |
+            demo_data/*sync.json
+            dist/api/status.json
+            dist/api/sources.json
+            test-results/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node 24)
+        if: inputs.sync_sources == true
+        with:
+          name: source-snapshot
+          path: demo_data
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0 (Node 24)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish == true
+        with:
+          path: dist
+
+  deploy:
+    needs: check
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish == true
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: pages-publication
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1 (Node 24)
+        id: deployment
+
+
+===== .github/workflows/sync.yml =====
+
+name: Scheduled source synchronization
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-synchronization
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    uses: ./.github/workflows/ci.yml
+    with:
+      sync_sources: true
+      publish: true
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+
+  notify:
+    needs: synchronize
+    if: always() && (needs.synchronize.result == 'failure' || needs.synchronize.result == 'success')
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0 (Node 24)
+        env:
+          SYNC_RESULT: ${{ needs.synchronize.result }}
+        with:
+          script: |
+            const title = 'Автоматическая синхронизация расписания: ошибка';
+            const {owner,repo} = context.repo;
+            const issues = await github.paginate(github.rest.issues.listForRepo,{owner,repo,state:'open',creator:'github-actions[bot]'});
+            const existing = issues.find(issue => !issue.pull_request && issue.title === title);
+            const run = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            if (process.env.SYNC_RESULT === 'failure') {
+              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
+              if (existing) await github.rest.issues.update({owner,repo,issue_number:existing.number,body});
+              else await github.rest.issues.create({owner,repo,title,body});
+            } else if (existing) {
+              await github.rest.issues.update({owner,repo,issue_number:existing.number,state:'closed',body:`Синхронизация и публикация восстановились. [Успешный запуск](${run}).`});
+            }
+
+
+===== tests/test_release.py =====
+
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_release_version_is_consistent_and_data_cache_is_stable():
+    html = (ROOT / "static/index.html").read_text(encoding="utf-8")
+    version = re.search(r'content="([0-9.]+)" name="app-version"', html)[1]
+    worker = (ROOT / "static/sw.js").read_text(encoding="utf-8")
+    builder = (ROOT / "scripts/build_static_site.py").read_text(encoding="utf-8")
+    assert f"const CACHE_NAME = 'esstu-live-v{version}';" in worker
+    assert f"esstu-live-v{version}" in builder
+    experience = (ROOT / "static/experience.js").read_text(encoding="utf-8")
+    assert f"const APP_VERSION = '{version}';" in experience
+    assert "const DATA_CACHE = `${CACHE_PREFIX}data-v1`;" in worker
+
+
+def test_workflows_pin_runner_and_action_revisions():
+    for file in (ROOT / ".github/workflows").glob("*.yml"):
+        text = file.read_text(encoding="utf-8")
+        assert "ubuntu-latest" not in text
+        assert "node-version: '22'" not in text or "ubuntu-24.04" in text
+        for action in re.findall(r"uses: (actions/[^\s]+)", text):
+            assert re.fullmatch(r"actions/[a-z-]+@[0-9a-f]{40}", action), action
+
+
+===== pytest --collect-only -q =====
+
+tests/test_audit.py::ReliabilityTests::test_ambiguous_room_assignments_are_explicit
+tests/test_audit.py::ReliabilityTests::test_cache_coalesces_concurrent_work
+tests/test_audit.py::ReliabilityTests::test_dates_do_not_invent_weekdays_or_overwrite_rows
+tests/test_audit.py::ReliabilityTests::test_fallback_is_structured_and_preserves_dates
+tests/test_audit.py::ReliabilityTests::test_merge_preserves_extra_pairs_and_missing_weeks
+tests/test_audit.py::ReliabilityTests::test_meta_cache_and_explicit_invalidation
+tests/test_audit.py::ReliabilityTests::test_missing_teacher_heading_is_not_a_person
+tests/test_audit.py::ReliabilityTests::test_spacer_rows_do_not_change_week
+tests/test_audit.py::HTTPRegressionTests::test_etag_and_binary_mime
+tests/test_audit.py::HTTPRegressionTests::test_invalid_json_body
+tests/test_audit.py::HTTPRegressionTests::test_rooms_route_reads_prebuilt_snapshot
+tests/test_audit.py::HTTPRegressionTests::test_routing_and_traversal
+tests/test_audit.py::HTTPRegressionTests::test_status_exposes_parser_diagnostics
+tests/test_catalog.py::test_missing_catalogs_are_reported
+tests/test_catalog.py::test_missing_department_is_reported
+tests/test_data.py::CalendarTests::test_aware_time_is_converted_to_campus_zone
+tests/test_data.py::CalendarTests::test_tabular_dates
+tests/test_data.py::ParserContractTests::test_correspondence_sunday_and_evening_time_are_in_source
+tests/test_data.py::ParserContractTests::test_explicit_headers_and_cell_weekdays
+tests/test_data.py::ParserContractTests::test_font_colour_cannot_change_week
+tests/test_data.py::ParserContractTests::test_frozen_demo_goldens
+tests/test_data.py::ParserContractTests::test_metadata_external_edit_invalidates_cache
+tests/test_data.py::ParserContractTests::test_model_rejects_invalid_interval
+tests/test_data.py::ParserContractTests::test_truncated_and_unknown_structures_are_explicit
+tests/test_data.py::ArchitectureTests::test_cold_cache_coalesces_and_force_refresh_waits
+tests/test_data.py::ArchitectureTests::test_failed_refresh_does_not_renew_stale_timestamp
+tests/test_data.py::ArchitectureTests::test_rooms_http_service_never_scans_schedules
+tests/test_data.py::ArchitectureTests::test_stale_refresh_is_nonblocking_and_coalesced
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[raspisan.htm]
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[craspisanEdt.htm]
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[Caf5.htm]
+tests/test_fallback.py::test_allowed_html_fallback_preserves_date_and_hash
+tests/test_fallback.py::test_groups_use_saved_json_when_live_catalog_is_unavailable
+tests/test_p0.py::ReadOnlyHTTPTests::test_invalid_lengths_and_transfer_encoding
+tests/test_p0.py::ReadOnlyHTTPTests::test_post_never_writes_and_has_no_cors
+tests/test_p0.py::ReadOnlyHTTPTests::test_preflight_cannot_enable_post
+tests/test_p0.py::LocalAvatarTests::test_legacy_remote_photo_is_ignored_and_writes_reject_it
+tests/test_p0.py::LocalAvatarTests::test_only_existing_local_raster_avatar_is_allowed
+tests/test_p0.py::LocalAvatarTests::test_tls_chain_and_hostname_checks_stay_enabled
+tests/test_publication.py::test_source_fingerprints_are_actual_bytes_and_not_a_new_check
+tests/test_publication.py::test_unknown_freshness_stays_unknown
+tests/test_publication.py::test_unparsed_cells_are_counted_separately_from_broken_tables
+tests/test_publication.py::test_partial_sync_cannot_succeed_silently[failed0]
+tests/test_publication.py::test_partial_sync_cannot_succeed_silently[failed1]
+tests/test_publication.py::test_mit_license_has_no_placeholders
+tests/test_release.py::test_release_version_is_consistent_and_data_cache_is_stable
+tests/test_release.py::test_workflows_pin_runner_and_action_revisions
+tests/test_rooms.py::RoomsTest::test_board_annotation_does_not_create_another_room
+tests/test_rooms.py::RoomsTest::test_collisions_and_duplicates
+tests/test_study.py::StudyParsingTests::test_attestation_types_for_groups_and_teachers
+tests/test_study.py::StudyParsingTests::test_subgroup_markers
+tests/test_sync.py::SyncValidationTest::test_invalid_response_preserves_last_good_snapshot
+tests/test_teachers.py::TeacherIndexTest::test_no_invented_teachers
+tests/test_teachers.py::TeacherIndexTest::test_official_cell_without_type
+tests/test_teachers.py::TeacherIndexTest::test_official_priority_and_group_supplement
+tests/test_teachers.py::TeacherIndexTest::test_preserves_source_and_deduplicates
+
+56 tests collected in 0.30s
+
+===== Playwright --list =====
+
+Listing tests:
+  [desktop] › accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher
+  [desktop] › accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks
+  [desktop] › accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it
+  [desktop] › accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group
+  [desktop] › accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure
+  [desktop] › accessibility.spec.cjs:66:1 › restoring a saved group resolves its name when the file number changes
+  [desktop] › accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh
+  [desktop] › accessibility.spec.cjs:91:1 › possible teacher identity collision is visible and clears for a group
+  [desktop] › design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label
+  [desktop] › design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate
+  [desktop] › design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note
+  [desktop] › release.spec.cjs:6:1 › an empty day links to the next known teaching day
+  [desktop] › release.spec.cjs:20:1 › recent schedules are local and search precedes filters
+  [desktop] › release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus
+  [desktop] › release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline
+  [desktop] › release.spec.cjs:80:1 › a room search highlights its building on the conditional campus diagram
+  [desktop] › schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix
+  [desktop] › schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day
+  [desktop] › schedule.spec.cjs:36:1 › installation URLs stay inside the repository and the cached shell opens offline
+  [mobile] › accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher
+  [mobile] › accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks
+  [mobile] › accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it
+  [mobile] › accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group
+  [mobile] › accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure
+  [mobile] › accessibility.spec.cjs:66:1 › restoring a saved group resolves its name when the file number changes
+  [mobile] › accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh
+  [mobile] › accessibility.spec.cjs:91:1 › possible teacher identity collision is visible and clears for a group
+  [mobile] › design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label
+  [mobile] › design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate
+  [mobile] › design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note
+  [mobile] › release.spec.cjs:6:1 › an empty day links to the next known teaching day
+  [mobile] › release.spec.cjs:20:1 › recent schedules are local and search precedes filters
+  [mobile] › release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus
+  [mobile] › release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline
+  [mobile] › release.spec.cjs:80:1 › a room search highlights its building on the conditional campus diagram
+  [mobile] › schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix
+  [mobile] › schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day
+  [mobile] › schedule.spec.cjs:36:1 › installation URLs stay inside the repository and the cached shell opens offline
+Total: 38 tests in 4 files
