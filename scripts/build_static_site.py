@@ -59,7 +59,7 @@ def build():
     worker_file = DIST_DIR / "sw.js"
     worker_file.write_text(
         worker_file.read_text(encoding="utf-8").replace(
-            "esstu-live-v2.4.0", f"esstu-live-v2.4.0-{int(start_time)}"
+            "esstu-live-v2.5.0", f"esstu-live-v2.5.0-{int(start_time)}"
         ),
         encoding="utf-8",
     )

@@ -13,7 +13,7 @@ Schedules come from saved portal.esstu.ru pages; freshness, incomplete data and 
 Existing static HTML, JavaScript, compiled local Tailwind CSS; Python background synchronization/build and GitHub Actions. Preserve relative Pages URLs, offline installation and exports.
 
 ## Preserve
-Group and teacher selection, current/next lesson, I/II week and day controls, subgroups, search, rooms, favorites, notes, calendar export, session records, deep links, dark/light/system themes, source diagnostics. Keep keyboard focus containment, Escape and focus return in dialogs. Never fabricate a room, person, schedule or date.
+Group and teacher selection, current/next lesson, I/II week and day controls, subgroups, search, rooms, favorites, recent choices, notes, calendar export, session records, deep links, dark/light/system themes, source diagnostics. Keep keyboard focus containment, Escape and focus return in dialogs. Calendar swipes and sheet handles supplement visible controls. Never fabricate a room, person, schedule or date.
 
 ## Success
 Nearest lesson and room can be read at a glance on a phone. The day list stays readable with long subjects and parallel lessons. Desktop uses available width. Secondary tools remain discoverable without crowding the schedule. Reduced-motion and light/dark contrast ship with the redesign.
