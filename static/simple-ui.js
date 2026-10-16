@@ -169,6 +169,7 @@ function renderCompactDay(container) {
 }
 function updateCompactUI() {
   if(!currentSchedule)return;
+  document.getElementById('teacherIdentityWarning').hidden=!(appMode==='teacher' && currentSchedule.identity_ambiguous);
   document.getElementById('currentEntityBtnText').textContent=appMode==='student'?savedState.groupName:(currentSchedule.profile?.short_name || savedState.teacherKey);
   const checked=currentSchedule.source_checked_at,offline=lastDelivery?.cached || !navigator.onLine;
   const fallback=currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode);

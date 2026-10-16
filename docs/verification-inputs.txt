@@ -1,0 +1,549 @@
+Проверочные материалы
+Дата: 2026-10-16 (Asia/Irkutsk)
+Ревизия кода: 00d6777984c1dec5e77fe98509f80a6f0c7f0134
+
+Список тестов собран командой: pytest --collect-only -q -o addopts=""
+Опция addopts очищена, чтобы вывести node IDs вместо сокращённого количества по файлам.
+
+
+===== static/sw.js =====
+SHA-256 (байты файла): 380d49cb9518c9a113cd55213ccebdb0c242b5f1106e65939ace31da7dd0ed72
+
+const CACHE_NAME = 'esstu-live-v2.4.0';
+const CACHE_PREFIX = `esstu-pwa:${self.registration.scope}:`;
+const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_NAME}`;
+const DATA_CACHE = `${CACHE_PREFIX}data-v1`;
+const SHELL = ['./', './index.html', './app.css', './shortcut-now.svg', './modern.js', './experience.js', './simple-ui.js', './study-tools.js', './accessibility.js', './manifest.json', './shortcut-now.png', './shortcut-rooms.png', './shortcut-session.png', './shortcut-campus.png'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL)));
+});
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const data = await caches.open(DATA_CACHE);
+    const apiURL = new URL('api/', self.registration.scope).href;
+    // Migrate this scope's data from the previous, combined shell/data caches.
+    for (const key of keys.filter(key => key.startsWith('esstu-live-')).reverse()) {
+      const legacy = await caches.open(key);
+      for (const request of await legacy.keys()) {
+        if (request.url.startsWith(apiURL) && !(await data.match(request))) {
+          try { await data.put(request, await legacy.match(request)); }
+          catch (error) { console.warn('ESSTU cache migration failed', error); }
+        }
+      }
+    }
+    // Retain data across shell updates. Never delete another application's caches.
+    await Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== SHELL_CACHE && key !== DATA_CACHE).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', event => {
+  const request = event.request, url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
+  event.respondWith((async () => {
+    const isData = url.pathname.startsWith(new URL('api/', self.registration.scope).pathname);
+    const cache = await caches.open(isData ? DATA_CACHE : SHELL_CACHE);
+    // A controlled page uses one installed shell until the user accepts its update.
+    // Search parameters select schedules, but do not change the HTML shell.
+    const shellURL = request.mode === 'navigate' ? new URL('./', self.registration.scope).href : url.href;
+    if (!isData) {
+      const shell = await cache.match(shellURL, {ignoreSearch: true});
+      if (shell) return shell;
+    }
+    try {
+      const response = await fetch(request, {cache: 'no-cache', signal: AbortSignal.timeout(12000)});
+      if (!response.ok) {
+        const saved = response.status >= 500 ? await cache.match(request) : null;
+        if (saved) return cachedResponse(saved);
+        return response;
+      }
+      // Storage quota failures must not hide a successful network response.
+      try { await cache.put(request, response.clone()); } catch (error) { console.warn('ESSTU cache write failed', error); }
+      return response;
+    } catch {
+      const saved = await cache.match(request) ||
+        (request.mode === 'navigate' ? await cache.match(new URL('./', self.registration.scope)) : null);
+      return saved ? cachedResponse(saved) : new Response('Нет сохранённой копии. Подключитесь к интернету.', {status:503});
+    }
+  })());
+});
+function cachedResponse(saved) {
+  const headers = new Headers(saved.headers); headers.set('X-ESSTU-Cache', 'offline');
+  return new Response(saved.body, {status:saved.status,statusText:saved.statusText,headers});
+}
+
+
+===== .github/workflows/ci.yml =====
+SHA-256 (байты файла): 719a69660159c75048e08dca53c41023eaccb186695026cec8acbd8101192739
+
+name: CI and Pages
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      sync_sources:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && 'main-data-and-code' || format('ci-{0}-{1}', github.workflow, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'pull_request') }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install locked Python dependencies
+        run: pip install --require-hashes -r requirements-dev.txt
+      - name: Ruff and pytest
+        run: |
+          ruff check .
+          ruff format --check .
+          pytest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build local stylesheet
+        run: |
+          npm ci --ignore-scripts
+          npm run build:css
+      - name: Find latest synchronized snapshots
+        if: inputs.sync_sources != true && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: snapshot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            let runs;
+            try{runs=await github.paginate(github.rest.actions.listWorkflowRuns,{owner,repo,workflow_id:'sync.yml',branch:'main',per_page:100});}
+            catch(error){if(error.status===404){core.info('No synchronization history yet; using repository snapshots.');return;}throw error;}
+            for(const run of runs){
+              const result=await github.rest.actions.listWorkflowRunArtifacts({owner,repo,run_id:run.id});
+              if(result.data.artifacts.some(artifact=>artifact.name==='source-snapshot' && !artifact.expired)){
+                core.setOutput('run_id',String(run.id));return;
+              }
+            }
+            core.warning('No retained source snapshot found; using repository data with its original freshness dates.');
+      - uses: actions/download-artifact@v4
+        if: steps.snapshot.outputs.run_id != ''
+        with:
+          name: source-snapshot
+          path: demo_data
+          run-id: ${{ steps.snapshot.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Synchronize sources
+        if: inputs.sync_sources == true
+        run: |
+          python -u -m scripts.sync_esstu
+          python -m scripts.check_sync
+      - name: Static build and JS checks
+        run: |
+          python -m scripts.build_static_site
+          npm run test:unit
+      - name: Browser and accessibility regressions
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-${{ github.run_id }}
+          path: |
+            demo_data/*sync.json
+            dist/api/status.json
+            dist/api/sources.json
+            test-results/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: inputs.sync_sources == true
+        with:
+          name: source-snapshot
+          path: demo_data
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@v3
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish == true
+        with:
+          path: dist
+
+  deploy:
+    needs: check
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish == true
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-publication
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
+
+
+===== .github/workflows/sync.yml =====
+SHA-256 (байты файла): 53265b4b9ca8dcb42e2f18693b26bf56efb1394f01c1d37d6d326c82d3aaaea3
+
+name: Scheduled source synchronization
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-synchronization
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    uses: ./.github/workflows/ci.yml
+    with:
+      sync_sources: true
+      publish: true
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+
+  notify:
+    needs: synchronize
+    if: always() && (needs.synchronize.result == 'failure' || needs.synchronize.result == 'success')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          SYNC_RESULT: ${{ needs.synchronize.result }}
+        with:
+          script: |
+            const title = 'Автоматическая синхронизация расписания: ошибка';
+            const {owner,repo} = context.repo;
+            const issues = await github.paginate(github.rest.issues.listForRepo,{owner,repo,state:'open',creator:'github-actions[bot]'});
+            const existing = issues.find(issue => !issue.pull_request && issue.title === title);
+            const run = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            if (process.env.SYNC_RESULT === 'failure') {
+              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
+              if (existing) await github.rest.issues.update({owner,repo,issue_number:existing.number,body});
+              else await github.rest.issues.create({owner,repo,title,body});
+            } else if (existing) {
+              await github.rest.issues.update({owner,repo,issue_number:existing.number,state:'closed',body:`Синхронизация и публикация восстановились. [Успешный запуск](${run}).`});
+            }
+
+
+===== preview/pytest-collection.txt =====
+SHA-256 (байты файла): 72f0ffb847cd320c5641736be040c5d5a83e295291eac69132c7fee1f441cb33
+
+tests/test_audit.py::ReliabilityTests::test_ambiguous_room_assignments_are_explicit
+tests/test_audit.py::ReliabilityTests::test_cache_coalesces_concurrent_work
+tests/test_audit.py::ReliabilityTests::test_dates_do_not_invent_weekdays_or_overwrite_rows
+tests/test_audit.py::ReliabilityTests::test_fallback_is_structured_and_preserves_dates
+tests/test_audit.py::ReliabilityTests::test_merge_preserves_extra_pairs_and_missing_weeks
+tests/test_audit.py::ReliabilityTests::test_meta_cache_and_explicit_invalidation
+tests/test_audit.py::ReliabilityTests::test_missing_teacher_heading_is_not_a_person
+tests/test_audit.py::ReliabilityTests::test_spacer_rows_do_not_change_week
+tests/test_audit.py::HTTPRegressionTests::test_etag_and_binary_mime
+tests/test_audit.py::HTTPRegressionTests::test_invalid_json_body
+tests/test_audit.py::HTTPRegressionTests::test_rooms_route_reads_prebuilt_snapshot
+tests/test_audit.py::HTTPRegressionTests::test_routing_and_traversal
+tests/test_audit.py::HTTPRegressionTests::test_status_exposes_parser_diagnostics
+tests/test_catalog.py::test_missing_catalogs_are_reported
+tests/test_catalog.py::test_missing_department_is_reported
+tests/test_data.py::CalendarTests::test_aware_time_is_converted_to_campus_zone
+tests/test_data.py::CalendarTests::test_tabular_dates
+tests/test_data.py::ParserContractTests::test_correspondence_sunday_and_evening_time_are_in_source
+tests/test_data.py::ParserContractTests::test_explicit_headers_and_cell_weekdays
+tests/test_data.py::ParserContractTests::test_font_colour_cannot_change_week
+tests/test_data.py::ParserContractTests::test_frozen_demo_goldens
+tests/test_data.py::ParserContractTests::test_metadata_external_edit_invalidates_cache
+tests/test_data.py::ParserContractTests::test_model_rejects_invalid_interval
+tests/test_data.py::ParserContractTests::test_truncated_and_unknown_structures_are_explicit
+tests/test_data.py::ArchitectureTests::test_cold_cache_coalesces_and_force_refresh_waits
+tests/test_data.py::ArchitectureTests::test_failed_refresh_does_not_renew_stale_timestamp
+tests/test_data.py::ArchitectureTests::test_rooms_http_service_never_scans_schedules
+tests/test_data.py::ArchitectureTests::test_stale_refresh_is_nonblocking_and_coalesced
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[raspisan.htm]
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[craspisanEdt.htm]
+tests/test_fallback.py::test_disabled_html_fallback_reaches_service_snapshot[Caf5.htm]
+tests/test_fallback.py::test_allowed_html_fallback_preserves_date_and_hash
+tests/test_fallback.py::test_groups_use_saved_json_when_live_catalog_is_unavailable
+tests/test_p0.py::ReadOnlyHTTPTests::test_invalid_lengths_and_transfer_encoding
+tests/test_p0.py::ReadOnlyHTTPTests::test_post_never_writes_and_has_no_cors
+tests/test_p0.py::ReadOnlyHTTPTests::test_preflight_cannot_enable_post
+tests/test_p0.py::LocalAvatarTests::test_legacy_remote_photo_is_ignored_and_writes_reject_it
+tests/test_p0.py::LocalAvatarTests::test_only_existing_local_raster_avatar_is_allowed
+tests/test_p0.py::LocalAvatarTests::test_tls_chain_and_hostname_checks_stay_enabled
+tests/test_publication.py::test_source_fingerprints_are_actual_bytes_and_not_a_new_check
+tests/test_publication.py::test_unknown_freshness_stays_unknown
+tests/test_publication.py::test_unparsed_cells_are_counted_separately_from_broken_tables
+tests/test_publication.py::test_partial_sync_cannot_succeed_silently[failed0]
+tests/test_publication.py::test_partial_sync_cannot_succeed_silently[failed1]
+tests/test_publication.py::test_mit_license_has_no_placeholders
+tests/test_rooms.py::RoomsTest::test_board_annotation_does_not_create_another_room
+tests/test_rooms.py::RoomsTest::test_collisions_and_duplicates
+tests/test_study.py::StudyParsingTests::test_attestation_types_for_groups_and_teachers
+tests/test_study.py::StudyParsingTests::test_subgroup_markers
+tests/test_sync.py::SyncValidationTest::test_invalid_response_preserves_last_good_snapshot
+tests/test_teachers.py::TeacherIndexTest::test_no_invented_teachers
+tests/test_teachers.py::TeacherIndexTest::test_official_cell_without_type
+tests/test_teachers.py::TeacherIndexTest::test_official_priority_and_group_supplement
+tests/test_teachers.py::TeacherIndexTest::test_preserves_source_and_deduplicates
+
+54 tests collected in 0.28s
+
+
+===== e2e/schedule.spec.cjs =====
+SHA-256 (байты файла): d5ebe38447756118f4344b5ece71b58e898d7f2b1d4211cbbdbb96a49c076d4b
+
+const {test,expect}=require('@playwright/test');
+// Mocked network responses must not be bypassed by service-worker fetches.
+const routedTest=test.extend({serviceWorkers:'block'});
+
+test('schedule, source status and teacher navigation work under the Pages prefix',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('./');
+  await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
+  await expect(page.locator('#pairsContainer')).not.toContainText('Загрузка');
+  await page.locator('#compactFreshnessText').click();
+  await expect(page.locator('#parseQualityStatus')).toContainText('Ошибок разбора:');
+  await page.getByRole('button',{name:'Закрыть сведения',exact:true}).click();
+  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Преподаватели',exact:true}).click();
+  await page.locator('#teacherSearchInput').fill('Дарибазарон');
+  const teacher=page.locator('#teacherModalContent button').filter({hasText:'Дарибазарон'});
+  await expect(teacher).toHaveCount(1);
+  await teacher.click();
+  await expect(page.getByRole('heading',{level:1})).toContainText('Дарибазарон');
+  expect(errors).toEqual([]);
+});
+
+routedTest('unreadable data is marked incomplete, not as a free day',async({page})=>{
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:{
+    mode:'student',group_name:'1146 тпуп',group_id:'1',section:'bakalavriat',
+    weeks:{1:{},2:{}},is_incomplete:true,parse_errors:['Unexpected table structure']
+  }}));
+  await page.goto('./');
+  await expect(page.locator('#incompleteWarning')).toBeVisible();
+  await expect(page.locator('#pairsContainer')).toContainText('Данные неполные');
+  await expect(page.locator('#pairsContainer')).not.toContainText('занятий нет');
+  await expect(page.locator('#dayTabs')).not.toContainText('нет пар');
+  await expect(page.locator('#heroLessons')).toContainText('Данные неполные');
+});
+
+test('installation URLs stay inside the repository and the cached shell opens offline',async({page,context,request})=>{
+  const manifest=await (await request.get('manifest.json')).json();
+  for(const relative of [manifest.start_url,manifest.scope,...manifest.shortcuts.map(shortcut=>shortcut.url)])
+    expect(new URL(relative,'https://example.test/esstu-schedule/manifest.json').pathname).toMatch(/^\/esstu-schedule\//);
+  await page.goto('./');
+  await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
+  await page.reload();
+  await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+  await expect(page.locator('#pairsContainer article').first()).toBeVisible();
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
+  await expect(page.locator('#compactFreshnessText')).toContainText('Офлайн');
+});
+
+
+===== e2e/accessibility.spec.cjs =====
+SHA-256 (байты файла): b8d3503ce326f063bbbda4958e9af217e001dd993c5b4ae3d577f8e8f624b8d7
+
+const {test,expect}=require('@playwright/test');
+const {default:AxeBuilder}=require('@axe-core/playwright');
+const fs=require('fs');
+const routedTest=test.extend({serviceWorkers:'block'});
+
+async function ready(page){await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');}
+test('dialogs trap focus, close with Escape and return to the launcher',async({page})=>{
+  await ready(page);
+  const launcher=page.getByRole('button',{name:'Поиск',exact:true});await launcher.click();
+  await expect(page.getByRole('textbox',{name:'Поиск учебной группы'})).toBeFocused();
+  const dialog=page.getByRole('dialog',{name:'Выбрать расписание'});
+  const close=page.getByRole('button',{name:'Закрыть поиск'});await close.focus();await page.keyboard.press('Shift+Tab');
+  expect(await dialog.evaluate(node=>node.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expect(launcher).toBeFocused();
+  await page.getByRole('button',{name:'Аудитории',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'Радар аудиторий'})).toBeVisible();
+  await page.keyboard.press('Escape');await expect(page.getByRole('button',{name:'Аудитории',exact:true})).toBeFocused();
+});
+
+test('dark and light views and the search dialog pass accessibility checks',async({page},testInfo)=>{
+  await ready(page);
+  for(const theme of ['dark','light']){
+    await page.getByRole('button',{name:'Выбрать',exact:true}).hover();
+    const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+    expect(result.violations).toEqual([]);
+    if(process.env.CAPTURE_SCREENSHOTS && theme==='dark'){
+      fs.mkdirSync('docs/screenshots',{recursive:true});
+      await page.screenshot({path:`docs/screenshots/schedule-${testInfo.project.name}.png`,fullPage:true});
+    }
+    if(theme==='dark'){
+      await page.getByRole('button',{name:'Ещё',exact:true}).click();
+      await page.getByRole('button',{name:'Сменить тему'}).click();await page.keyboard.press('Escape');
+    }
+  }
+  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  const modal=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
+  expect(modal.violations).toEqual([]);
+});
+
+test('last successful group is restored and a deep-link overrides it',async({page})=>{
+  const groups=JSON.parse(fs.readFileSync('dist/api/groups/bakalavriat.json','utf8')).groups;
+  const target=groups[1];await page.goto('./?group='+encodeURIComponent(target.name));
+  await expect(page.getByRole('heading',{level:1})).toHaveText(target.name);
+  await page.goto('./');await expect(page.getByRole('heading',{level:1})).toHaveText(target.name);
+  await page.goto('./?group='+encodeURIComponent(groups[0].name));
+  await expect(page.getByRole('heading',{level:1})).toHaveText(groups[0].name);
+});
+
+test('an unknown group link never silently opens the saved group',async({page})=>{
+  const requests=[];page.on('request',request=>{if(request.url().includes('/api/schedule/'))requests.push(request.url());});
+  await page.goto('./?group=not-a-real-group');
+  await expect(page.locator('#pairsContainer')).toContainText('Группа из ссылки не найдена');
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+  expect(requests).toEqual([]);
+});
+
+routedTest('loading skeleton becomes an explicit unavailable state on failure',async({page})=>{
+  let release;const gate=new Promise(resolve=>release=resolve);
+  await page.route('**/api/schedule/bakalavriat/1.json*',async route=>{await gate;await route.fulfill({status:503,body:'Unavailable'});});
+  await page.goto('./');await expect(page.getByRole('status',{name:'Загрузка расписания'})).toBeVisible();
+  release();await expect(page.locator('#pairsContainer')).toContainText('Источник расписания недоступен');
+  await expect(page.getByRole('button',{name:'Повторить',exact:true})).toBeVisible();
+});
+
+
+test('restoring a saved group resolves its name when the file number changes',async({page})=>{
+  const groups=JSON.parse(fs.readFileSync('dist/api/groups/bakalavriat.json','utf8')).groups;
+  const target=groups[1];
+  await page.addInitScript(({target,oldId})=>{
+    localStorage.setItem('esstu_mode','student');localStorage.setItem('esstu_section','bakalavriat');
+    localStorage.setItem('esstu_group_id',oldId);localStorage.setItem('esstu_group_name',target.name);
+  },{target,oldId:groups[0].id});
+  await page.goto('./');await expect(page.getByRole('heading',{level:1})).toHaveText(target.name);
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+});
+
+routedTest('server fallback remains visible after a manual refresh',async({page})=>{
+  const schedule=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
+  Object.assign(schedule,{is_stale_fallback:true,source_mode:'saved_snapshot',source_checked_at:'2026-10-12T01:00:00Z'});
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:schedule}));
+  await ready(page);
+  await expect(page.locator('#compactFreshnessText')).toContainText('Сохранённая копия');
+  await expect(page.locator('#daySourceStatus')).toContainText('Сохранённая копия');
+  await page.locator('#compactFreshnessText').click();
+  await page.locator('#refreshSchedule').click();
+  await expect(page.locator('#refreshSchedule')).toBeEnabled();
+  await expect(page.locator('#freshnessBadge')).toContainText('Сохранённая копия');
+  await expect(page.locator('#freshnessBadge')).not.toContainText('версия проверена');
+});
+
+test('possible teacher identity collision is visible and clears for a group',async({page})=>{
+  await ready(page);
+  await page.evaluate(()=>{
+    currentSchedule={...currentSchedule,mode:'teacher',identity_ambiguous:true,teacher_key:'test',profile:{short_name:'Тест Т.Т.'}};
+    appMode='teacher';renderAll();
+  });
+  await expect(page.locator('#teacherIdentityWarning')).toBeVisible();
+  await expect(page.locator('#teacherIdentityWarning')).toContainText('Возможны данные нескольких преподавателей');
+  await page.evaluate(()=>{appMode='student';renderAll();});
+  await expect(page.locator('#teacherIdentityWarning')).toBeHidden();
+});
+
+
+===== e2e/unit/test_sw.cjs =====
+SHA-256 (байты файла): 3bc716afe591887a65e903df81d5cb1d80a882cf30f2f7906a1c2f41d3ba758f
+
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const scope='https://example.test/esstu-schedule/', prefix=`esstu-pwa:${scope}:`;
+const handlers={},stores=new Map(),deleted=[];
+let offline=false,status=200,failPut=false,fetches=0,skipped=false;
+const key=request=>new URL(typeof request==='string'?request:request.url,scope).href;
+function store(name){
+  if(!stores.has(name)){
+    const entries=new Map();
+    stores.set(name,{
+      async match(request,options={}){
+        const url=key(request);
+        const found=[...entries].find(([candidate])=>options.ignoreSearch?candidate.split('?')[0]===url.split('?')[0]:candidate===url);
+        return found?.[1].clone();
+      },
+      async put(request,response){if(failPut)throw Error('quota');entries.set(key(request),response.clone())},
+      async keys(){return [...entries.keys()].map(url=>new Request(url))},
+      async addAll(assets){for(const asset of assets){assert(asset.startsWith('./'));await this.put(asset,new Response('installed shell'))}}
+    });
+  }
+  return stores.get(name);
+}
+const context={self:{addEventListener:(name,fn)=>handlers[name]=fn,location:{origin:new URL(scope).origin},registration:{scope},clients:{claim:async()=>{}},skipWaiting:async()=>{skipped=true}},
+  caches:{open:async name=>store(name),keys:async()=>[...stores.keys()],delete:async name=>{deleted.push(name);return stores.delete(name)}},
+  fetch:async()=>{fetches++;if(offline)throw Error('offline');return new Response('network',{status})},
+  Response,Headers,URL,AbortSignal,console:{warn(){}}};
+vm.createContext(context);vm.runInContext(fs.readFileSync('static/sw.js','utf8'),context);
+async function lifecycle(name,event={}){let job;handlers[name]({...event,waitUntil:p=>job=p});await job}
+async function request(path,options={}){let result;handlers.fetch({request:new Request(new URL(path,scope),options),respondWith:p=>result=p});return result}
+(async()=>{
+  const legacy=store('esstu-live-v1');
+  await legacy.put('api/schedule?group=A',new Response('A'));
+  await legacy.put('api/schedule?group=B',new Response('B'));
+  await legacy.put('https://example.test/another-app/api/private',new Response('other'));
+  store(`${prefix}old-shell`);store('another-app');store('esstu-pwa:another-scope:shell');
+  await lifecycle('install');assert(!skipped,'update waits for the user');
+  await lifecycle('activate');assert.deepEqual(deleted,[`${prefix}old-shell`]);
+  const data=store(`${prefix}data-v1`);
+  assert(!(await data.match('https://example.test/another-app/api/private')));
+  offline=true;
+  assert.equal(await (await request('api/schedule?group=A')).text(),'A');
+  assert.equal(await (await request('api/schedule?group=B')).text(),'B');
+  assert.equal((await request('api/schedule?group=C')).status,503);
+  assert.equal((await request('api/schedule?group=A')).headers.get('X-ESSTU-Cache'),'offline');
+  const before=fetches;
+  assert.equal(await (await request('modern.js')).text(),'installed shell');assert.equal(fetches,before);
+  offline=false;failPut=true;
+  assert.equal(await (await request('api/new.json')).text(),'network','quota cannot hide network success');
+  failPut=false;status=404;
+  assert.equal((await request('api/schedule?group=A')).status,404,'do not resurrect deleted resources');
+  status=503;assert.equal(await (await request('api/schedule?group=A')).text(),'A');
+  status=200;assert.equal(await (await request('api/schedule?group=A')).text(),'network');
+  await lifecycle('activate');offline=true;
+  assert.equal(await (await request('api/schedule?group=A')).text(),'network','reactivation preserves data');
+  assert.equal(await request('https://example.test/outside/api/data'),undefined);
+  assert.equal(await request('api/meta',{method:'POST'}),undefined);
+  await lifecycle('message',{data:{type:'SKIP_WAITING'}});assert(skipped);
+  console.log('Worker: shell isolation, persistent data migration, exact queries, freshness, quota errors, 404/503 and manual activation OK');
+})().catch(error=>{console.error(error);process.exitCode=1});
+

@@ -74,7 +74,8 @@ function relativeChecked(value,now=Date.now()){
 function daySourceText(schedule,delivery,online=true){
   const offline=!online || delivery?.cached;
   const source=schedule.partial?'Расписания групп':'Портал ВСГУТУ';
-  return `${offline?'Офлайн-копия · ':''}${source} · ${relativeChecked(schedule.source_checked_at)}`;
+  const fallback=schedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(schedule.source_mode);
+  return `${offline?'Офлайн-копия · ':fallback?'Сохранённая копия · ':''}${source} · ${relativeChecked(schedule.source_checked_at)}`;
 }
 function renderDaySource(){
   const target=document.getElementById('daySourceStatus');if(!target || !currentSchedule)return;

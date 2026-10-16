@@ -92,6 +92,12 @@ class TeacherIndexTest(unittest.TestCase):
         self.assertEqual(len(lessons), 2)
         self.assertEqual(lessons[0]["source_type"], "official_caf")
         self.assertEqual(result["caf_ids"], ["Caf5"])
+        self.assertFalse(result["identity_ambiguous"])
+        other_caf = deepcopy(official)
+        other_caf["caf_id"] = "Caf6"
+        candidate = combine_teacher_catalog([official, other_caf], [derived])[0]
+        self.assertTrue(candidate["identity_ambiguous"])
+        self.assertEqual(candidate["identity_source_caf_ids"], ["Caf5", "Caf6"])
 
         # The same subject and room do not imply the same group or lesson type.
         parallel = deepcopy(official)

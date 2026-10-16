@@ -162,6 +162,15 @@ def combine_teacher_catalog(official, derived):
             )
         )
     for teacher in result.values():
+        source_cafs = sorted(
+            {
+                item["caf_id"]
+                for item in official
+                if item["teacher_key"] == teacher["teacher_key"] and item.get("caf_id")
+            }
+        )
+        teacher["identity_ambiguous"] = len(source_cafs) > 1
+        teacher["identity_source_caf_ids"] = source_cafs
         for days in teacher["weeks"].values():
             for day in days.values():
                 day["pairs"].sort(key=lambda p: (p["start"], p["number"]))

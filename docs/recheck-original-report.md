@@ -2,26 +2,47 @@
 
 16 октября 2026. Проверялись реализации в `esstu_schedule/`, а не только
 корневые файлы совместимости. Предыдущие исправления кэша и сборки опубликованы
-в PR #14. Исходный отчёт описывает преимущественно более раннюю ревизию.
+в [PR #14](https://github.com/stasdondukov2-sys/esstu-schedule/pull/14). Исправления fallback — в [PR #15](https://github.com/stasdondukov2-sys/esstu-schedule/pull/15). Исходный отчёт описывает преимущественно более раннюю ревизию.
 
-| Пункты отчёта | Текущее состояние |
-| --- | --- |
-| 1–4, POST и произвольные фотографии | Публичный сервер только для чтения, POST возвращает 405. Внешние аватары ограничены, стандартные аватары локальные. Формы публичного редактирования нет. |
-| 5, TLS | `create_default_context()` сохраняет проверку цепочки и имени. `CERT_NONE` не используется. |
-| 6–7, тело запроса и статика | POST отклоняется без разбора тела, размер ограничен; неожиданные ошибки GET логируются и дают общее сообщение. Путь проверяется через `is_relative_to`. |
-| 8, `allow_group_fallback` | Подтверждено и исправлено этой сверкой. При `False` локальный HTML не подставляется; сервис может перейти к сохранённому JSON. При `True` остаётся явно помеченный HTML-fallback. |
-| 9, происхождение данных | Используются поля `FetchedPage`, `source_mode`, `source_checked_at`, `source_sha256`, `is_stale_fallback`. |
-| 10–11, холодный индекс и stampede | Сервер отдаёт готовый индекс аудиторий; есть блокировки и singleflight по ключу и stale-while-revalidate. Они работают в пределах одного процесса. |
-| 12–13, разделы и статика | Неизвестные разделы отклоняются; ограничение кафедр двумя разделами явно. Есть ETag, Cache-Control, корректные MIME и 404 для отсутствующего файла. |
-| 14, воскресная граница недели | Уже исправлено: опорная дата 2026 года — 31 августа. 18.10.2026 — I неделя, 19.10 — II. Тесты дополнены точными датами отчёта, 2027 годом и сменой года. |
-| 15, заочное расписание | День и дата берутся из ячейки; даты получают отдельные ключи, не перезаписываются по шестидневному индексу. Цвет шрифта не определяет неделю. Есть golden-фикстуры и тест воскресенья. |
-| 16, метаданные | Кэшируются с ключом по пути, mtime и размеру. |
-| 17, объединение | Усечение по `min(len)` устранено; пары сопоставляются по номеру и времени. Риск совпадения фамилии и инициалов сохраняется: в источнике нет надёжного ID человека. Это ограничение добавлено в README. |
-| 18–19, репозиторий | Есть актуальный README, описание API/деплоя, MIT LICENSE, структура tests/e2e и CI. Настройки About/topics не являются частью исходного кода и этой сверкой повторно не проверялись. |
-| 20, ФИО в шаблоне | Подтверждено: скрытый шаблон содержал реальное ФИО и степень. Очищено; профиль заполняется только загруженными данными. |
-| 21, метатеги | `description` и Open Graph уже присутствуют. |
+| Пункты отчёта | Текущее состояние  Доказательства на фиксированной ревизии |
+| --- | --- | --- |
+| 1–4, POST и произвольные фотографии | Публичный сервер только для чтения, POST возвращает 405. Внешние аватары ограничены, стандартные аватары локальные. Формы публичного редактирования нет.  [POST: запрет записи](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_p0.py#L17) · [Локальные аватары](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_p0.py#L67) |
+| 5, TLS | `create_default_context()` сохраняет проверку цепочки и имени. `CERT_NONE` не используется.  [TLS: цепочка и имя](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_p0.py#L107) |
+| 6–7, тело запроса и статика | POST отклоняется без разбора тела, размер ограничен; неожиданные ошибки GET логируются и дают общее сообщение. Путь проверяется через `is_relative_to`.  [Размер POST](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_p0.py#L31) · [Маршруты и traversal](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L190) |
+| 8, `allow_group_fallback` | Подтверждено и исправлено этой сверкой. При `False` локальный HTML не подставляется; сервис может перейти к сохранённому JSON. При `True` остаётся явно помеченный HTML-fallback.  [JSON-fallback](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_fallback.py#L40) · [Запрет HTML-fallback](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_fallback.py#L11) |
+| 9, происхождение данных | Используются поля `FetchedPage`, `source_mode`, `source_checked_at`, `source_sha256`, `is_stale_fallback`.  [Поля происхождения](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L128) · [Видимость после обновления](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/accessibility.spec.cjs#L77) |
+| 10–11, холодный индекс и stampede | Сервер отдаёт готовый индекс аудиторий; есть блокировки и singleflight по ключу и stale-while-revalidate. Они работают в пределах одного процесса.  [Индекс без сканирования](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L228) · [Объединение запросов](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L180) · [Ограничение одним процессом](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/README.md#L114) |
+| 12–13, разделы и статика | Неизвестные разделы отклоняются; ограничение кафедр двумя разделами явно. Есть ETag, Cache-Control, корректные MIME и 404 для отсутствующего файла.  [400/404 и разделы](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L190) · [ETag и MIME](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L204) |
+| 14, воскресная граница недели | Уже исправлено: опорная дата 2026 года — 31 августа. 18.10.2026 — I неделя, 19.10 — II. Тесты дополнены точными датами отчёта, 2027 годом и сменой года.  [CalendarTests::test_tabular_dates](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L23) · [Python/JS parity](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/unit/test_reference.cjs#L1) |
+| 15, заочное расписание | День и дата берутся из ячейки; даты получают отдельные ключи, не перезаписываются по шестидневному индексу. Цвет шрифта не определяет неделю. Есть golden-фикстуры и тест воскресенья.  [Golden-фикстуры](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L69) · [Даты не перезаписываются](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L57) · [Цвет не определяет неделю](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L100) |
+| 16, метаданные | Кэшируются с ключом по пути, mtime и размеру.  [Инвалидация по изменению файла](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_data.py#L139) |
+| 17, объединение | Усечение по `min(len)` устранено; пары сопоставляются по номеру и времени. Риск совпадения фамилии и инициалов сохраняется: в источнике нет надёжного ID человека. Это ограничение добавлено в README.  [Объединение пар](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_audit.py#L29) · [Сигнал неоднозначности](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/tests/test_teachers.py#L56) · [Предупреждение в интерфейсе](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/accessibility.spec.cjs#L91) |
+| 18–19, репозиторий | Есть актуальный README, описание API/деплоя, MIT LICENSE, структура tests/e2e и CI. About и homepage проверены через GitHub API 16.10.2026; topics: `esstu`, `pwa`, `python`, `schedule`. Настройки могут измениться независимо от коммита.  [README](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/README.md#L1) · [MIT](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/LICENSE#L1) · [CI](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/.github/workflows/ci.yml#L1) |
+| 20, ФИО в шаблоне | Подтверждено: скрытый шаблон содержал реальное ФИО и степень. Очищено; профиль заполняется только загруженными данными.  [Пустой шаблон](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/static/index.html#L947) |
+| 21, метатеги | `description` и Open Graph уже присутствуют.  [Description](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/static/index.html#L13) · [Open Graph](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/static/index.html#L15) |
 
 Новые тесты проверяют запрет локального HTML-fallback для каталогов и кафедр,
 сохранение исходной даты и хеша при разрешённом fallback и возврат сохранённого
 JSON без перезаписи старым каталогом. Схема статической публикации не меняется:
 этот параметр относится к динамическому серверу.
+
+## Ревизии и результаты проверок
+
+Дата сверки и дополнения: **16 октября 2026, Asia/Irkutsk**. Даты 18–19 октября
+в таблице — входные данные тестов, а не даты их выполнения.
+
+- [Код, к которому привязаны ссылки](https://github.com/stasdondukov2-sys/esstu-schedule/commit/00d6777984c1dec5e77fe98509f80a6f0c7f0134): `00d6777984c1dec5e77fe98509f80a6f0c7f0134`.
+- [Успешный CI и Pages после PR #15](https://github.com/stasdondukov2-sys/esstu-schedule/actions/runs/38874634649): ревизия `a25ca66c6281034f3772a8981d5ba5b446f0e73d`, 54 Python-теста, 36 subtests, 18 браузерных случаев.
+- После новых проверок видимости fallback и неоднозначного профиля: локально 54 Python-теста, 36 subtests, **22 браузерных случая** (11 сценариев × desktop/mobile), 9 групп JS-проверок. Статус CI этой ветки следует проверять в PR, а не выводить из старого успешного запуска.
+- Полный исходный текст worker, workflows и результат сбора тестов: [verification-inputs.txt](verification-inputs.txt).
+- Блокировки и кэши ограничены процессом. Между несколькими воркерами/инстансами распределённой блокировки нет.
+- Ключ по кафедре автоматически не вводится: один преподаватель может работать на нескольких кафедрах. При совпадении ключа в разных официальных кафедрах показывается предупреждение. Это не доказывает, что людей несколько, и не выявляет совпадения внутри одной кафедры.
+
+## Отдельные проверки, которые не были доступны внешнему анализатору
+
+- Service Worker: [Код](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/static/sw.js#L1).
+- Тест сети, кэша, миграции, квоты и активации: [Тест worker](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/unit/test_sw.cjs#L1).
+- Cron, права, уведомления: [Workflow синхронизации](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/.github/workflows/sync.yml#L1).
+- Права CI и публикация: [Workflow CI](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/.github/workflows/ci.yml#L1).
+- Фокус, Escape и возврат фокуса: [Клавиатурный сценарий](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/accessibility.spec.cjs#L7).
+- Контраст и автоматическая доступность: [axe-core](https://github.com/stasdondukov2-sys/esstu-schedule/blob/00d6777984c1dec5e77fe98509f80a6f0c7f0134/e2e/accessibility.spec.cjs#L20).
