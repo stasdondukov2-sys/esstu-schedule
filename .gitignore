@@ -17,3 +17,6 @@ portal-*-sample.htm
 
 test-results/
 playwright-report/
+
+.pytest_cache/
+.ruff_cache/

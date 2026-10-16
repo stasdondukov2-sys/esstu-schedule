@@ -2,3 +2,35 @@
 @source "../static";
 @config "../tailwind.config.cjs";
 @custom-variant dark (&:where(.dark, .dark *));
+
+
+.ui-icon { display:inline-block; width:1.1em; height:1.1em; vertical-align:-.15em; flex-shrink:0; }
+:focus-visible { outline:2px solid #0f766e; outline-offset:3px; }
+.dark :focus-visible { outline-color:#5eead4; }
+.bg-teal-600 { background-color:#0f766e; }
+.text-teal-600,.text-teal-500 { color:#0f766e; }
+.text-slate-400,.text-slate-500 { color:#475569; }
+.text-amber-600,.text-amber-500 { color:#92400e; }
+.text-emerald-600 { color:#047857; }
+.text-rose-500 { color:#be123c; }
+.dark .text-slate-500,.dark .text-slate-400 { color:#a6b7cc; }
+.dark .text-teal-600,.dark .text-teal-500 { color:#5eead4; }
+.dark .text-amber-600,.dark .text-amber-500 { color:#fcd34d; }
+.dark .text-emerald-600 { color:#6ee7b7; }
+.dark .text-rose-500 { color:#fda4af; }
+.schedule-skeleton { display:grid; gap:12px; }
+.skeleton-card { padding:20px; border-radius:16px; background:#e2e8f0; }
+.skeleton-card i { display:block; height:12px; width:70%; margin:10px 0; border-radius:8px; background:#cbd5e1; animation:skeleton-pulse 1.5s ease-in-out infinite; }
+.skeleton-card i:nth-child(2) { width:90%; }
+.skeleton-card i:nth-child(3) { width:45%; }
+.dark .skeleton-card { background:#101c2e; }
+.dark .skeleton-card i { background:#334155; }
+.empty-state { padding:32px 16px; text-align:center; border:1px solid #cbd5e1; border-radius:16px; }
+.dark .empty-state { border-color:#334155; }
+@keyframes skeleton-pulse { 50% { opacity:.45; } }
+@media(prefers-reduced-motion:reduce) { .skeleton-card i { animation:none; } * { scroll-behavior:auto !important; } }
+
+input::placeholder,textarea::placeholder {color:#56677e;opacity:1;}
+.dark input::placeholder,.dark textarea::placeholder {color:#a6b7cc;}
+
+[class~="hover:bg-teal-500"]:hover {background-color:#115e59;}

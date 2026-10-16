@@ -143,7 +143,7 @@ function renderDataQuality() {
   const warning=document.getElementById('incompleteWarning');
   if(warning)warning.classList.toggle('hidden',!currentSchedule?.is_incomplete);
   const status=document.getElementById('parseQualityStatus');
-  if(status)status.textContent=catalogQuality ? `Ошибок разбора: ${catalogQuality.parse_error_count ?? 0} · Неполных расписаний: ${catalogQuality.incomplete_schedule_count ?? 0}` : 'Статистика качества пока недоступна';
+  if(status)status.textContent=catalogQuality ? `Ошибок разбора: ${catalogQuality.parse_error_count ?? 0} · Неполных расписаний: ${catalogQuality.incomplete_schedule_count ?? '—'} · Ячеек для сверки: ${catalogQuality.unparsed_cell_count ?? '—'}` : 'Статистика качества пока недоступна';
 }
 document.addEventListener('DOMContentLoaded',async()=>{
   try { const response=await fetch(getApiUrl('/api/status')); if(!response.ok)throw Error(response.status); catalogQuality=await response.json(); }

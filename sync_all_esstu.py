@@ -1,8 +1,12 @@
 """Compatibility entry point for scripts.sync_all_esstu."""
+
 import sys
+
 if __name__ == "__main__":
     import runpy
+
     runpy.run_module("scripts.sync_all_esstu", run_name="__main__")
 else:
     from scripts import sync_all_esstu as _implementation
+
     sys.modules[__name__] = _implementation

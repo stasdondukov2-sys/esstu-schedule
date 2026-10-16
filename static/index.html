@@ -89,7 +89,8 @@
 <button id="activeSubgroupChip" class="hidden text-xs text-teal-600 dark:text-teal-300" onclick="openSimpleDialog('moreMenuModal')"></button>
 <p id="selectedDaySummary" class="text-xs font-semibold text-slate-500 dark:text-slate-400"></p>
 <div id="incompleteWarning" class="hidden text-sm text-amber-600 dark:text-amber-300" role="alert">Данные неполные: структура источника не распознана. Сверьте расписание с порталом.</div>
-<section class="space-y-2.5" id="pairsContainer"></section>
+<p id="daySourceStatus" class="text-[11px] text-slate-500 dark:text-slate-400"></p>
+<section class="space-y-2.5" id="pairsContainer" aria-busy="true"><div class="schedule-skeleton" role="status" aria-label="Загрузка расписания"><span class="sr-only">Загрузка расписания…</span><div class="skeleton-card" aria-hidden="true"><i></i><i></i><i></i></div></div></section>
 <footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
 </main>
 <!-- ===================================================================== -->
@@ -113,7 +114,7 @@
 <div class="w-full max-w-md bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 rounded-3xl p-4 space-y-3 shadow-2xl">
 <div class="flex items-center justify-between">
 <h3 class="font-bold text-sm" id="noteModalTitle">Заметка к предмету</h3>
-<button class="text-slate-400 hover:text-white" onclick="closeNoteModal()">✕</button>
+<button class="text-slate-400 hover:text-teal-700 dark:hover:text-teal-200" onclick="closeNoteModal()">✕</button>
 </div>
 <textarea class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-teal-500" id="noteTextarea" placeholder="Например: Сдать реферат, принести лабораторную тетрадь..." rows="3"></textarea>
 <div class="flex items-center justify-between gap-2">
@@ -261,13 +262,13 @@
       const notes = getNotesMap();
       document.getElementById('noteModalTitle').textContent = `📝 Заметка: ${subjectTitle}`;
       document.getElementById('noteTextarea').value = notes[noteKey] || '';
-      document.getElementById('noteModal').classList.remove('hidden');
+      openSimpleDialog('noteModal');
       document.getElementById('noteTextarea').focus();
     }
 
     function closeNoteModal() {
       editingNoteKey = null;
-      document.getElementById('noteModal').classList.add('hidden');
+      closeSimpleDialog('noteModal');
     }
 
     function saveCurrentNote() {
@@ -542,10 +543,13 @@
     }
 
     async function loadStudentSchedule(section, groupId, groupName = null, forceFresh = false) {
+      const version=beginScheduleLoad(),previous=currentSchedule;
       try {
         const nameParam = groupName ? `?group_name=${encodeURIComponent(groupName)}` : '';
         const res = await fetch(getApiUrl(`/api/schedule/${section}/${encodeURIComponent(groupId)}${nameParam}`), {cache:forceFresh ? 'reload' : 'default'});
         const data = await scheduleJSON(res);
+        if(version!==scheduleLoadVersion)return false;
+        finishScheduleLoad(version);
         appMode = 'student';
         localStorage.setItem('esstu_mode', 'student');
         currentSchedule = data;
@@ -568,13 +572,11 @@
         return true;
       } catch (e) {
         console.error('Ошибка загрузки расписания:', e);
-        document.getElementById('freshnessBadge').textContent = 'Расписание выбранной группы недоступно. Повторите обновление позже.';
-        if (!currentSchedule) {
-          document.getElementById('heroLessons').textContent = 'Не удалось получить подтверждённое расписание этой группы.';
-          document.getElementById('pairsContainer').textContent = 'Источник недоступен или имя группы не совпало с каталогом.';
-        }
+        if(version!==scheduleLoadVersion)return false;
+        if(forceFresh && previous){currentSchedule=previous;renderAll();showToast('Источник недоступен. Показана сохранённая версия.');}
+        else{currentSchedule=null;document.getElementById('currentEntityBtnText').textContent=groupName || groupId;scheduleUnavailable('Источник расписания недоступен');}
         return false;
-      }
+      } finally {finishScheduleLoad(version);}
     }
 
     let teacherDirectoryLoading = null;
@@ -612,21 +614,27 @@
     }
 
     async function loadTeacherSchedule(teacherKey, cafId = '', forceFresh = false) {
-      if (forceFresh || !allTeachersDirectory.length) await loadDepartmentsAndTeachers(forceFresh);
-      let found = allTeachersDirectory.find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
-      if (!found && cafId) {
-        try {
+      const version=beginScheduleLoad(),previous=currentSchedule;
+      try {
+        if (forceFresh || !allTeachersDirectory.length) await loadDepartmentsAndTeachers(forceFresh);
+        let found = allTeachersDirectory.find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
+        if (!found && cafId) {
           const res = await fetch(getApiUrl(`/api/department/bakalavriat/${encodeURIComponent(cafId)}?merge=true`));
           if (res.ok) found = ((await res.json()).teachers || []).find(t => normSearch(t.teacher_key) === normSearch(teacherKey));
-        } catch (e) { console.error(e); }
-      }
-      if (!found) { alert('Преподаватель не найден в сохранённых расписаниях. Попробуйте поиск по фамилии.'); return; }
-      appMode = 'teacher'; localStorage.setItem('esstu_mode', 'teacher');
-      savedState.teacherKey = found.teacher_key; savedState.teacherCafId = found.caf_id || '';
-      localStorage.setItem('esstu_teacher_key', savedState.teacherKey);
-      localStorage.setItem('esstu_teacher_caf', savedState.teacherCafId);
-      currentSchedule = found; trackSchedule(found); renderAll();
-      return true;
+        }
+        if(version!==scheduleLoadVersion)return false;
+        if(!found)throw Error('Преподаватель не найден в сохранённых расписаниях');
+        appMode = 'teacher'; localStorage.setItem('esstu_mode', 'teacher');
+        savedState.teacherKey = found.teacher_key; savedState.teacherCafId = found.caf_id || '';
+        localStorage.setItem('esstu_teacher_key', savedState.teacherKey);
+        localStorage.setItem('esstu_teacher_caf', savedState.teacherCafId);
+        currentSchedule = found; trackSchedule(found);finishScheduleLoad(version);renderAll();return true;
+      }catch(error){
+        console.error(error);if(version!==scheduleLoadVersion)return false;
+        if(forceFresh && previous){currentSchedule=previous;renderAll();showToast('Не удалось обновить преподавателя.');}
+        else{currentSchedule=null;scheduleUnavailable('Расписание преподавателя недоступно');}
+        return false;
+      }finally{finishScheduleLoad(version);}
     }
 
     function openSelectorModal() {
@@ -816,14 +824,25 @@
       const dayIdx = (now.getDay() + 6) % 7;
       selectedDayKey = dayIdx < 6 ? DAY_KEYS[dayIdx] : 'monday';
 
+      setInterval(updateLiveHero, 1000);
       const params = new URLSearchParams(location.search);
       if (params.has('group')) {
         appMode = 'student';
-        savedState.section = params.get('section') || 'bakalavriat';
-        const response = await fetch(getApiUrl(`/api/groups?section=${savedState.section}`));
-        const groups = (await response.json()).groups || [];
-        const group = groups.find(g => g.name === params.get('group'));
-        if (group) { savedState.groupId = group.id; savedState.groupName = group.name; }
+        const requested=params.get('group'),section=params.get('section') || 'bakalavriat';
+        try {
+          if(!['bakalavriat','spezialitet','zo1','zo2'].includes(section))throw Error('Неизвестный раздел в ссылке');
+          const response=await fetch(getApiUrl(`/api/groups?section=${section}`));
+          if(!response.ok)throw Error('Каталог групп недоступен');
+          const groups=(await response.json()).groups || [];
+          const group=groups.find(g=>normSearch(g.name)===normSearch(requested) || String(g.id)===requested);
+          if(!group)throw Error('Группа из ссылки не найдена');
+          savedState.section=section;savedState.groupId=group.id;savedState.groupName=group.name;
+        }catch(error){
+          startupLinkFailed=true;
+          document.getElementById('pairsContainer').setAttribute('aria-busy','false');
+          document.getElementById('currentEntityBtnText').textContent=requested || 'Выберите группу';
+          scheduleUnavailable(error.message);loadGroups(savedState.section);loadDepartmentsAndTeachers();return;
+        }
       } else if (params.has('teacher')) {
         appMode = 'teacher'; savedState.teacherKey = params.get('teacher');
         savedState.teacherCafId = params.get('caf') || 'Caf5';
@@ -837,7 +856,7 @@
         await loadStudentSchedule(savedState.section, savedState.groupId, savedState.groupName);
       }
 
-      setInterval(updateLiveHero, 1000);
+
       await handleUrlShortcuts();
 
 
@@ -847,6 +866,7 @@
 <script src="experience.js"></script>
 <script src="simple-ui.js"></script>
 <script src="study-tools.js"></script>
+<script src="accessibility.js"></script>
 <div aria-labelledby="searchTitle" aria-modal="true" class="simple-overlay hidden" id="searchModal" role="dialog">
 <div class="simple-sheet"><div class="flex justify-between items-center gap-2"><h2 class="font-bold" id="searchTitle">Выбрать расписание</h2><button aria-label="Закрыть поиск" class="w-10 text-xl" onclick="closeSearchModal()">×</button></div>
 <div aria-label="Каталог" class="flex gap-2 my-2" role="group"><button class="px-4 rounded-xl" id="searchStudentTab" onclick="openSearchModal('student')">Группы</button><button class="px-4 rounded-xl" id="searchTeacherTab" onclick="openSearchModal('teacher')">Преподаватели</button></div>
