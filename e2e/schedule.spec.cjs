@@ -40,6 +40,8 @@ test('installation URLs stay inside the repository and the cached shell opens of
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await page.reload();
   await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+  await expect(page.locator('#pairsContainer article').first()).toBeVisible();
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
