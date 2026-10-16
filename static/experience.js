@@ -1,4 +1,4 @@
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
 let scheduleChanges = [], highlightChanges = true, lastDelivery = null;
 function flattenSchedule(schedule) {
   const rows = [];

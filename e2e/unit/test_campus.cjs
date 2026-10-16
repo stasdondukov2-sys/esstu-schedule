@@ -34,3 +34,7 @@ for(const [time,kind] of [['08:59','next'],['09:00','current'],['10:35','next'],
 context.now=new Date('2026-10-18T09:30:00');assert.equal(run('heroState(schedule,now).kind'),'empty');
 assert.equal(run('dayDateMeta({session_date:"25.12"},"monday",{}).shortLabel'),'25.12');
 console.log('Calendar boundaries, lesson transitions, parallel lessons and conservative room decoding OK');
+
+assert.equal(run('formatBreak(40)'), 'Перерыв 40 мин');
+assert.equal(run('formatBreak(80)'), 'Окно 1 ч 20 мин');
+assert.equal(run('formatBreak(120)'), 'Окно 2 ч');

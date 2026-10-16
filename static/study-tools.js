@@ -148,7 +148,7 @@ function downloadICS(lines,name) {
   const folded=lines.map(line=>{let text='',width=0;for(const char of line){const length=new TextEncoder().encode(char).length;if(width+length>75){text+='\r\n ';width=1;}text+=char;width+=length;}return text;});
   const url=URL.createObjectURL(new Blob([folded.join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-let campusBuildings=[],campusSelection=null;
+let campusBuildings=[],campusSelection=null,campusRoomQuery='';
 function buildCampusDirectory(rooms) {
   const buildings=new Map();
   for(const room of rooms){const label=decodeEsstuRoom(room.room)?.building;if(!label)continue;if(!buildings.has(label))buildings.set(label,[]);buildings.get(label).push(room.room);}
@@ -159,15 +159,15 @@ async function openCampusMapModal(building=null) {
   const status=document.getElementById('campusStatus');status.textContent='Загрузка аудиторий…';
   try{
     if(!roomDirectory){const response=await fetch(getApiUrl('/api/rooms'));if(!response.ok)throw Error();roomDirectory=await response.json();}
-    campusBuildings=buildCampusDirectory(roomDirectory.rooms || []);campusSelection=building;
+    campusBuildings=buildCampusDirectory(roomDirectory.rooms || []);campusSelection=building;campusRoomQuery='';document.getElementById('campusRoomSearch').value='';
     renderCampusMap();status.textContent=campusBuildings.length?'Выберите корпус, чтобы найти его аудитории.':'В загруженных данных нет обозначений корпусов.';
   }catch{status.textContent='Не удалось загрузить аудитории. Повторите при подключении к сети.';}
 }
 function renderCampusMap() {
   const height=Math.max(100,Math.ceil(campusBuildings.length/3)*70+10);
-  document.getElementById('campusDiagram').innerHTML=`<svg viewBox="0 0 420 ${height}" class="w-full h-auto" role="group" aria-label="Условная схема корпусов">${campusBuildings.map((building,index)=>{const x=10+(index%3)*138,y=10+Math.floor(index/3)*70,active=campusSelection===building.label;return `<g role="button" tabindex="0" aria-label="${escapeHTML(building.label)}" aria-pressed="${active}" onclick="selectCampusBuilding(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectCampusBuilding(${index});}"><rect x="${x}" y="${y}" width="124" height="56" rx="10" fill="${active?'#0d9488':'currentColor'}" fill-opacity="${active?'1':'.06'}" stroke="${active?'#0d9488':'#64748b'}"/><text x="${x+62}" y="${y+24}" text-anchor="middle" fill="${active?'white':'currentColor'}" font-size="12" font-weight="600">${escapeHTML(building.label)}</text><text x="${x+62}" y="${y+43}" text-anchor="middle" fill="${active?'white':'currentColor'}" font-size="10">${building.rooms.length} ауд.</text></g>`;}).join('')}</svg>`;
+  document.getElementById('campusDiagram').innerHTML=`<svg viewBox="0 0 420 ${height}" class="w-full h-auto" role="group" aria-label="Условная схема корпусов">${campusBuildings.map((building,index)=>{const x=10+(index%3)*138,y=10+Math.floor(index/3)*70,active=campusSelection===building.label;return `<g role="button" tabindex="0" aria-label="${escapeHTML(building.label)}" aria-pressed="${active}" onclick="selectCampusBuilding(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectCampusBuilding(${index});}"><rect x="${x}" y="${y}" width="124" height="56" rx="10" fill="${active?'var(--campus-solid)':'currentColor'}" fill-opacity="${active?'1':'.06'}" stroke="${active?'var(--campus-accent)':'var(--campus-muted)'}"/><text x="${x+62}" y="${y+24}" text-anchor="middle" fill="${active?'white':'currentColor'}" font-size="12" font-weight="600">${escapeHTML(building.label)}</text><text x="${x+62}" y="${y+43}" text-anchor="middle" fill="${active?'white':'currentColor'}" font-size="10">${building.rooms.length} ауд.</text></g>`;}).join('')}</svg>`;
   const selected=campusBuildings.find(building=>building.label===campusSelection);
-  document.getElementById('campusBldCard').innerHTML=selected?`<h3 class="font-bold text-sm">${escapeHTML(selected.label)}</h3><p class="text-xs text-slate-500 mt-1">Корпус определён по обозначению аудитории в расписании.</p><div class="flex flex-wrap gap-2 mt-3">${selected.rooms.map((room,index)=>`<button class="px-3 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-300 text-xs" onclick="campusRoom(${index})">${escapeHTML(room)}</button>`).join('')}</div>`:'';
+  document.getElementById('campusBldCard').innerHTML=selected?`<h3 class="font-bold text-sm">${escapeHTML(selected.label)}</h3><p class="text-xs text-slate-500 mt-1">Корпус определён по обозначению аудитории в расписании.</p><div class="flex flex-wrap gap-2 mt-3">${selected.rooms.map((room,index)=>({room,index})).filter(({room})=>!campusRoomQuery || normSearch(room).includes(campusRoomQuery) || normSearch(selected.label).includes(campusRoomQuery)).map(({room,index})=>`<button data-found="${!!campusRoomQuery}" class="px-3 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-300 text-xs" onclick="campusRoom(${index})">${escapeHTML(room)}</button>`).join('')}</div>`:'';
 }
 function selectCampusBuilding(index){campusSelection=campusBuildings[index]?.label;renderCampusMap();document.querySelector('#campusDiagram [aria-pressed="true"]')?.focus();}
 function campusRoom(index){const room=campusBuildings.find(building=>building.label===campusSelection)?.rooms[index];if(room){closeSimpleDialog('campusMapModal');openRoomsModal(room);}}
@@ -177,4 +177,12 @@ async function handleUrlShortcuts() {
   if(action==='session')setScheduleTab('session');
   if(action==='campus')await openCampusMapModal();
   if(action==='now'){bottomNavToday();document.getElementById('liveHeroCard').scrollIntoView({behavior:'smooth',block:'center'});}
+}
+
+function filterCampusRoom(value){
+  campusRoomQuery=normSearch(value);
+  const matches=campusBuildings.filter(building=>normSearch(building.label).includes(campusRoomQuery)||building.rooms.some(room=>normSearch(room).includes(campusRoomQuery)));
+  if(campusRoomQuery)campusSelection=matches[0]?.label || null;
+  renderCampusMap();
+  document.getElementById('campusStatus').textContent=campusRoomQuery?(matches.length?'Найденные аудитории подсвечены. Корпус определён по обозначению в расписании.':'В известных расписаниях аудитории не найдены.'):'Выберите корпус, чтобы найти его аудитории.';
 }

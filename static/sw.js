@@ -1,8 +1,8 @@
-const CACHE_NAME = 'esstu-live-v2.4.0';
+const CACHE_NAME = 'esstu-live-v2.5.0';
 const CACHE_PREFIX = `esstu-pwa:${self.registration.scope}:`;
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_NAME}`;
 const DATA_CACHE = `${CACHE_PREFIX}data-v1`;
-const SHELL = ['./', './index.html', './app.css', './shortcut-now.svg', './modern.js', './experience.js', './simple-ui.js', './study-tools.js', './accessibility.js', './manifest.json', './shortcut-now.png', './shortcut-rooms.png', './shortcut-session.png', './shortcut-campus.png'];
+const SHELL = ['./', './index.html', './app.css', './shortcut-now.svg', './modern.js', './experience.js', './simple-ui.js', './study-tools.js', './accessibility.js', './manifest.json', './icons/app-icon.svg', './icons/app-icon-192.png', './icons/app-icon-512.png', './shortcut-now.png', './shortcut-rooms.png', './shortcut-session.png', './shortcut-campus.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL)));
 });

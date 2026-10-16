@@ -21,6 +21,7 @@ function presentDialog(id){
   for(const button of dialog.querySelectorAll('button'))if(/^[×✕]$/.test(button.textContent.trim())){button.setAttribute('aria-label',button.getAttribute('aria-label') || 'Закрыть окно');button.innerHTML=uiIcon('close');}
   dialog.classList.remove('hidden');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
   const sheet=dialog.querySelector('.simple-sheet');
+  if(sheet)prepareSheetHandle(dialog,sheet);
   if(sheet && dialogInputMode==='pointer' && !matchMedia('(prefers-reduced-motion: reduce)').matches){
     sheet.classList.add('motion-enter');
     sheet.addEventListener('animationend',()=>sheet.classList.remove('motion-enter'),{once:true});
@@ -31,6 +32,7 @@ function presentDialog(id){
 function dismissDialog(id){
   const index=modalStack.findIndex(entry=>entry.dialog.id===id);
   const entry=index>=0?modalStack.splice(index,1)[0]:null;
+  document.getElementById(id)?.dispatchEvent(new Event('sheetreset'));
   document.getElementById(id)?.classList.add('hidden');
   document.getElementById(id)?.querySelector('.motion-enter')?.classList.remove('motion-enter');
   updateModalBackground();
@@ -60,7 +62,9 @@ function beginScheduleLoad(){
   startupLinkFailed=false;
   const version=++scheduleLoadVersion;
   const container=document.getElementById('pairsContainer');container.setAttribute('aria-busy','true');container.innerHTML=scheduleSkeleton();
-  document.getElementById('heroLessons').textContent='Загрузка расписания…';
+  document.getElementById('heroLessons').innerHTML='<div class="hero-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>';
+  document.getElementById('heroStatusLabel').textContent='Загрузка расписания…';
+  for(const id of ['heroRemainingTime','heroNextPairRow','heroProgressWrap'])document.getElementById(id).classList.add('hidden');
   return version;
 }
 function finishScheduleLoad(version){if(version===scheduleLoadVersion)document.getElementById('pairsContainer').setAttribute('aria-busy','false');}
@@ -90,10 +94,15 @@ function daySourceText(schedule,delivery,online=true){
 function renderDaySource(){
   const target=document.getElementById('daySourceStatus');if(!target || !currentSchedule)return;
   target.textContent=daySourceText(currentSchedule,lastDelivery,navigator.onLine);
+  target.dataset.source=(!navigator.onLine || lastDelivery?.cached)?'offline':(currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode))?'fallback':'fresh';
 }
 
 // Decorative SVG replaces emoji without changing source data or button names.
 const ICON_PATHS={
+  book:'M12 5C8 2 4 3 3 4v15c3-2 6-2 9 1m0-15c4-3 8-2 9-1v15c-3-2-6-2-9 1V5Z',
+  pen:'m4 16 12-12 4 4L8 20H4v-4Zm9-9 4 4',
+  flask:'M9 3h6m-5 0v6L4 19a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2L14 9V3M7 15h10',
+  activity:'M3 12h4l3-8 4 16 3-8h4',
   arrowUpRight:'M6 18 18 6M6 6h12v12',
   calendar:'M5 4h14v16H5z M8 2v4m8-4v4M5 9h14',
   person:'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2',
@@ -139,3 +148,23 @@ document.addEventListener('DOMContentLoaded',()=>{
   new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)replaceDecorativeIcons(node);}).observe(document.body,{childList:true,subtree:true});
   setInterval(renderDaySource,60000);window.addEventListener('online',renderDaySource);window.addEventListener('offline',renderDaySource);
 });
+
+function prepareSheetHandle(dialog,sheet){
+  if(sheet.querySelector('.sheet-handle'))return;
+  const handle=document.createElement('div');handle.className='sheet-handle';handle.setAttribute('aria-hidden','true');
+  handle.append(document.createElement('span'));sheet.prepend(handle);
+  let drag=null;
+  dialog.addEventListener('sheetreset',()=>{drag=null;sheet.style.transform='';sheet.style.transition='';});
+  handle.addEventListener('pointerdown',event=>{
+    if(innerWidth>700)return;
+    drag={id:event.pointerId,y:event.clientY,delta:0};handle.setPointerCapture(event.pointerId);sheet.style.transition='none';
+  });
+  handle.addEventListener('pointermove',event=>{if(!drag || drag.id!==event.pointerId)return;drag.delta=Math.max(0,event.clientY-drag.y);sheet.style.transform=`translateY(${drag.delta}px)`;});
+  function finish(cancel=false){
+    if(!drag)return;const distance=drag.delta;drag=null;
+    sheet.style.transition=matchMedia('(prefers-reduced-motion: reduce)').matches?'none':'transform 160ms var(--campus-ease-out)';sheet.style.transform='';
+    setTimeout(()=>{sheet.style.transition='';},180);
+    if(!cancel && distance>80){if(dialog.id==='noteModal')closeNoteModal();else if(dialog.id==='roomsModal')closeRoomsModal();else closeSimpleDialog(dialog.id);}
+  }
+  handle.addEventListener('pointerup',()=>finish());handle.addEventListener('pointercancel',()=>finish(true));
+}

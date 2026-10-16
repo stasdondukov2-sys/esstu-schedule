@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-16T13:19:32.131Z",
+  "generatedAt": "2026-10-16T14:08:40.427Z",
   "title": "Design System: ВСГУТУ — Campus Glass",
   "extensions": {
     "colorMeta": {
@@ -339,16 +339,44 @@
           "oklch(83.6% 0.1040 65.9)",
           "oklch(95% 0.1040 65.9)"
         ]
+      },
+      "fresh": {
+        "role": "secondary",
+        "displayName": "fresh",
+        "tonalRamp": [
+          "oklch(15% 0.0664 174.1)",
+          "oklch(26.4% 0.0664 174.1)",
+          "oklch(37.9% 0.0664 174.1)",
+          "oklch(49.3% 0.0664 174.1)",
+          "oklch(60.7% 0.0664 174.1)",
+          "oklch(72.1% 0.0664 174.1)",
+          "oklch(83.6% 0.0664 174.1)",
+          "oklch(95% 0.0664 174.1)"
+        ]
+      },
+      "light-fresh": {
+        "role": "secondary",
+        "displayName": "light fresh",
+        "tonalRamp": [
+          "oklch(15% 0.0752 176.1)",
+          "oklch(26.4% 0.0752 176.1)",
+          "oklch(37.9% 0.0752 176.1)",
+          "oklch(49.3% 0.0752 176.1)",
+          "oklch(60.7% 0.0752 176.1)",
+          "oklch(72.1% 0.0752 176.1)",
+          "oklch(83.6% 0.0752 176.1)",
+          "oklch(95% 0.0752 176.1)"
+        ]
       }
     },
     "typographyMeta": {
       "room": {
         "displayName": "Room",
-        "purpose": "Nearest lesson room: mobile increases to 43px."
+        "purpose": "Nearest lesson room: 2.5rem, increasing to 2.6875rem on mobile."
       },
       "headline": {
         "displayName": "Page headline",
-        "purpose": "Current screen heading; mobile 28px."
+        "purpose": "Current screen heading: 2rem; mobile 1.75rem."
       },
       "title": {
         "displayName": "Hero subject",
@@ -356,11 +384,11 @@
       },
       "body": {
         "displayName": "Body",
-        "purpose": "App baseline."
+        "purpose": "App baseline: 1rem (16px at the default root)."
       },
       "lesson": {
         "displayName": "Agenda subject",
-        "purpose": "Lesson rows; mobile 14px."
+        "purpose": "Agenda subjects: 1rem on desktop and mobile; closed titles clamp to two lines, open titles are full."
       }
     },
     "shadows": [],
@@ -373,11 +401,11 @@
       {
         "name": "button-press",
         "value": "120ms cubic-bezier(.23,1,.32,1)",
-        "purpose": "Active .98 scale; reduced motion disables."
+        "purpose": "Pointer-active .98 scale only; keyboard and reduced motion do not scale."
       },
       {
         "name": "sheet-enter",
-        "value": "220ms cubic-bezier(.23,1,.32,1)",
+        "value": "200ms cubic-bezier(.23,1,.32,1)",
         "purpose": "Pointer-only: opacity .5 to 1, translateY 12px to 0, scale .985 to 1. Keyboard opening and closing immediate; reduced motion disables."
       },
       {
@@ -389,6 +417,11 @@
         "name": "ease-drawer",
         "value": "cubic-bezier(.32,.72,0,1)",
         "purpose": "Declared source token; no current component consumer."
+      },
+      {
+        "name": "sheet-drag-reset",
+        "value": "160ms cubic-bezier(.23,1,.32,1)",
+        "purpose": "Short or cancelled mobile handle drags return to rest. Downward drag >80px closes; reduced motion resets immediately. Drag itself tracks the pointer."
       }
     ],
     "breakpoints": [
@@ -412,24 +445,24 @@
       "kind": "button",
       "refersTo": "button-primary",
       "description": "Filled dialog action.",
-      "html": "<button class=\"ds-primary\">Сохранить</button>",
-      "css": ".ds-primary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-solid,#7252be);color:#fff;min-height:44px;border:0;border-radius:9px;padding:0 16px;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-primary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-primary:hover{background:var(--campus-solid,#7252be)}.ds-primary:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:active{transform:none}}"
+      "html": "<button data-input=\"pointer\" class=\"ds-primary\">Сохранить</button>",
+      "css": ".ds-primary{font-size:1rem;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-solid,#7252be);color:#fff;min-height:44px;border:0;border-radius:9px;padding:0 16px;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-primary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-primary:hover{background:var(--campus-solid,#7252be)}.ds-primary[data-input=\"pointer\"]:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary[data-input=\"pointer\"]:active{transform:none}}"
     },
     {
       "name": "Secondary action",
       "kind": "button",
       "refersTo": "button-secondary",
       "description": "Header schedule selection.",
-      "html": "<button class=\"ds-secondary\">Выбрать</button>",
-      "css": ".ds-secondary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:44px;border-radius:10px;padding:0 18px;font-size:12px;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-secondary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-secondary:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17))}.ds-secondary:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:active{transform:none}}"
+      "html": "<button data-input=\"pointer\" class=\"ds-secondary\">Выбрать</button>",
+      "css": ".ds-secondary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:44px;border-radius:10px;padding:0 18px;font-size:0.75rem;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-secondary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-secondary:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17))}.ds-secondary[data-input=\"pointer\"]:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary[data-input=\"pointer\"]:active{transform:none}}"
     },
     {
       "name": "Search field",
       "kind": "input",
       "refersTo": "search-field",
-      "description": "Accessible schedule search.",
+      "description": "Search field placed before filters; 1rem text and 48px minimum height.",
       "html": "<input class=\"ds-search\" aria-label=\"Поиск учебной группы\" placeholder=\"Поиск группы\"/>",
-      "css": ".ds-search{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:44px;border-radius:10px;padding:0 14px;font-size:14px;caret-color:var(--campus-accent,#cfbfff);}.ds-search:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-search::placeholder{color:var(--campus-muted,#b2b9cd);opacity:1}"
+      "css": ".ds-search{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:48px;border-radius:10px;padding:10px 13px;font-size:1rem;caret-color:var(--campus-accent,#cfbfff);}.ds-search:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-search::placeholder{color:var(--campus-muted,#b2b9cd);opacity:1}.ds-search:focus{border-color:var(--campus-focus,#d5c7ff)}"
     },
     {
       "name": "Room chip",
@@ -437,7 +470,7 @@
       "refersTo": "room-chip",
       "description": "Noninteractive room identifier; preview uses a placeholder.",
       "html": "<span class=\"ds-room\">ауд. —</span>",
-      "css": ".ds-room{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;display:inline-block;background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff);font-size:11px;white-space:nowrap;border-radius:6px;padding:4px 7px;}"
+      "css": ".ds-room{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;display:inline-block;background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff);font-size:0.6875rem;white-space:nowrap;border-radius:6px;padding:4px 7px;}"
     },
     {
       "name": "Glass surface",
@@ -445,7 +478,7 @@
       "refersTo": "glass-panel",
       "description": "Shared translucent major surface.",
       "html": "<section class=\"ds-panel\"><h3>Сегодня</h3><p>Выберите расписание</p></section>",
-      "css": ".ds-panel{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-glass,rgba(29,33,48,.82));padding:24px;border-radius:16px;}.ds-panel h3{margin:0;font-size:22px;font-weight:600}.ds-panel p{color:var(--campus-muted,#b2b9cd);font-size:12px}@supports(backdrop-filter:blur(1px)){.ds-panel{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-panel{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-panel{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
+      "css": ".ds-panel{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-glass,rgba(29,33,48,.82));padding:24px;border-radius:16px;}.ds-panel h3{margin:0;font-size:1.375rem;font-weight:600}.ds-panel p{color:var(--campus-muted,#b2b9cd);font-size:0.75rem}@supports(backdrop-filter:blur(1px)){.ds-panel{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-panel{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-panel{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
     },
     {
       "name": "Floating navigation",
@@ -453,20 +486,20 @@
       "refersTo": "floating-nav",
       "description": "Three schedule actions. The schedule remains highlighted while dialogs open.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Основная навигация\"><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M4 4h16v16H4z M4 9h16 M9 9v11\"/></svg><span>Расписание</span></button><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M15 15l6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0\"/></svg><span>Поиск</span></button><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M6 21V3h12v18 M3 21h18 M14 12h1\"/></svg><span>Аудитории</span></button></nav>",
-      "css": ".ds-nav{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-glass,rgba(29,33,48,.82));border:1px solid var(--campus-line,rgba(213,219,255,.15));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px;border-radius:18px;width:390px;max-width:100%;}.ds-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:52px;padding:6px 8px;border-radius:12px;border:0;background:transparent;color:var(--campus-muted,#b2b9cd);cursor:pointer}.ds-nav button:first-child,.ds-nav button:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff)}.ds-nav button:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-nav svg{width:19px;height:19px}.ds-nav span{font-size:11px;font-weight:500}@supports(backdrop-filter:blur(1px)){.ds-nav{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-nav{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-nav{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
+      "css": ".ds-nav{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-glass,rgba(29,33,48,.82));border:1px solid var(--campus-line,rgba(213,219,255,.15));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px;border-radius:18px;width:390px;max-width:100%;}.ds-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:52px;padding:6px 8px;border-radius:12px;border:0;background:transparent;color:var(--campus-muted,#b2b9cd);cursor:pointer}.ds-nav button:first-child,.ds-nav button:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff)}.ds-nav button:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-nav svg{width:19px;height:19px}.ds-nav span{font-size:0.6875rem;font-weight:500}@supports(backdrop-filter:blur(1px)){.ds-nav{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-nav{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-nav{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
     },
     {
       "name": "Lesson disclosure",
       "kind": "custom",
       "refersTo": "glass-panel",
-      "description": "Native details row. Preview contains no invented lesson.",
-      "html": "<details class=\"ds-lesson\"><summary><span>Занятие</span><strong>Выберите расписание</strong></summary><p>Данные появятся после загрузки источника.</p></details>",
-      "css": ".ds-lesson{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border-top:1px solid var(--campus-line,rgba(213,219,255,.15));padding:23px 0;}.ds-lesson summary{cursor:pointer;list-style:none;min-height:78px;border-radius:6px}.ds-lesson summary::-webkit-details-marker{display:none}.ds-lesson summary>span{display:block;font-size:11px;color:var(--campus-muted,#b2b9cd);margin-bottom:8px}.ds-lesson strong{font-size:15px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}.ds-lesson p{font-size:12px;color:var(--campus-muted,#b2b9cd)}.ds-lesson summary:hover strong{color:var(--campus-accent,#cfbfff)}.ds-lesson summary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}"
+      "description": "Native details row with SVG plus type text and two-line closed title; opening reveals full title. Preview contains no invented lesson.",
+      "html": "<details class=\"ds-lesson\"><summary><span><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M5 4h14v16H5z M8 2v4m8-4v4M5 9h14\"/></svg>Занятие</span><strong>Выберите расписание</strong></summary><p>Данные появятся после загрузки источника.</p></details>",
+      "css": ".ds-lesson{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border-top:1px solid var(--campus-line,rgba(213,219,255,.15));padding:23px 0;}.ds-lesson summary{cursor:pointer;list-style:none;min-height:78px;border-radius:6px}.ds-lesson summary::-webkit-details-marker{display:none}.ds-lesson summary>span{display:block;font-size:0.6875rem;color:var(--campus-muted,#b2b9cd);margin-bottom:8px}.ds-lesson strong{font-size:1rem;font-weight:600;line-height:1.45;overflow-wrap:anywhere}.ds-lesson p{font-size:0.75rem;color:var(--campus-muted,#b2b9cd)}.ds-lesson summary:hover strong{color:var(--campus-accent,#cfbfff)}.ds-lesson summary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-lesson summary svg{width:14px;height:14px;margin-right:6px;vertical-align:-2px}.ds-lesson:not([open]) strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}"
     }
   ],
   "narrative": {
     "northStar": "Campus Glass",
-    "overview": "The user chose a dark schedule interface with a glass effect. Graphite, translucent panels and muted lavender support a calm, practical student tool. The nearest lesson and its room supply the strongest visual emphasis; this is an operating screen with real schedule data.\n\nThe system remains usable in light and system themes and without transparency. Freshness, source uncertainty and incomplete data remain readable parts of the interface. This document records source implementation in `styles/campus.css`, `static/index.html`, `static/simple-ui.js` and `static/accessibility.js`; it does not claim independent visual or contrast verification.",
+    "overview": "The user chose a dark schedule interface with a glass effect. Graphite, translucent panels and muted lavender support a calm, practical student tool. The nearest lesson and its room supply the strongest visual emphasis; this is an operating screen with real schedule data.\n\nThe system remains usable in light and system themes and without transparency. Freshness, source uncertainty and incomplete data remain readable parts of the interface. This document records the 2.5.0 source implementation in `styles/campus.css`, `static/index.html`, `static/simple-ui.js` and `static/accessibility.js` (including dynamic sheets in `static/modern.js`); it does not claim independent visual or contrast verification.",
     "keyCharacteristics": [
       "Dark graphite canvas with restrained lavender emphasis.",
       "Large room typography and a compact readable day agenda.",
