@@ -130,10 +130,13 @@ def fetch_esstu_html_sync(
             )
     except (OSError, ValueError):
         LOGGER.warning(
-            "Portal unavailable for %s; trying saved source", clean_rel, exc_info=True
+            "Portal unavailable for %s; local HTML fallback allowed: %s",
+            clean_rel,
+            allow_group_fallback,
+            exc_info=True,
         )
         local_file = DEMO_DIR / clean_rel
-        if local_file.is_file():
+        if allow_group_fallback and local_file.is_file():
             raw = local_file.read_bytes()
             meta = source_metadata(DEMO_DIR).get(clean_rel, {})
             return FetchedPage(
