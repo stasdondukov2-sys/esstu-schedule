@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-16T13:19:32.131Z",
+  "title": "Design System: ВСГУТУ — Campus Glass",
+  "extensions": {
+    "colorMeta": {
+      "graphite": {
+        "role": "neutral",
+        "displayName": "graphite",
+        "tonalRamp": [
+          "oklch(15% 0.0210 271.4)",
+          "oklch(26.4% 0.0210 271.4)",
+          "oklch(37.9% 0.0210 271.4)",
+          "oklch(49.3% 0.0210 271.4)",
+          "oklch(60.7% 0.0210 271.4)",
+          "oklch(72.1% 0.0210 271.4)",
+          "oklch(83.6% 0.0210 271.4)",
+          "oklch(95% 0.0210 271.4)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15% 0.0081 278.6)",
+          "oklch(26.4% 0.0081 278.6)",
+          "oklch(37.9% 0.0081 278.6)",
+          "oklch(49.3% 0.0081 278.6)",
+          "oklch(60.7% 0.0081 278.6)",
+          "oklch(72.1% 0.0081 278.6)",
+          "oklch(83.6% 0.0081 278.6)",
+          "oklch(95% 0.0081 278.6)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15% 0.0294 270.3)",
+          "oklch(26.4% 0.0294 270.3)",
+          "oklch(37.9% 0.0294 270.3)",
+          "oklch(49.3% 0.0294 270.3)",
+          "oklch(60.7% 0.0294 270.3)",
+          "oklch(72.1% 0.0294 270.3)",
+          "oklch(83.6% 0.0294 270.3)",
+          "oklch(95% 0.0294 270.3)"
+        ]
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "glass",
+        "tonalRamp": [
+          "oklch(15% 0.0291 272.6)",
+          "oklch(26.4% 0.0291 272.6)",
+          "oklch(37.9% 0.0291 272.6)",
+          "oklch(49.3% 0.0291 272.6)",
+          "oklch(60.7% 0.0291 272.6)",
+          "oklch(72.1% 0.0291 272.6)",
+          "oklch(83.6% 0.0291 272.6)",
+          "oklch(95% 0.0291 272.6)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "panel",
+        "tonalRamp": [
+          "oklch(15% 0.0311 273.1)",
+          "oklch(26.4% 0.0311 273.1)",
+          "oklch(37.9% 0.0311 273.1)",
+          "oklch(49.3% 0.0311 273.1)",
+          "oklch(60.7% 0.0311 273.1)",
+          "oklch(72.1% 0.0311 273.1)",
+          "oklch(83.6% 0.0311 273.1)",
+          "oklch(95% 0.0311 273.1)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "tonalRamp": [
+          "oklch(15% 0.0498 277.9)",
+          "oklch(26.4% 0.0498 277.9)",
+          "oklch(37.9% 0.0498 277.9)",
+          "oklch(49.3% 0.0498 277.9)",
+          "oklch(60.7% 0.0498 277.9)",
+          "oklch(72.1% 0.0498 277.9)",
+          "oklch(83.6% 0.0498 277.9)",
+          "oklch(95% 0.0498 277.9)"
+        ]
+      },
+      "control": {
+        "role": "neutral",
+        "displayName": "control",
+        "tonalRamp": [
+          "oklch(15% 0.0574 275.4)",
+          "oklch(26.4% 0.0574 275.4)",
+          "oklch(37.9% 0.0574 275.4)",
+          "oklch(49.3% 0.0574 275.4)",
+          "oklch(60.7% 0.0574 275.4)",
+          "oklch(72.1% 0.0574 275.4)",
+          "oklch(83.6% 0.0574 275.4)",
+          "oklch(95% 0.0574 275.4)"
+        ]
+      },
+      "lavender": {
+        "role": "primary",
+        "displayName": "lavender",
+        "tonalRamp": [
+          "oklch(15% 0.0897 295.9)",
+          "oklch(26.4% 0.0897 295.9)",
+          "oklch(37.9% 0.0897 295.9)",
+          "oklch(49.3% 0.0897 295.9)",
+          "oklch(60.7% 0.0897 295.9)",
+          "oklch(72.1% 0.0897 295.9)",
+          "oklch(83.6% 0.0897 295.9)",
+          "oklch(95% 0.0897 295.9)"
+        ]
+      },
+      "solid": {
+        "role": "primary",
+        "displayName": "solid",
+        "tonalRamp": [
+          "oklch(15% 0.1627 293.7)",
+          "oklch(26.4% 0.1627 293.7)",
+          "oklch(37.9% 0.1627 293.7)",
+          "oklch(49.3% 0.1627 293.7)",
+          "oklch(60.7% 0.1627 293.7)",
+          "oklch(72.1% 0.1627 293.7)",
+          "oklch(83.6% 0.1627 293.7)",
+          "oklch(95% 0.1627 293.7)"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "accent soft",
+        "tonalRamp": [
+          "oklch(15% 0.1615 296.0)",
+          "oklch(26.4% 0.1615 296.0)",
+          "oklch(37.9% 0.1615 296.0)",
+          "oklch(49.3% 0.1615 296.0)",
+          "oklch(60.7% 0.1615 296.0)",
+          "oklch(72.1% 0.1615 296.0)",
+          "oklch(83.6% 0.1615 296.0)",
+          "oklch(95% 0.1615 296.0)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "focus",
+        "tonalRamp": [
+          "oklch(15% 0.0781 296.2)",
+          "oklch(26.4% 0.0781 296.2)",
+          "oklch(37.9% 0.0781 296.2)",
+          "oklch(49.3% 0.0781 296.2)",
+          "oklch(60.7% 0.0781 296.2)",
+          "oklch(72.1% 0.0781 296.2)",
+          "oklch(83.6% 0.0781 296.2)",
+          "oklch(95% 0.0781 296.2)"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "warning",
+        "tonalRamp": [
+          "oklch(15% 0.0906 77.0)",
+          "oklch(26.4% 0.0906 77.0)",
+          "oklch(37.9% 0.0906 77.0)",
+          "oklch(49.3% 0.0906 77.0)",
+          "oklch(60.7% 0.0906 77.0)",
+          "oklch(72.1% 0.0906 77.0)",
+          "oklch(83.6% 0.0906 77.0)",
+          "oklch(95% 0.0906 77.0)"
+        ]
+      },
+      "light-bg": {
+        "role": "neutral",
+        "displayName": "light bg",
+        "tonalRamp": [
+          "oklch(15% 0.0083 271.3)",
+          "oklch(26.4% 0.0083 271.3)",
+          "oklch(37.9% 0.0083 271.3)",
+          "oklch(49.3% 0.0083 271.3)",
+          "oklch(60.7% 0.0083 271.3)",
+          "oklch(72.1% 0.0083 271.3)",
+          "oklch(83.6% 0.0083 271.3)",
+          "oklch(95% 0.0083 271.3)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "light ink",
+        "tonalRamp": [
+          "oklch(15% 0.0320 271.6)",
+          "oklch(26.4% 0.0320 271.6)",
+          "oklch(37.9% 0.0320 271.6)",
+          "oklch(49.3% 0.0320 271.6)",
+          "oklch(60.7% 0.0320 271.6)",
+          "oklch(72.1% 0.0320 271.6)",
+          "oklch(83.6% 0.0320 271.6)",
+          "oklch(95% 0.0320 271.6)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "light muted",
+        "tonalRamp": [
+          "oklch(15% 0.0341 261.3)",
+          "oklch(26.4% 0.0341 261.3)",
+          "oklch(37.9% 0.0341 261.3)",
+          "oklch(49.3% 0.0341 261.3)",
+          "oklch(60.7% 0.0341 261.3)",
+          "oklch(72.1% 0.0341 261.3)",
+          "oklch(83.6% 0.0341 261.3)",
+          "oklch(95% 0.0341 261.3)"
+        ]
+      },
+      "light-glass": {
+        "role": "neutral",
+        "displayName": "light glass",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.9)",
+          "oklch(26.4% 0.0000 89.9)",
+          "oklch(37.9% 0.0000 89.9)",
+          "oklch(49.3% 0.0000 89.9)",
+          "oklch(60.7% 0.0000 89.9)",
+          "oklch(72.1% 0.0000 89.9)",
+          "oklch(83.6% 0.0000 89.9)",
+          "oklch(95% 0.0000 89.9)"
+        ]
+      },
+      "light-panel": {
+        "role": "neutral",
+        "displayName": "light panel",
+        "tonalRamp": [
+          "oklch(15% 0.0067 277.2)",
+          "oklch(26.4% 0.0067 277.2)",
+          "oklch(37.9% 0.0067 277.2)",
+          "oklch(49.3% 0.0067 277.2)",
+          "oklch(60.7% 0.0067 277.2)",
+          "oklch(72.1% 0.0067 277.2)",
+          "oklch(83.6% 0.0067 277.2)",
+          "oklch(95% 0.0067 277.2)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "light line",
+        "tonalRamp": [
+          "oklch(15% 0.0484 271.8)",
+          "oklch(26.4% 0.0484 271.8)",
+          "oklch(37.9% 0.0484 271.8)",
+          "oklch(49.3% 0.0484 271.8)",
+          "oklch(60.7% 0.0484 271.8)",
+          "oklch(72.1% 0.0484 271.8)",
+          "oklch(83.6% 0.0484 271.8)",
+          "oklch(95% 0.0484 271.8)"
+        ]
+      },
+      "light-control": {
+        "role": "neutral",
+        "displayName": "light control",
+        "tonalRamp": [
+          "oklch(15% 0.0569 275.4)",
+          "oklch(26.4% 0.0569 275.4)",
+          "oklch(37.9% 0.0569 275.4)",
+          "oklch(49.3% 0.0569 275.4)",
+          "oklch(60.7% 0.0569 275.4)",
+          "oklch(72.1% 0.0569 275.4)",
+          "oklch(83.6% 0.0569 275.4)",
+          "oklch(95% 0.0569 275.4)"
+        ]
+      },
+      "light-accent": {
+        "role": "primary",
+        "displayName": "light accent",
+        "tonalRamp": [
+          "oklch(15% 0.1595 293.9)",
+          "oklch(26.4% 0.1595 293.9)",
+          "oklch(37.9% 0.1595 293.9)",
+          "oklch(49.3% 0.1595 293.9)",
+          "oklch(60.7% 0.1595 293.9)",
+          "oklch(72.1% 0.1595 293.9)",
+          "oklch(83.6% 0.1595 293.9)",
+          "oklch(95% 0.1595 293.9)"
+        ]
+      },
+      "light-solid": {
+        "role": "primary",
+        "displayName": "light solid",
+        "tonalRamp": [
+          "oklch(15% 0.1603 294.6)",
+          "oklch(26.4% 0.1603 294.6)",
+          "oklch(37.9% 0.1603 294.6)",
+          "oklch(49.3% 0.1603 294.6)",
+          "oklch(60.7% 0.1603 294.6)",
+          "oklch(72.1% 0.1603 294.6)",
+          "oklch(83.6% 0.1603 294.6)",
+          "oklch(95% 0.1603 294.6)"
+        ]
+      },
+      "light-accent-soft": {
+        "role": "primary",
+        "displayName": "light accent soft",
+        "tonalRamp": [
+          "oklch(15% 0.0249 301.1)",
+          "oklch(26.4% 0.0249 301.1)",
+          "oklch(37.9% 0.0249 301.1)",
+          "oklch(49.3% 0.0249 301.1)",
+          "oklch(60.7% 0.0249 301.1)",
+          "oklch(72.1% 0.0249 301.1)",
+          "oklch(83.6% 0.0249 301.1)",
+          "oklch(95% 0.0249 301.1)"
+        ]
+      },
+      "light-focus": {
+        "role": "primary",
+        "displayName": "light focus",
+        "tonalRamp": [
+          "oklch(15% 0.1681 294.9)",
+          "oklch(26.4% 0.1681 294.9)",
+          "oklch(37.9% 0.1681 294.9)",
+          "oklch(49.3% 0.1681 294.9)",
+          "oklch(60.7% 0.1681 294.9)",
+          "oklch(72.1% 0.1681 294.9)",
+          "oklch(83.6% 0.1681 294.9)",
+          "oklch(95% 0.1681 294.9)"
+        ]
+      },
+      "light-warning": {
+        "role": "secondary",
+        "displayName": "light warning",
+        "tonalRamp": [
+          "oklch(15% 0.1040 65.9)",
+          "oklch(26.4% 0.1040 65.9)",
+          "oklch(37.9% 0.1040 65.9)",
+          "oklch(49.3% 0.1040 65.9)",
+          "oklch(60.7% 0.1040 65.9)",
+          "oklch(72.1% 0.1040 65.9)",
+          "oklch(83.6% 0.1040 65.9)",
+          "oklch(95% 0.1040 65.9)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "room": {
+        "displayName": "Room",
+        "purpose": "Nearest lesson room: mobile increases to 43px."
+      },
+      "headline": {
+        "displayName": "Page headline",
+        "purpose": "Current screen heading; mobile 28px."
+      },
+      "title": {
+        "displayName": "Hero subject",
+        "purpose": "Wrapping nearest lesson subject."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "App baseline."
+      },
+      "lesson": {
+        "displayName": "Agenda subject",
+        "purpose": "Lesson rows; mobile 14px."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "button-color",
+        "value": "160ms ease",
+        "purpose": "Background and border state transitions."
+      },
+      {
+        "name": "button-press",
+        "value": "120ms cubic-bezier(.23,1,.32,1)",
+        "purpose": "Active .98 scale; reduced motion disables."
+      },
+      {
+        "name": "sheet-enter",
+        "value": "220ms cubic-bezier(.23,1,.32,1)",
+        "purpose": "Pointer-only: opacity .5 to 1, translateY 12px to 0, scale .985 to 1. Keyboard opening and closing immediate; reduced motion disables."
+      },
+      {
+        "name": "schedule-change",
+        "value": "0ms",
+        "purpose": "No entrance animation on frequent day/week changes or clock ticks."
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(.32,.72,0,1)",
+        "purpose": "Declared source token; no current component consumer."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "850px"
+      },
+      {
+        "name": "stacked-mobile",
+        "value": "700px"
+      },
+      {
+        "name": "narrow-mobile",
+        "value": "360px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled dialog action.",
+      "html": "<button class=\"ds-primary\">Сохранить</button>",
+      "css": ".ds-primary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-solid,#7252be);color:#fff;min-height:44px;border:0;border-radius:9px;padding:0 16px;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-primary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-primary:hover{background:var(--campus-solid,#7252be)}.ds-primary:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:active{transform:none}}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Header schedule selection.",
+      "html": "<button class=\"ds-secondary\">Выбрать</button>",
+      "css": ".ds-secondary{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:44px;border-radius:10px;padding:0 18px;font-size:12px;cursor:pointer;transition:background-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);}.ds-secondary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-secondary:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17))}.ds-secondary:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:active{transform:none}}"
+    },
+    {
+      "name": "Search field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Accessible schedule search.",
+      "html": "<input class=\"ds-search\" aria-label=\"Поиск учебной группы\" placeholder=\"Поиск группы\"/>",
+      "css": ".ds-search{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-control,rgba(205,214,255,.07));min-height:44px;border-radius:10px;padding:0 14px;font-size:14px;caret-color:var(--campus-accent,#cfbfff);}.ds-search:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-search::placeholder{color:var(--campus-muted,#b2b9cd);opacity:1}"
+    },
+    {
+      "name": "Room chip",
+      "kind": "chip",
+      "refersTo": "room-chip",
+      "description": "Noninteractive room identifier; preview uses a placeholder.",
+      "html": "<span class=\"ds-room\">ауд. —</span>",
+      "css": ".ds-room{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;display:inline-block;background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff);font-size:11px;white-space:nowrap;border-radius:6px;padding:4px 7px;}"
+    },
+    {
+      "name": "Glass surface",
+      "kind": "card",
+      "refersTo": "glass-panel",
+      "description": "Shared translucent major surface.",
+      "html": "<section class=\"ds-panel\"><h3>Сегодня</h3><p>Выберите расписание</p></section>",
+      "css": ".ds-panel{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border:1px solid var(--campus-line,rgba(213,219,255,.15));background:var(--campus-glass,rgba(29,33,48,.82));padding:24px;border-radius:16px;}.ds-panel h3{margin:0;font-size:22px;font-weight:600}.ds-panel p{color:var(--campus-muted,#b2b9cd);font-size:12px}@supports(backdrop-filter:blur(1px)){.ds-panel{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-panel{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-panel{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
+    },
+    {
+      "name": "Floating navigation",
+      "kind": "nav",
+      "refersTo": "floating-nav",
+      "description": "Three schedule actions. The schedule remains highlighted while dialogs open.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Основная навигация\"><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M4 4h16v16H4z M4 9h16 M9 9v11\"/></svg><span>Расписание</span></button><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M15 15l6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0\"/></svg><span>Поиск</span></button><button type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M6 21V3h12v18 M3 21h18 M14 12h1\"/></svg><span>Аудитории</span></button></nav>",
+      "css": ".ds-nav{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;background:var(--campus-glass,rgba(29,33,48,.82));border:1px solid var(--campus-line,rgba(213,219,255,.15));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px;border-radius:18px;width:390px;max-width:100%;}.ds-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:52px;padding:6px 8px;border-radius:12px;border:0;background:transparent;color:var(--campus-muted,#b2b9cd);cursor:pointer}.ds-nav button:first-child,.ds-nav button:hover{background:var(--campus-accent-soft,rgba(169,135,247,.17));color:var(--campus-accent,#cfbfff)}.ds-nav button:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}.ds-nav svg{width:19px;height:19px}.ds-nav span{font-size:11px;font-weight:500}@supports(backdrop-filter:blur(1px)){.ds-nav{backdrop-filter:blur(22px)}}@supports not(backdrop-filter:blur(1px)){.ds-nav{background:var(--campus-panel,#1c2030)}}@media(prefers-reduced-transparency:reduce){.ds-nav{background:var(--campus-panel,#1c2030);backdrop-filter:none}}"
+    },
+    {
+      "name": "Lesson disclosure",
+      "kind": "custom",
+      "refersTo": "glass-panel",
+      "description": "Native details row. Preview contains no invented lesson.",
+      "html": "<details class=\"ds-lesson\"><summary><span>Занятие</span><strong>Выберите расписание</strong></summary><p>Данные появятся после загрузки источника.</p></details>",
+      "css": ".ds-lesson{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:var(--campus-ink,#f1f2f8);border-top:1px solid var(--campus-line,rgba(213,219,255,.15));padding:23px 0;}.ds-lesson summary{cursor:pointer;list-style:none;min-height:78px;border-radius:6px}.ds-lesson summary::-webkit-details-marker{display:none}.ds-lesson summary>span{display:block;font-size:11px;color:var(--campus-muted,#b2b9cd);margin-bottom:8px}.ds-lesson strong{font-size:15px;font-weight:600;line-height:1.45;overflow-wrap:anywhere}.ds-lesson p{font-size:12px;color:var(--campus-muted,#b2b9cd)}.ds-lesson summary:hover strong{color:var(--campus-accent,#cfbfff)}.ds-lesson summary:focus-visible{outline:2px solid var(--campus-focus,#d5c7ff);outline-offset:4px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Campus Glass",
+    "overview": "The user chose a dark schedule interface with a glass effect. Graphite, translucent panels and muted lavender support a calm, practical student tool. The nearest lesson and its room supply the strongest visual emphasis; this is an operating screen with real schedule data.\n\nThe system remains usable in light and system themes and without transparency. Freshness, source uncertainty and incomplete data remain readable parts of the interface. This document records source implementation in `styles/campus.css`, `static/index.html`, `static/simple-ui.js` and `static/accessibility.js`; it does not claim independent visual or contrast verification.",
+    "keyCharacteristics": [
+      "Dark graphite canvas with restrained lavender emphasis.",
+      "Large room typography and a compact readable day agenda.",
+      "Translucent bordered surfaces with opaque fallbacks.",
+      "Quiet state changes and immediate keyboard interaction."
+    ],
+    "rules": [
+      {
+        "name": "The Truth Stays Visible Rule",
+        "body": "Never use low contrast or decoration to hide data age, saved/offline delivery, incomplete parsing or ambiguous teacher identity.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Glass Rule",
+        "body": "Glass must stay readable without blur. Reduced-transparency preferences use the opaque panel token and disable blur; unsupported backdrop filtering also uses the opaque panel. Never depend on a background image for contrast.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Quiet Schedule Rule",
+        "body": "Frequent day/week switches and clock ticks do not animate content entrances. Reduced motion disables button transitions, press scaling and dialog entrances. General button state transitions use 160ms for color and border and 120ms for press transforms. The drawer easing token exists in CSS but no documented component currently consumes it.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** keep source status and warnings readable alongside the schedule.",
+      "**Do** use the existing system font and let long subject names wrap.",
+      "**Do** preserve native details, selected-state semantics and dialog focus behavior.",
+      "**Do** verify dark, light, opaque fallback and reduced-motion states when extending components."
+    ],
+    "donts": [
+      "**Don't** animate frequent day changes or delay keyboard dialog access.",
+      "**Don't** fabricate rooms, dates or a current lesson when source data cannot establish them.",
+      "**Don't** introduce blur-dependent readability or promote legacy dialog shadows into the canonical surface style.",
+      "**Don't** replace functional warnings with color-only signals."
+    ]
+  }
+}

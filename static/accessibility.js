@@ -1,5 +1,8 @@
 // One focus stack for all modal dialogs, including nested dialogs and notes.
 const modalStack=[];
+let dialogInputMode='keyboard';
+document.addEventListener('pointerdown',()=>{dialogInputMode='pointer';document.body.dataset.input='pointer';},true);
+document.addEventListener('keydown',()=>{dialogInputMode='keyboard';document.body.dataset.input='keyboard';},true);
 function visibleControls(dialog){return [...dialog.querySelectorAll('button,a[href],input,textarea,select,summary,[tabindex]:not([tabindex="-1"])')].filter(node=>!node.disabled && !node.closest('[inert]') && node.getClientRects().length);}
 function updateModalBackground(){
   const top=modalStack.at(-1)?.dialog;
@@ -17,13 +20,20 @@ function presentDialog(id){
   dialog.tabIndex=-1;
   for(const button of dialog.querySelectorAll('button'))if(/^[×✕]$/.test(button.textContent.trim())){button.setAttribute('aria-label',button.getAttribute('aria-label') || 'Закрыть окно');button.innerHTML=uiIcon('close');}
   dialog.classList.remove('hidden');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
+  const sheet=dialog.querySelector('.simple-sheet');
+  if(sheet && dialogInputMode==='pointer' && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    sheet.classList.add('motion-enter');
+    sheet.addEventListener('animationend',()=>sheet.classList.remove('motion-enter'),{once:true});
+  }
   updateModalBackground();
   (visibleControls(dialog)[0] || dialog).focus();
 }
 function dismissDialog(id){
   const index=modalStack.findIndex(entry=>entry.dialog.id===id);
   const entry=index>=0?modalStack.splice(index,1)[0]:null;
-  document.getElementById(id)?.classList.add('hidden');updateModalBackground();
+  document.getElementById(id)?.classList.add('hidden');
+  document.getElementById(id)?.querySelector('.motion-enter')?.classList.remove('motion-enter');
+  updateModalBackground();
   const top=modalStack.at(-1)?.dialog;
   if(entry?.launcher?.isConnected && entry.launcher.getClientRects().length && !entry.launcher.closest('[inert]'))entry.launcher.focus();
   else if(top)(visibleControls(top)[0] || top).focus();
@@ -84,6 +94,7 @@ function renderDaySource(){
 
 // Decorative SVG replaces emoji without changing source data or button names.
 const ICON_PATHS={
+  arrowUpRight:'M6 18 18 6M6 6h12v12',
   calendar:'M5 4h14v16H5z M8 2v4m8-4v4M5 9h14',
   person:'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2',
   pin:'M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
