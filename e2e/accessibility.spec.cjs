@@ -1,6 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const {default:AxeBuilder}=require('@axe-core/playwright');
 const fs=require('fs');
+const routedTest=test.extend({serviceWorkers:'block'});
 
 async function ready(page){await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');}
 test('dialogs trap focus, close with Escape and return to the launcher',async({page})=>{
@@ -53,7 +54,7 @@ test('an unknown group link never silently opens the saved group',async({page})=
   expect(requests).toEqual([]);
 });
 
-test('loading skeleton becomes an explicit unavailable state on failure',async({page})=>{
+routedTest('loading skeleton becomes an explicit unavailable state on failure',async({page})=>{
   let release;const gate=new Promise(resolve=>release=resolve);
   await page.route('**/api/schedule/bakalavriat/1.json*',async route=>{await gate;await route.fulfill({status:503,body:'Unavailable'});});
   await page.goto('./');await expect(page.getByRole('status',{name:'Загрузка расписания'})).toBeVisible();
