@@ -65,6 +65,7 @@ function displayDate(value) {
 function updateExperienceUI() {
   if (!currentSchedule) return;
   renderDataQuality();
+  protectOfflineSchedules();
   const cached = lastDelivery?.cached || !navigator.onLine || currentSchedule.is_stale_fallback;
   document.getElementById('freshnessBadge').textContent = cached ? '💾 Сохранённая копия' : '🌐 Загружено с сайта';
   const checked = currentSchedule.source_checked_at;
@@ -80,7 +81,8 @@ function updateExperienceUI() {
 async function scheduleJSON(response) {
   if (!response.ok) throw Error(`HTTP ${response.status}`);
   const data = await response.json();
-  data._delivery = {cached:response.headers.get('X-ESSTU-Cache')==='offline', at:new Date().toISOString()};
+  const reason=response.headers.get('X-ESSTU-Cache');
+  data._delivery = {cached:['offline','server-error','refreshing'].includes(reason), reason, at:new Date().toISOString()};
   return data;
 }
 function toggleDiffHighlightMode() { highlightChanges=!highlightChanges;renderAll(); }
@@ -110,17 +112,29 @@ function renderProminentNext() {
 }
 const originalLiveHero = updateLiveHero;
 updateLiveHero = function() { originalLiveHero();renderProminentNext(); };
-let pendingWorker = null;
-function showUpdateBanner(worker) { pendingWorker=worker;document.getElementById('appUpdateBanner').classList.remove('hidden'); }
-async function applyAppUpdate() {
-  if (pendingWorker) pendingWorker.postMessage({type:'SKIP_WAITING'});
-  else location.reload();
+let pendingWorker = null, appReloading = false, updateFallbackTimer;
+function reloadAppOnce() {
+  if(appReloading)return;
+  appReloading=true;clearTimeout(updateFallbackTimer);location.reload();
+}
+function showUpdateBanner(worker) {
+  pendingWorker=worker;
+  document.getElementById('appUpdateBanner').classList.remove('hidden');
+}
+async function applyAppUpdate(event) {
+  const button=event?.currentTarget || document.getElementById('applyAppUpdateButton');
+  button.disabled=true;button.textContent='Обновление…';
+  if(!pendingWorker){reloadAppOnce();return;}
+  updateFallbackTimer=setTimeout(reloadAppOnce,4000);
+  try{pendingWorker.postMessage({type:'SKIP_WAITING'});}
+  catch(error){console.warn('Не удалось активировать обновление',error);reloadAppOnce();}
 }
 async function initAppUpdates() {
   if (!('serviceWorker' in navigator)) return;
-  let reloading=false;
+  let hadController=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if (!reloading && pendingWorker) { reloading=true;location.reload(); }
+    if(hadController)reloadAppOnce();
+    hadController=true;
   });
   try {
     const registration=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});
@@ -129,24 +143,61 @@ async function initAppUpdates() {
       const worker=registration.installing;
       worker?.addEventListener('statechange',()=>{ if(worker.state==='installed' && navigator.serviceWorker.controller) showUpdateBanner(worker); });
     });
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') registration.update().catch(()=>{});});
-    setInterval(()=>registration.update().catch(()=>{}),180000);
+    const check=()=>{if(document.visibilityState==='visible')registration.update().catch(()=>{});};
+    document.addEventListener('visibilitychange',check);
+    setInterval(check,15*60000);
   } catch (error) { console.error('Не удалось включить офлайн-режим',error); }
 }
 document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('applyAppUpdateButton').addEventListener('click',applyAppUpdate);
   initAppUpdates();
   window.addEventListener('online',updateExperienceUI);window.addEventListener('offline',updateExperienceUI);
 });
 
 let catalogQuality = null;
 function renderDataQuality() {
+  const ageWarning=document.getElementById('publicationFreshnessWarning');
+  const generated=Date.parse(catalogQuality?.generated_at);
+  if(ageWarning){
+    const stale=Number.isFinite(generated) && Date.now()-generated>12*3600000;
+    ageWarning.hidden=!stale;
+    ageWarning.textContent=stale?'Выгрузка не обновлялась более 12 часов. Проверьте занятия на портале ВСГУТУ.':'';
+  }
   const warning=document.getElementById('incompleteWarning');
   if(warning)warning.classList.toggle('hidden',!currentSchedule?.is_incomplete);
   const status=document.getElementById('parseQualityStatus');
-  if(status)status.textContent=catalogQuality ? `Ошибок разбора: ${catalogQuality.parse_error_count ?? 0} · Неполных расписаний: ${catalogQuality.incomplete_schedule_count ?? '—'} · Ячеек для сверки: ${catalogQuality.unparsed_cell_count ?? '—'}` : 'Статистика качества пока недоступна';
+  if(status)status.textContent=catalogQuality ? `Ошибок разбора: ${catalogQuality.parse_error_count ?? 0} · Неполных расписаний: ${catalogQuality.incomplete_schedule_count ?? '—'} · Ячеек для сверки: ${catalogQuality.review_cell_count ?? catalogQuality.unparsed_cell_count ?? '—'}` : 'Статистика качества пока недоступна';
 }
 document.addEventListener('DOMContentLoaded',async()=>{
   try { const response=await fetch(getApiUrl('/api/status')); if(!response.ok)throw Error(response.status); catalogQuality=await response.json(); }
   catch(error){console.warn('Статистика разбора недоступна',error);}
   renderDataQuality();
+  setInterval(renderDataQuality,60000);
 });
+
+
+function protectOfflineSchedules(){
+  if(!navigator.serviceWorker?.controller)return;
+  const choices=[currentFavorite(),...getFavorites()].slice(0,30);
+  const urls=choices.flatMap(choice=>choice.type==='student'?
+    [getApiUrl(`/api/schedule/${choice.section}/${encodeURIComponent(choice.id)}`),getApiUrl(`/api/groups?section=${choice.section}`)]:
+    [getApiUrl('/api/teachers/all?section=bakalavriat')]);
+  navigator.serviceWorker.controller.postMessage({type:'PROTECT_DATA',urls:[...new Set(urls.map(url=>new URL(url,location.href).href))]});
+}
+async function receiveBackgroundData(event){
+  const message=event.data;
+  if(message?.type!=='DATA_UPDATED')return;
+  const url=new URL(message.url,location.href);
+  if(url.origin!==location.origin || !url.href.startsWith(new URL('api/',location.href).href))return;
+  try{
+    const data=await scheduleJSON(await fetch(url,{headers:{'X-ESSTU-Cache-Only':'1'}}));
+    if(url.pathname.endsWith('/rooms.json')){roomDirectory=data;if(!document.getElementById('roomsModal')?.classList.contains('hidden'))renderRoomsModalList();}
+    else if(data.mode==='student' && appMode==='student' && data.section===savedState.section && String(data.group_id)===String(savedState.groupId)){
+      currentSchedule=data;trackSchedule(data);renderAll();
+    }else if(Array.isArray(data.teachers)){
+      allTeachersDirectory=data.teachers.map(teacher=>({...teacher,_delivery:data._delivery}));
+      if(appMode==='teacher'){const current=allTeachersDirectory.find(teacher=>normSearch(teacher.teacher_key)===normSearch(savedState.teacherKey));if(current){currentSchedule=current;trackSchedule(current);renderAll();}}
+    }
+  }catch(error){console.warn('Не удалось показать фоновое обновление',error);}
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',receiveBackgroundData);

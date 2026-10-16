@@ -143,7 +143,7 @@ The palette combines cool graphite neutrals with a soft lavender accent; light t
 
 Use the platform system sans-serif stack in the frontmatter. There are no external font downloads. Times, dates and remaining minutes use tabular numerals where specified in CSS.
 
-CSS font sizes use rem so they respond to the root text size. At the browser default root of 16px, body text, agenda subjects and dialog fields are 1rem (16px). Metadata remains smaller. The room role increases to 2.6875rem on mobile; the page headline reduces to 1.75rem. Hero subjects retain the title role. Supporting labels generally range from .625rem to .8125rem; the smallest current-state badge is .5rem and is supplementary, not the sole indicator of a current lesson.
+CSS font sizes use rem so they respond to the root text size. At the browser default root of 16px, body text, agenda subjects and dialog fields are 1rem (16px). The room role increases to 2.6875rem on mobile; the page headline reduces to 1.75rem. Hero subjects retain the title role. Supporting labels on the agenda, schedule picker and room radar use at least .75rem (12px), including calendar counts, source age, pair numbers and current-state labels.
 
 Long subjects wrap with `overflow-wrap:anywhere`. Closed agenda disclosures clamp the subject to two lines; opening the disclosure reveals its full title. Avoid shrinking the title or forcing a single line. Keep room identifiers as source strings rather than inventing a shorter number.
 
@@ -171,19 +171,23 @@ Major surfaces use the panel radius. Controls are more compact, chips have a sma
 
 ### Buttons and fields
 
-Buttons, including the week selector, use a 44px minimum height. Primary actions use solid violet and white text; neutral actions use the control surface. Focus-visible uses a 2px focus outline with a 4px offset. Fine-pointer hover changes background or text; pointer-active press scales to .98; keyboard activation does not scale. Inputs and textareas use the accent caret and a focus-token border, and placeholder text uses the muted token. Dialog fields use 1rem text; the relocated search field has a 48px minimum height. Disabled buttons reduce opacity and display a waiting cursor.
+Buttons, including the week selector, use a 44px minimum height. Primary actions use solid violet and white text; neutral actions use the control surface. Focus-visible uses a 2px focus outline with a 2px offset. Inputs and textareas have a single outline at zero offset with no shadow. Fine-pointer hover changes background or text; pointer-active press scales to .98; keyboard activation does not scale. Fields use the accent caret and muted placeholders. Dialog fields use 1rem text; the relocated search field has a 48px minimum height. Disabled buttons reduce opacity and display a waiting cursor. Scrollable lists use thin, muted scrollbars.
 
 ### Nearest lesson and day rows
 
 The hero displays current or next lesson metadata, subject, teacher/groups and a large clickable room only when a room can be decoded. It preserves parallel lessons. A progress indicator uses `scaleX` during a current lesson. Clock updates preserve the hero's content node while the lesson is unchanged, protecting keyboard focus. Dated session records and incomplete sources do not receive a fabricated current lesson.
 
-Day rows use native details/summary for expanded metadata, notes, teacher and room actions. Lesson types pair an inline SVG symbol with the written type label; the former type-color dots are disabled. Current rows receive the soft accent background and curved inset highlight. Positive gaps derive from actual adjacent lesson times: under an hour uses a minutes label; longer gaps use hours plus remaining minutes. Missing data and a known empty day use distinct messages. Known empty days can offer the next study day only when a recurring, complete schedule supports that calculation.
+Day rows use native details/summary for expanded metadata, notes, teacher and room actions. The whole summary is interactive; its SVG chevron has a 44px square area. Lesson types pair a semantic color and inline SVG symbol with the written label. Parse warnings use an amber frame, smaller subject text and a warning icon; the raw source cell remains inside the disclosure. Current rows receive the soft accent background. Gaps appear between adjacent rows with both boundary times. Missing data and a known empty day use distinct messages. The compact finished-day hero offers tomorrow or the nearest teaching day, including its pair count, first time and known rooms, only when a recurring, complete schedule supports that calculation.
+
+Source freshness appears once, as an interactive chip above the agenda. Saved and offline copies retain their explicit label and relative check age. Unknown or older-than-24-hour checks receive an amber background; an unknown check date is never substituted with the build date. Opening the chip reveals full source diagnostics.
 
 ### Selection and navigation
 
 Day and week buttons expose selected state with `aria-pressed`; today's calendar day also uses `aria-current="date"`. The floating navigation keeps the schedule item visually selected; search and rooms launch dialogs rather than changing the underlying route selection. Calendar days also support left/right keyboard keys and horizontal touch swipes without animated content replacement. Small markers distinguish days with lessons and the current week.
 
-The search dialog places the active search input before filters, with recent schedules and favorites available nearby. Recent selections are stored locally, deduplicated and capped at six across student/teacher entries, with only the active search mode shown. Incomplete schedules do not enter the recent list.
+The search dialog places the active search input before filters. Favorites and recent chips are visible above the list. Groups sort by course, then by natural name order, and the current group has a checkmark and pressed state. Course labels do not repeat the selected study level. Recent selections are stored locally, deduplicated and capped at six across student/teacher entries, with only the active search mode shown. Incomplete schedules do not enter the recent list. Past calendar dates use muted text while preserving contrast; changed days use an amber dot and count, explained by a visible legend.
+
+The room radar uses filled segmented controls for time presets and occupancy filters. In the Now preset, the pair selector explicitly shows current time; a manual pair determines occupancy and the context heading. Room lessons sort by start and end and merge identical time/subject rows. Rooms group by occupancy and building, with free rooms first. Green free and amber busy-until badges describe known schedule entries. A numbered slot timeline repeats those entries without claiming physical access. Building notation and access limitations appear once above the list.
 
 ### Dialogs and motion
 

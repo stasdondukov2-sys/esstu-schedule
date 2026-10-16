@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./fixtures.cjs');
 // Mocked network responses must not be bypassed by service-worker fetches.
 const routedTest=test.extend({serviceWorkers:'block'});
 

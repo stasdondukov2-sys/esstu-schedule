@@ -1,0 +1,31 @@
+{
+  "api/status.json": {
+    "generated_at": "2026-10-16T18:43:01.227406+00:00",
+    "code_revision": "916defb190876e648da606fff0c6e3339b0669dc",
+    "incomplete_schedule_count": 121,
+    "group_expected_count": null,
+    "group_failed_count": null,
+    "sources_sha256": "9d43bcb383ee6eab5fc1efafe9b03434cdf4e83f1db1480828b27cb4e908cf90",
+    "sources_without_check_date": 47
+  },
+  "api/catalog-status.json": {
+    "generated_at": "2026-10-16T18:43:01.227406+00:00",
+    "code_revision": "916defb190876e648da606fff0c6e3339b0669dc",
+    "incomplete_schedule_count": 121,
+    "group_expected_count": null,
+    "group_failed_count": null,
+    "sources_sha256": "9d43bcb383ee6eab5fc1efafe9b03434cdf4e83f1db1480828b27cb4e908cf90",
+    "sources_without_check_date": 47
+  },
+  "api/schedule/zo1/24.json": {
+    "group_name": "..",
+    "is_incomplete": true,
+    "parse_errors": [
+      "Имя группы не совпадает с каталогом"
+    ],
+    "source_checked_at": "2026-10-16T18:42:04.835882+00:00"
+  },
+  "index.html": {
+    "app_version": "2.5.0"
+  }
+}

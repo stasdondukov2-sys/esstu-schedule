@@ -3,6 +3,9 @@ name: Scheduled source synchronization
 on:
   schedule:
     - cron: '0 */3 * * *'
+    # 08:00–18:00 Asia/Irkutsk, Monday–Saturday, in UTC.
+    - cron: '*/30 0-9 * * 1-6'
+    - cron: '0 10 * * 1-6'
   workflow_dispatch:
 
 permissions:
@@ -14,20 +17,22 @@ concurrency:
 
 jobs:
   synchronize:
+    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/ci.yml
     with:
       sync_sources: true
       publish: true
     permissions:
-      contents: read
+      contents: write
       actions: read
       pages: write
       id-token: write
 
   notify:
     needs: synchronize
-    if: always() && (needs.synchronize.result == 'failure' || needs.synchronize.result == 'success')
+    if: always() && needs.synchronize.result != 'skipped'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:
@@ -41,8 +46,8 @@ jobs:
             const issues = await github.paginate(github.rest.issues.listForRepo,{owner,repo,state:'open',creator:'github-actions[bot]'});
             const existing = issues.find(issue => !issue.pull_request && issue.title === title);
             const run = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
-            if (process.env.SYNC_RESULT === 'failure') {
-              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
+            if (['failure','cancelled'].includes(process.env.SYNC_RESULT)) {
+              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой или была отменена. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
               if (existing) await github.rest.issues.update({owner,repo,issue_number:existing.number,body});
               else await github.rest.issues.create({owner,repo,title,body});
             } else if (existing) {

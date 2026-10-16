@@ -17,3 +17,20 @@ def department_schedules(
             html, caf_id, section, department_name
         )
     ]
+
+
+def group_identity_error(schedule, expected_name):
+    from ..parser import normalize_group_name
+
+    actual = schedule.get("group_name", "")
+    if (
+        not expected_name
+        or not any(character.isalnum() for character in expected_name)
+        or expected_name == "Магистратура"
+    ):
+        return "catalog_placeholder"
+    if actual == schedule.get("group_id"):
+        return "heading_missing"
+    if normalize_group_name(actual) != normalize_group_name(expected_name):
+        return "group_name_mismatch"
+    return None

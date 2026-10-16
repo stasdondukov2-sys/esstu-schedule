@@ -442,9 +442,9 @@
             "lessons": [
               {
                 "raw": "лек.Основы безопасности и защиты Родины РИНЧИНОВА С.Б. а.8236 и/дэкол",
-                "type": "Лекция",
-                "type_code": "lecture",
-                "subject": "Основы безопасности и защиты Родины РИНЧИНОВА С.Б. а.8236 и/дэкол",
+                "type": "Требуется сверка",
+                "type_code": "other",
+                "subject": "Не удалось разобрать занятие — сверьте с источником",
                 "teacher": "",
                 "teacher_key": "",
                 "teacher_photo": "",
@@ -453,7 +453,8 @@
                 "tag": "",
                 "tags": [],
                 "groups": "",
-                "parse_warning": "",
+                "parse_warning": "В названии остались ФИО или обозначение аудитории. Проверьте исходную ячейку.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "spezialitet/1.htm"
               }
@@ -468,9 +469,9 @@
             "lessons": [
               {
                 "raw": "пр.Основы безопасности и защиты Родины РИНЧИНОВА С.Б. а.8236 и/дэкол",
-                "type": "Практика",
-                "type_code": "practice",
-                "subject": "Основы безопасности и защиты Родины РИНЧИНОВА С.Б. а.8236 и/дэкол",
+                "type": "Требуется сверка",
+                "type_code": "other",
+                "subject": "Не удалось разобрать занятие — сверьте с источником",
                 "teacher": "",
                 "teacher_key": "",
                 "teacher_photo": "",
@@ -479,7 +480,8 @@
                 "tag": "",
                 "tags": [],
                 "groups": "",
-                "parse_warning": "",
+                "parse_warning": "В названии остались ФИО или обозначение аудитории. Проверьте исходную ячейку.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "spezialitet/1.htm"
               }

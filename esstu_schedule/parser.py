@@ -10,7 +10,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from .data.diagnostics import record_error, record_unparsed_cell
+from .data.diagnostics import record_error, record_cell
 
 ESSTU_BASE_URL = "https://portal.esstu.ru"
 
@@ -95,8 +95,26 @@ def local_teacher_photo(value: str) -> str:
     )
 
 
+def repair_mojibake(text: str) -> str:
+    def repair(match):
+        word = match.group()
+        if not re.search(r"[РС]", word):
+            return word
+        try:
+            decoded = word.encode("cp1251").decode("utf-8")
+        except (UnicodeError, ValueError):
+            return word
+        return (
+            decoded
+            if len(decoded) < len(word) and re.search("[А-Яа-яЁё]", decoded)
+            else word
+        )
+
+    return re.sub(r"\S+", repair, text or "")
+
+
 def clean_text(text: str) -> str:
-    return re.sub(r"\s+", " ", text or "").strip()
+    return re.sub(r"\s+", " ", repair_mojibake(text)).strip()
 
 
 def normalize_group_name(name: str) -> str:
@@ -260,14 +278,15 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
         lesson_type, type_code = "Физкультура", "sport"
 
     room = ""
-    room_match = re.search(r"\bа\.?\s*([0-9А-Яа-яA-Za-z\-/]+(?:\s+и/д)?)\s*$", rest)
+    room_match = re.search(r"\bа\.?\s*([0-9А-Яа-яA-Za-z\-/]+(?:\s+и/[пд])?)\s*$", rest)
     if room_match:
         room = room_match.group(1).strip()
         rest = rest[: room_match.start()].strip()
 
     teacher, teacher_key, teacher_profile = "", "", None
     teacher_match = re.search(
-        r"([А-ЯЁ][А-ЯЁа-яё\-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.(?:[А-ЯЁа-яё\.]+)?)\s*$", rest
+        r"([А-ЯЁ][А-ЯЁа-яё\-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.(?:[А-ЯЁа-яё\.]+)?)\s*[-–—]?\s*$",
+        rest,
     )
     if teacher_match:
         raw_t = teacher_match.group(1).strip()
@@ -288,6 +307,20 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
             "other",
         )
         room, teacher, teacher_key, teacher_profile = "", "", "", None
+    missing_subject = bool(teacher_match) and not rest
+    warning = ""
+    if ambiguous:
+        warning = "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание."
+    elif missing_subject:
+        rest, lesson_type = "Предмет не указан", "Требуется сверка"
+        warning = "В ячейке указано только ФИО преподавателя. Название предмета отсутствует — сверьте с источником."
+    elif re.search(r"\bа\.\s*\d|[А-ЯЁ][А-ЯЁа-яё-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.", rest):
+        rest, lesson_type, type_code = (
+            "Не удалось разобрать занятие — сверьте с источником",
+            "Требуется сверка",
+            "other",
+        )
+        warning = "В названии остались ФИО или обозначение аудитории. Проверьте исходную ячейку."
     return {
         "raw": raw,
         "type": lesson_type,
@@ -301,9 +334,8 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
         "tag": ", ".join(tags),
         "tags": tags,
         "groups": "",
-        "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание."
-        if ambiguous
-        else "",
+        "parse_warning": warning,
+        **({"needs_review": True} if warning else {}),
     }
 
 
@@ -382,7 +414,7 @@ def parse_teacher_cell_lessons(
         elif prefix.startswith("конс"):
             lesson_type, type_code = "Консультация", "consultation"
     room_match = re.search(
-        r"\bа\.\s*((?:[0-9][0-9А-Яа-яA-Za-z\-/]*|дист\.*|д\.о\.[/]*)(?:\s+и/д)?)",
+        r"\bа\.\s*((?:[0-9][0-9А-Яа-яA-Za-z\-/]*|дист\.*|д\.о\.[/]*)(?:\s+и/[пд])?)",
         before_subject,
         flags=re.IGNORECASE,
     )
@@ -622,12 +654,13 @@ def parse_14row_table(table, is_teacher=False, owner_name="", section="bakalavri
                 if is_teacher
                 else parse_cell_lessons(text)
             )
-            if any(
+            empty = clean_text(text) in ("", "_", "-", "—")
+            review = any(
                 lesson.get("parse_warning")
                 or lesson.get("subject") == "Предмет не указан в источнике"
                 for lesson in lessons
-            ):
-                record_unparsed_cell()
+            )
+            record_cell(empty=empty, lost=not empty and not lessons, review=review)
             total += len(lessons)
             pairs.append({**bell, "is_empty": not lessons, "lessons": lessons})
         weeks[week][key] = {
@@ -665,13 +698,22 @@ def parse_group_schedule_html(
     html: str, group_id: str = "1", section: str = "bakalavriat"
 ) -> dict[str, Any]:
     soup = BeautifulSoup(html, "lxml")
-    group_name = group_id
-    for f in soup.find_all(
-        "font", attrs={"color": re.compile(r"#ff00ff", re.IGNORECASE)}
-    ):
-        if clean_text(f.get_text()):
-            group_name = clean_text(f.get_text())
+    # The semantic heading identifies the owner; font colour is presentation.
+    prefix = []
+    for node in soup.descendants:
+        if getattr(node, "name", None) == "table":
             break
+        if isinstance(node, str):
+            prefix.append(str(node))
+    heading = re.search(
+        r"Расписание\s+занятий\s+учебной\s+группы\s*:\s*(.+)$",
+        clean_text(" ".join(prefix)),
+        re.I,
+    )
+    group_name = clean_text(heading.group(1)) if heading else ""
+    if not group_name:
+        font = soup.find("font", attrs={"color": re.compile(r"#ff00ff", re.I)})
+        group_name = clean_text(font.get_text()) if font else group_id
     parsed = parse_table_with_status(
         soup.find("table"),
         f"{section}/{group_id}.htm",
