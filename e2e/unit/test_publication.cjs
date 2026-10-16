@@ -5,6 +5,7 @@ ui.now=Date.parse('2026-10-16T08:00:00+08:00');
 assert.equal(vm.runInContext('relativeChecked("2026-10-16T06:00:00+08:00",now)',ui),'Проверено 2 ч назад');
 assert.equal(vm.runInContext('relativeChecked(null,now)',ui),'Дата проверки неизвестна');
 assert(vm.runInContext('daySourceText({source_file:"bakalavriat/1.htm"},{cached:true},true)',ui).startsWith('Офлайн-копия'));
+assert(vm.runInContext('daySourceText({is_stale_fallback:true},{cached:false},true)',ui).startsWith('Сохранённая копия'));
 
 // Exercise the actual notification script with an in-memory GitHub API.
 const workflow=fs.readFileSync('.github/workflows/sync.yml','utf8').replace(/\r\n/g,'\n');

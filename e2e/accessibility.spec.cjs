@@ -73,3 +73,29 @@ test('restoring a saved group resolves its name when the file number changes',as
   await page.goto('./');await expect(page.getByRole('heading',{level:1})).toHaveText(target.name);
   await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
 });
+
+routedTest('server fallback remains visible after a manual refresh',async({page})=>{
+  const schedule=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
+  Object.assign(schedule,{is_stale_fallback:true,source_mode:'saved_snapshot',source_checked_at:'2026-10-12T01:00:00Z'});
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:schedule}));
+  await ready(page);
+  await expect(page.locator('#compactFreshnessText')).toContainText('Сохранённая копия');
+  await expect(page.locator('#daySourceStatus')).toContainText('Сохранённая копия');
+  await page.locator('#compactFreshnessText').click();
+  await page.locator('#refreshSchedule').click();
+  await expect(page.locator('#refreshSchedule')).toBeEnabled();
+  await expect(page.locator('#freshnessBadge')).toContainText('Сохранённая копия');
+  await expect(page.locator('#freshnessBadge')).not.toContainText('версия проверена');
+});
+
+test('possible teacher identity collision is visible and clears for a group',async({page})=>{
+  await ready(page);
+  await page.evaluate(()=>{
+    currentSchedule={...currentSchedule,mode:'teacher',identity_ambiguous:true,teacher_key:'test',profile:{short_name:'Тест Т.Т.'}};
+    appMode='teacher';renderAll();
+  });
+  await expect(page.locator('#teacherIdentityWarning')).toBeVisible();
+  await expect(page.locator('#teacherIdentityWarning')).toContainText('Возможны данные нескольких преподавателей');
+  await page.evaluate(()=>{appMode='student';renderAll();});
+  await expect(page.locator('#teacherIdentityWarning')).toBeHidden();
+});

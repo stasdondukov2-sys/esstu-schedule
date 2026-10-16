@@ -89,7 +89,7 @@ async function forceRefreshSchedule() {
   try {
     const ok = appMode==='student' ? await loadStudentSchedule(savedState.section,savedState.groupId,savedState.groupName,true) : await loadTeacherSchedule(savedState.teacherKey,savedState.teacherCafId,true);
     if (!ok) throw Error();
-    document.getElementById('freshnessBadge').textContent = lastDelivery?.cached ? '💾 Сеть недоступна — сохранённая копия' : '✓ Доступная версия проверена';
+    updateExperienceUI();
   } catch { document.getElementById('freshnessBadge').textContent='Не удалось обновить. Попробуйте позже.'; }
   finally { button.disabled=false;button.textContent='🔄 Обновить'; }
 }
