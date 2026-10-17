@@ -1,2 +1,7 @@
-# Golden HTML is a byte-for-byte cp1251 snapshot with SHA-256 provenance.
+* text=auto eol=lf
+# Raw portal bytes and golden fixtures retain SHA-256 provenance.
+demo_data/**/*.htm -text
 tests/fixtures/*.htm binary
+*.png binary
+*.jpg binary
+*.webp binary

@@ -8,7 +8,6 @@ import urllib.request
 import urllib.error
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -17,11 +16,18 @@ from esstu_schedule.data.repository import (
 )
 from esstu_schedule.data.repository import group_schedule as parse_group_schedule_html
 from esstu_schedule.parser import parse_departments_list_html, parse_groups_list_html
-from esstu_schedule.data.repository import group_identity_error
+from esstu_schedule.identity import resolve_catalog, issue_text
+from scripts.sync_runtime import download_targets, require_time, remaining
 from esstu_schedule.data.store import write_json_atomic
 
 ROOT = Path(__file__).resolve().parents[1] / "demo_data"
 SECTIONS = ("bakalavriat", "spezialitet")
+
+
+class SourceDefect(ValueError):
+    def __init__(self, issue):
+        self.issue = issue
+        super().__init__(issue_text(issue))
 
 
 def validate_page(relative, raw):
@@ -39,10 +45,12 @@ def validate_page(relative, raw):
             if catalog.exists()
             else []
         )
-        expected = next(
-            (group["name"] for group in groups if group["id"] == name[:-4]), None
-        )
-        if expected is None or group_identity_error(schedule, expected):
+        if not any(group["id"] == name[:-4] for group in groups):
+            raise ValueError("Group identity does not match the current catalog")
+        _, issues, _ = resolve_catalog(groups, {name[:-4]: schedule})
+        if name[:-4] in issues:
+            if issues[name[:-4]]["category"] == "source":
+                raise SourceDefect(issues[name[:-4]])
             raise ValueError("Group identity does not match the current catalog")
         valid = not schedule.get("is_incomplete") and bool(
             schedule["weeks"]["1"] or schedule["weeks"]["2"]
@@ -56,7 +64,23 @@ def validate_page(relative, raw):
 
 
 def fetch_page(relative):
+    require_time()
     target = ROOT / relative
+    rejected = ROOT / ".negative" / relative
+    rejected_meta = rejected.with_suffix(".json")
+    if rejected_meta.exists():
+        saved = json.loads(rejected_meta.read_text(encoding="utf-8"))
+        if (
+            saved.get("catalog_sha256")
+            == hashlib.sha256(
+                (ROOT / relative.split("/")[0] / "raspisan.htm").read_bytes()
+            ).hexdigest()
+        ):
+            age = (
+                datetime.now(UTC) - datetime.fromisoformat(saved["checked_at"])
+            ).total_seconds()
+            if 0 <= age < 24 * 3600:
+                raise SourceDefect(saved["issue"])
     manifest_path = ROOT / "sources.json"
     manifest = (
         json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -94,13 +118,27 @@ def fetch_page(relative):
         if old.get("last_modified"):
             headers["If-Modified-Since"] = old["last_modified"]
     for attempt in range(3):
+        require_time()
         try:
             request = urllib.request.Request(
                 "https://portal.esstu.ru/" + relative, headers=headers
             )
             try:
-                with urllib.request.urlopen(request, timeout=10) as response:
-                    raw = response.read()
+                with urllib.request.urlopen(
+                    request, timeout=min(10, remaining())
+                ) as response:
+                    chunks = []
+                    while True:
+                        require_time()
+                        try:
+                            chunk = response.read(65536)
+                        except TypeError:
+                            chunks = [response.read()]
+                            break
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                    raw = b"".join(chunks)
                     modified = response.headers.get("Last-Modified")
                     etag = response.headers.get("ETag")
                     length = response.headers.get("Content-Length")
@@ -112,7 +150,29 @@ def fetch_page(relative):
                 raw = previous
                 modified = old.get("last_modified")
                 etag = old.get("etag")
-            validate_page(relative, raw)
+            try:
+                validate_page(relative, raw)
+            except SourceDefect as error:
+                rejected.parent.mkdir(parents=True, exist_ok=True)
+                rejected.write_bytes(raw)
+                write_json_atomic(
+                    rejected_meta,
+                    {
+                        "checked_at": datetime.now(UTC).isoformat(),
+                        "issue": error.issue,
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                        "etag": etag,
+                        "last_modified": modified,
+                        "catalog_sha256": hashlib.sha256(
+                            (
+                                ROOT / relative.split("/")[0] / "raspisan.htm"
+                            ).read_bytes()
+                        ).hexdigest(),
+                    },
+                )
+                raise
+            if rejected_meta.exists():
+                rejected_meta.unlink()
             target.parent.mkdir(parents=True, exist_ok=True)
             if raw != previous:
                 temporary = target.with_suffix(target.suffix + ".tmp")
@@ -131,7 +191,7 @@ def fetch_page(relative):
                 raise
             if attempt == 2:
                 raise
-            time.sleep(0.5 * 2**attempt)
+            time.sleep(min(0.5 * 2**attempt, remaining()))
 
 
 def sync():
@@ -164,25 +224,32 @@ def sync():
                 for department in institute["departments"]:
                     if re.fullmatch(r"Caf\d+", department["caf_id"], re.IGNORECASE):
                         targets.append(f"{section}/{department['caf_id']}.htm")
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        pending = {pool.submit(fetch_page, path): path for path in sorted(set(targets))}
-        for future in as_completed(pending):
-            try:
-                path, meta = future.result()
-                manifest[path] = meta
-                write_json_atomic(manifest_path, manifest)
-                successes.append(path)
-            except Exception as exc:
-                logging.getLogger(__name__).exception(
-                    "Source synchronization failed: %s", pending[future]
-                )
-                failures.append({"path": pending[future], "error": str(exc)})
+    for relative, result, error in download_targets(targets, fetch_page):
+        if error:
+            failures.append(
+                {
+                    "path": relative,
+                    "error": str(error),
+                    "reason": error.issue["reason"]
+                    if isinstance(error, SourceDefect)
+                    else "download_failed",
+                }
+            )
+        else:
+            path, meta = result
+            manifest[path] = meta
+            write_json_atomic(manifest_path, manifest)
+            successes.append(path)
     write_json_atomic(manifest_path, manifest)
     report = {
         "checked_at": datetime.now(UTC).isoformat(),
         "downloaded": successes,
         "failed": failures,
         "department_pages_expected": len(set(targets)),
+        "deadline_reached": remaining() <= 0,
+        "deferred": sorted(
+            set(targets) - set(successes) - {row["path"] for row in failures}
+        ),
     }
     write_json_atomic(ROOT / "department-sync.json", report)
     print(f"Official pages downloaded: {len(successes)}; failed: {len(failures)}")

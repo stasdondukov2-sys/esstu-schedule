@@ -22,7 +22,7 @@ def check_reports(root, allow_partial=False):
 
 def check_parse_quality(site, max_error_rate=None, baseline=None, max_regression=None):
     if max_error_rate is None:
-        max_error_rate = float(os.environ.get("ESSTU_MAX_PARSE_ERROR_RATE", "0.25"))
+        max_error_rate = float(os.environ.get("ESSTU_MAX_PARSE_ERROR_RATE", "0.05"))
     if max_regression is None:
         max_regression = float(os.environ.get("ESSTU_MAX_PARSE_REGRESSION", "0.01"))
     if not 0 <= max_regression <= 1:
@@ -32,7 +32,7 @@ def check_parse_quality(site, max_error_rate=None, baseline=None, max_regression
     status = json.loads((Path(site) / "api/status.json").read_text(encoding="utf-8"))
     total, failed = (
         status.get("group_expected_count", 0),
-        status.get("group_failed_count", 0),
+        status.get("pipeline_failed_count", status.get("group_failed_count", 0)),
     )
     if (
         not isinstance(total, int)
@@ -48,37 +48,34 @@ def check_parse_quality(site, max_error_rate=None, baseline=None, max_regression
             (Path(baseline) / "api/status.json").read_text(encoding="utf-8")
         )
         previous_total = previous.get("group_expected_count", 0)
-        previous_failed = previous.get("group_failed_count", 0)
-        catalogs = list((Path(baseline) / "api/groups").glob("*.json"))
-        if catalogs:
-            from esstu_schedule.data.repository import group_identity_error
+        previous_failed = previous.get("pipeline_failed_count")
+        if previous_failed is None:
+            from esstu_schedule.identity import SOURCE_REASONS
 
-            previous_total = previous_failed = 0
-            for catalog in catalogs:
-                for group in json.loads(catalog.read_text(encoding="utf-8"))["groups"]:
-                    previous_total += 1
-                    path = (
-                        Path(baseline)
-                        / "api/schedule"
-                        / catalog.stem
-                        / (str(group["id"]) + ".json")
+            previous_failed = sum(
+                row.get("reason") not in SOURCE_REASONS
+                for row in previous.get("group_failures", [])
+            )
+            if not previous.get("group_failures"):
+                # Legacy APIs contain parse_errors but no source/pipeline distinction.
+                previous_failed = sum(
+                    not any(
+                        marker in row.get("message", "")
+                        for marker in (
+                            "Имя группы не совпадает",
+                            "Название на странице",
+                        )
                     )
-                    old = (
-                        json.loads(path.read_text(encoding="utf-8"))
-                        if path.exists()
-                        else {"is_incomplete": True}
-                    )
-                    previous_failed += bool(
-                        old.get("is_incomplete")
-                        or group_identity_error(old, group["name"])
-                    )
+                    for row in previous.get("parse_errors", [])
+                    if "/Caf" not in row.get("source", "")
+                )
         if previous_total:
             allowed = min(allowed, previous_failed / previous_total + max_regression)
     if ratio > allowed:
         raise RuntimeError(
-            f"Publication blocked: {failed}/{total} group schedules failed ({ratio:.1%}), allowed {allowed:.1%}"
+            f"Publication blocked: {failed}/{total} pipeline failures ({ratio:.1%}), allowed {allowed:.1%}"
         )
-    print(f"Parser quality OK: {failed}/{total} group schedules failed ({ratio:.1%})")
+    print(f"Parser quality OK: {failed}/{total} pipeline failures ({ratio:.1%})")
 
 
 if __name__ == "__main__":
@@ -88,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max-error-rate",
         type=float,
-        default=float(os.environ.get("ESSTU_MAX_PARSE_ERROR_RATE", "0.25")),
+        default=float(os.environ.get("ESSTU_MAX_PARSE_ERROR_RATE", "0.05")),
     )
     parser.add_argument("--baseline", type=Path)
     args = parser.parse_args()

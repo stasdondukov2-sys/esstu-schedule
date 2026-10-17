@@ -76,19 +76,37 @@ def test_group_fallback_has_identity_and_seven_day_expiry(age, used):
 def test_quality_checks_regression_and_absolute_ceiling(tmp_path):
     baseline = tmp_path / "previous"
     site = tmp_path / "site"
-    for root, failed in [(baseline, 20), (site, 21)]:
+    for root, failed in [(baseline, 2), (site, 3)]:
         (root / "api").mkdir(parents=True)
         (root / "api/status.json").write_text(
-            json.dumps({"group_expected_count": 100, "group_failed_count": failed})
+            json.dumps(
+                {
+                    "group_expected_count": 100,
+                    "group_failed_count": failed,
+                    "pipeline_failed_count": failed,
+                }
+            )
         )
     check_parse_quality(site, baseline=baseline)
     (site / "api/status.json").write_text(
-        json.dumps({"group_expected_count": 100, "group_failed_count": 22})
+        json.dumps(
+            {
+                "group_expected_count": 100,
+                "group_failed_count": 4,
+                "pipeline_failed_count": 4,
+            }
+        )
     )
     with pytest.raises(RuntimeError):
         check_parse_quality(site, baseline=baseline)
     (site / "api/status.json").write_text(
-        json.dumps({"group_expected_count": 100, "group_failed_count": 26})
+        json.dumps(
+            {
+                "group_expected_count": 100,
+                "group_failed_count": 6,
+                "pipeline_failed_count": 6,
+            }
+        )
     )
     with pytest.raises(RuntimeError):
         check_parse_quality(site)
@@ -204,7 +222,7 @@ def test_fetch_rejects_wrong_group_before_replacing_saved_source(tmp_path, monke
 
     monkeypatch.setattr(sync_departments, "ROOT", tmp_path)
     monkeypatch.setattr("urllib.request.urlopen", lambda *args, **kwargs: Response())
-    with pytest.raises(ValueError, match="identity"):
+    with pytest.raises(sync_departments.SourceDefect, match="не совпадает"):
         sync_departments.fetch_page("bakalavriat/1.htm")
     assert (tmp_path / "bakalavriat/1.htm").read_bytes() == raw
 

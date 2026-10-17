@@ -51,6 +51,8 @@ def last_good_group(candidate, previous, now=None, max_age_days=7):
         source_mode="last_good_json",
         fallback_reason=candidate.get("parse_errors", []),
         origin_source_file=previous.get("source_file"),
+        incomplete_reason=candidate.get("incomplete_reason"),
+        source_issue=candidate.get("source_issue"),
     )
     return result
 
@@ -71,10 +73,38 @@ def previous_groups(root):
 def reuse_api(site, baseline, expected_build):
     site, baseline = Path(site), Path(baseline)
     current = read_json(site / "api/status.json")
+    previous = read_json(baseline / "api/status.json")
     if current["build_id"] != expected_build:
         raise RuntimeError("Publication shell differs from tested shell")
-    previous = read_json(baseline / "api/status.json")
-    # Stage the complete previous API before replacing anything in the new site.
+    # Parser changes must reach the API even for a release without portal access.
+    if current.get("parser_revision") and current.get(
+        "parser_revision"
+    ) != previous.get("parser_revision"):
+        from scripts.check_sync import check_parse_quality
+
+        try:
+            check_parse_quality(site, baseline=baseline)
+        except RuntimeError as error:
+            # A rejected data candidate must not prevent a tested shell release.
+            previous.update(
+                parser_rebuild_error=str(error),
+                parser_rebuild_candidate_revision=current["parser_revision"],
+            )
+            print(
+                "Parser rebuild rejected; keep previous API and publish tested shell:",
+                error,
+            )
+        else:
+            current.update(
+                api_reparsed_from_sources=True,
+                previous_parser_revision=previous.get("parser_revision"),
+                code_deployed_at=current["generated_at"],
+            )
+            write_json_atomic(site / "api/status.json", current)
+            print(
+                "Parser changed: publish API rebuilt from restored source bytes; source check dates preserved"
+            )
+            return
     staged = site / "previous-api"
     shutil.copytree(baseline / "api", staged)
     shutil.rmtree(site / "api")
@@ -103,9 +133,7 @@ if __name__ == "__main__":
         and (args.baseline / "api/status.json").exists()
     ):
         reuse_api(args.site, args.baseline, args.expected_build)
-        print(
-            "Code release: previous API reused byte-for-byte except shell provenance in status"
-        )
+        print("Code release: tested shell prepared; source check dates preserved")
     elif (
         args.mode == "code"
         and __import__("os").environ.get("GITHUB_REF") == "refs/heads/main"

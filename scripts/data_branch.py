@@ -27,7 +27,7 @@ def git(root, *arguments, check=True):
     return result
 
 
-def restore(directory, repository, sources):
+def initialize(directory, repository):
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     git(directory, "init", "-q")
@@ -36,14 +36,31 @@ def restore(directory, repository, sources):
     available = git(
         directory, "ls-remote", "--heads", "origin", "refs/heads/data"
     ).stdout.strip()
+    if available:
+        git(directory, "fetch", "--depth=1", "origin", "data")
+        git(directory, "checkout", "-B", "data", "FETCH_HEAD")
+    return bool(available)
+
+
+def restore(directory, repository, sources):
+    directory = Path(directory)
+    available = initialize(directory, repository)
     if not available:
         from scripts.published_data import bootstrap
 
         owner, repo = repository.removesuffix(".git").rstrip("/").split("/")[-2:]
         bootstrap(directory, f"https://{owner}.github.io/{repo}/")
+        from scripts.source_artifact import restore_artifact
+        import json
+
+        expected = json.loads(
+            (directory / "api/sources.json").read_text(encoding="utf-8")
+        )
+        if not restore_artifact(f"{owner}/{repo}", sources, expected=expected):
+            raise RuntimeError(
+                "No source snapshot matches the published API; parser rebuild cannot safely use unrelated sources"
+            )
         return False
-    git(directory, "fetch", "--depth=1", "origin", "data")
-    git(directory, "checkout", "-B", "data", "FETCH_HEAD")
     if not (directory / "api/status.json").exists():
         raise RuntimeError("Data branch is missing a validated API")
     shutil.copytree(directory / "sources", sources, dirs_exist_ok=True)
@@ -85,7 +102,7 @@ def save(directory, site, sources, revision):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["restore", "save", "checkpoint"])
+    parser.add_argument("mode", choices=["restore", "save", "initialize"])
     parser.add_argument("--directory", type=Path, default=Path("preview/data"))
     parser.add_argument("--site", type=Path, default=Path("dist"))
     parser.add_argument("--sources", type=Path, default=Path("demo_data"))
@@ -98,13 +115,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.mode == "restore":
         restore(args.directory, args.repository, args.sources)
-    elif args.mode == "checkpoint":
-        save(
-            args.directory,
-            args.directory,
-            args.sources,
-            os.environ.get("GITHUB_SHA", "local"),
-        )
+    elif args.mode == "initialize":
+        initialize(args.directory, args.repository)
     else:
         save(
             args.directory,

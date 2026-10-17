@@ -7,6 +7,10 @@ function freshnessProblem(status,now=Date.now()){
     else if(stamp>now+300000)issues.push(`${label}: дата в будущем`);
     else if(now-stamp>12*3600000)issues.push(`${label}: более 12 часов назад (${new Date(stamp).toISOString()})`);
   }
+  const dates=Object.values(status?.group_check_dates||{});
+  const fresh=dates.filter(value=>{const stamp=Date.parse(value);return Number.isFinite(stamp)&&stamp<=now+300000&&now-stamp<=24*3600000;}).length;
+  if(!dates.length)issues.push('Покрытие групп: даты проверки неизвестны');
+  else if(fresh/dates.length<0.9)issues.push(`Покрытие групп за 24 часа: ${fresh}/${dates.length} (${(100*fresh/dates.length).toFixed(1)}%), требуется 90%`);
   return issues.join('\n');
 }
 async function monitor({github,context,fetchImpl=fetch,now=Date.now()}){

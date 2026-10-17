@@ -1,0 +1,1254 @@
+{
+  "group_expected_count": 663,
+  "group_failed_count": 104,
+  "pipeline_failed_count": 0,
+  "source_issue_count": 104,
+  "catalog_recovered_count": 28,
+  "group_failure_reasons": {
+    "group_name_mismatch": 70,
+    "source_unfilled": 21,
+    "duplicate_page": 13
+  },
+  "catalog_repairs": [
+    {
+      "section": "zo1",
+      "id": "97",
+      "catalog_name": "...",
+      "page_name": "ЗМ-314"
+    },
+    {
+      "section": "zo1",
+      "id": "2",
+      "catalog_name": "...",
+      "page_name": "ЗУС-1125"
+    },
+    {
+      "section": "zo1",
+      "id": "27",
+      "catalog_name": "...",
+      "page_name": "ЗУС-514-2ТД"
+    },
+    {
+      "section": "zo1",
+      "id": "48",
+      "catalog_name": "......",
+      "page_name": "ЗУ-423-1"
+    },
+    {
+      "section": "zo1",
+      "id": "71",
+      "catalog_name": ".....",
+      "page_name": "ЗМ-295"
+    },
+    {
+      "section": "zo1",
+      "id": "101",
+      "catalog_name": "...",
+      "page_name": "ЗМ-524"
+    },
+    {
+      "section": "zo1",
+      "id": "105",
+      "catalog_name": "....",
+      "page_name": "ЗМ-5154"
+    },
+    {
+      "section": "zo1",
+      "id": "77",
+      "catalog_name": "...",
+      "page_name": "ЗМ-545"
+    },
+    {
+      "section": "zo1",
+      "id": "107",
+      "catalog_name": "...",
+      "page_name": "ЗМ-574-2"
+    },
+    {
+      "section": "zo1",
+      "id": "80",
+      "catalog_name": "...",
+      "page_name": "ЗМ-595"
+    },
+    {
+      "section": "zo1",
+      "id": "111",
+      "catalog_name": "....",
+      "page_name": "ЗМ-634"
+    },
+    {
+      "section": "zo1",
+      "id": "21",
+      "catalog_name": "..",
+      "page_name": "ЗУ-394-1"
+    },
+    {
+      "section": "zo1",
+      "id": "118",
+      "catalog_name": "....",
+      "page_name": "ЗМ273-1"
+    },
+    {
+      "section": "zo1",
+      "id": "91",
+      "catalog_name": "...",
+      "page_name": "ЗМ-224"
+    },
+    {
+      "section": "zo2",
+      "id": "156",
+      "catalog_name": ".",
+      "page_name": "ЗБ622 Тепл"
+    },
+    {
+      "section": "zo2",
+      "id": "157",
+      "catalog_name": ".",
+      "page_name": "ЗБ632-1"
+    },
+    {
+      "section": "zo2",
+      "id": "158",
+      "catalog_name": "Магистратура",
+      "page_name": "ЗБ632-2"
+    },
+    {
+      "section": "zo2",
+      "id": "103",
+      "catalog_name": ".",
+      "page_name": "З153Сервис"
+    },
+    {
+      "section": "zo2",
+      "id": "150",
+      "catalog_name": ".",
+      "page_name": "ЗБ5122 Жур"
+    },
+    {
+      "section": "zo2",
+      "id": "151",
+      "catalog_name": ".",
+      "page_name": "ЗБ5142 РСО"
+    },
+    {
+      "section": "zo2",
+      "id": "26",
+      "catalog_name": ".",
+      "page_name": "ЗУ 5155"
+    },
+    {
+      "section": "zo2",
+      "id": "28",
+      "catalog_name": ".",
+      "page_name": "ЗБ625 ТЭиТ"
+    },
+    {
+      "section": "zo2",
+      "id": "89",
+      "catalog_name": ".",
+      "page_name": "ЗУ634-2б"
+    },
+    {
+      "section": "zo2",
+      "id": "180",
+      "catalog_name": ".",
+      "page_name": "ЗБ291-2"
+    },
+    {
+      "section": "zo2",
+      "id": "60",
+      "catalog_name": ".",
+      "page_name": "ЗБ5144 РСО"
+    },
+    {
+      "section": "zo2",
+      "id": "181",
+      "catalog_name": ".",
+      "page_name": "ЗБ2101ТПОП"
+    },
+    {
+      "section": "zo2",
+      "id": "91",
+      "catalog_name": ".",
+      "page_name": "ЗУ314-1"
+    },
+    {
+      "section": "zo2",
+      "id": "129",
+      "catalog_name": ".",
+      "page_name": "ЗБ252 УК"
+    }
+  ],
+  "group_failures": [
+    {
+      "source": "zo1/1.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-396-1",
+      "parsed_name": "ЗУ-395-1",
+      "duplicate_of": [],
+      "bytes": 40252,
+      "sha256": "340706f50bfd4203e26e03e90d72dac1f530db77f19c855d136b915db41d7a44"
+    },
+    {
+      "source": "zo1/68.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ126ппрс",
+      "parsed_name": "....",
+      "duplicate_of": [],
+      "bytes": 8932,
+      "sha256": "dc1573513ef9c0371b572319a6ede4cd43edfd6c5128efd8cdc1e700213e4480"
+    },
+    {
+      "source": "zo1/98.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ125ппрс",
+      "parsed_name": "ЗМ274",
+      "duplicate_of": [],
+      "bytes": 29335,
+      "sha256": "2b8cf22fe0d01f5a7da777a25b0ccb45e864c86b65671b860e8bef74ef02be7d"
+    },
+    {
+      "source": "zo1/3.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗУ-436-1",
+      "parsed_name": "ЗУ-425-1",
+      "duplicate_of": [
+        "29"
+      ],
+      "bytes": 39447,
+      "sha256": "a6d525bbfc3ffcd022811cd62d3b94541c18d72db8bb8d52218c3e6e06dccdcf"
+    },
+    {
+      "source": "zo1/69.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ136ппжп",
+      "parsed_name": "ЗМ-275",
+      "duplicate_of": [],
+      "bytes": 29359,
+      "sha256": "07425077cf9151b153687ece2efb4f065496f701ea78d55008a22b587c8997f1"
+    },
+    {
+      "source": "zo1/99.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ135ппжп",
+      "parsed_name": "ЗМ284",
+      "duplicate_of": [],
+      "bytes": 30248,
+      "sha256": "e68a864a61b251090c144288887505b2fa3ade1f2d15bf7533f3c73a36a410c1"
+    },
+    {
+      "source": "zo1/4.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗУ-426-1",
+      "parsed_name": "ЗУ-425-2",
+      "duplicate_of": [
+        "30"
+      ],
+      "bytes": 39459,
+      "sha256": "a7201800f230260d549b646a2263cfd21ee20398cb3d78d00b38d78f21c1f320"
+    },
+    {
+      "source": "zo1/70.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ146тпооп",
+      "parsed_name": "ЗМ-285",
+      "duplicate_of": [],
+      "bytes": 29204,
+      "sha256": "e5a841d71553991cbc2d4ed1cb2fb2739edd7f1d389d84aedac127607a869f98"
+    },
+    {
+      "source": "zo1/100.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ145тпооп",
+      "parsed_name": "ЗМ294",
+      "duplicate_of": [],
+      "bytes": 29523,
+      "sha256": "6d51f839296b64491a07fd86375fa2141433f94dde45b4ca571383341d82a36d"
+    },
+    {
+      "source": "zo1/5.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗУ-426-2",
+      "parsed_name": "ЗУ-435-1",
+      "duplicate_of": [
+        "28"
+      ],
+      "bytes": 39366,
+      "sha256": "86988d961a2a711cb53708629688bc366fd4628377f7effe7b0b490646a1f8a9"
+    },
+    {
+      "source": "zo1/6.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-5106",
+      "parsed_name": "ЗУ-5105",
+      "duplicate_of": [],
+      "bytes": 8955,
+      "sha256": "e166221894b65f6f67576db24e45c3cdde5b834e0e55c424ea5f23a66fb6b4f1"
+    },
+    {
+      "source": "zo1/52.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-5104",
+      "parsed_name": "ЗУ-573-1",
+      "duplicate_of": [],
+      "bytes": 37494,
+      "sha256": "c07c75710c005c412793017f5444b11c5100c6a45637efa06ca3dc66a5d85c45"
+    },
+    {
+      "source": "zo1/72.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ116биот",
+      "parsed_name": "ЗМ-315",
+      "duplicate_of": [],
+      "bytes": 29416,
+      "sha256": "2a2a6c1c9d3226b53b317607cb6bc509df5f5e94ad0aae218e2740242ccfa96b"
+    },
+    {
+      "source": "zo1/102.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ115биот",
+      "parsed_name": "....",
+      "duplicate_of": [],
+      "bytes": 8940,
+      "sha256": "b86dc3d1851c3592dc85490a3d6fbff5ab982e6538d16e431fff8d8824bb100a"
+    },
+    {
+      "source": "zo1/7.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-516-4",
+      "parsed_name": "ЗУ-515-4",
+      "duplicate_of": [],
+      "bytes": 8956,
+      "sha256": "c659800a77324c6ef5b8c589e5bf5069eea473c0670897b7550cd641320b5198"
+    },
+    {
+      "source": "zo1/53.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-514-4",
+      "parsed_name": "ЗУ-573-2",
+      "duplicate_of": [],
+      "bytes": 8943,
+      "sha256": "8106df7eca99c6cf3bca04f3d24d12e5eba5796cb6ec56cd3012828d393591eb"
+    },
+    {
+      "source": "zo1/73.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ186тмо",
+      "parsed_name": "ЗМ-535",
+      "duplicate_of": [],
+      "bytes": 29339,
+      "sha256": "fcb7bb2ed367c8689445832b28811c4954f5053029e9bca0717d1d6b76bbafb7"
+    },
+    {
+      "source": "zo1/103.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ185тмо",
+      "parsed_name": "ЗМ-544",
+      "duplicate_of": [],
+      "bytes": 30504,
+      "sha256": "9de2f93f402d72b994875681c074aa487e9bb247da7fef30c65c32bfedd740d0"
+    },
+    {
+      "source": "zo1/8.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-516-6",
+      "parsed_name": "ЗУ-515-6",
+      "duplicate_of": [],
+      "bytes": 8956,
+      "sha256": "671a3df4530f98708ab47030b9076ca50a0311e4fea97e8131bca6bc785c1fe0"
+    },
+    {
+      "source": "zo1/33.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-515-2",
+      "parsed_name": "ЗУ-514-2",
+      "duplicate_of": [],
+      "bytes": 8957,
+      "sha256": "123b25596c8afd8bd7fe6729ef7b2386abdd590b2e739ca9b9a0cc5622c70d91"
+    },
+    {
+      "source": "zo1/54.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-514-6",
+      "parsed_name": "ЗК13,121",
+      "duplicate_of": [],
+      "bytes": 29943,
+      "sha256": "5bbd61ab4de89f718d1dea3c9c78f8c04c6e400a8a713f22427954e5d4547dea"
+    },
+    {
+      "source": "zo1/74.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ166туризм",
+      "parsed_name": "ЗМ515-1",
+      "duplicate_of": [],
+      "bytes": 28640,
+      "sha256": "9ffd57ebfdceb34d7b03d46a02509c034c37f812378db0c4f8d6f5aef42d37ae"
+    },
+    {
+      "source": "zo1/104.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ165туризм",
+      "parsed_name": "ЗМ-5104",
+      "duplicate_of": [],
+      "bytes": 30236,
+      "sha256": "71b7610e0b73e89d6fdde4a64864f181303778366d50453ee374be7729f3c6c7"
+    },
+    {
+      "source": "zo1/9.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-596а",
+      "parsed_name": "ЗУ-575-1",
+      "duplicate_of": [],
+      "bytes": 39994,
+      "sha256": "936deb5a6f1efba11529d424635b3b12051846595fc9b5740ae263fd35b0ba3d"
+    },
+    {
+      "source": "zo1/34.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-515-3",
+      "parsed_name": "ЗУ-514-3",
+      "duplicate_of": [],
+      "bytes": 8957,
+      "sha256": "822ab06f972659c900dfd75147182757a859c9e4cb260555df02472f8126b78f"
+    },
+    {
+      "source": "zo1/75.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ1106см",
+      "parsed_name": "ЗМ515-2",
+      "duplicate_of": [],
+      "bytes": 29298,
+      "sha256": "ce4e1b3913747bfb9d9bf7a46808c92245581cae26bfb4f961feeea42311e559"
+    },
+    {
+      "source": "zo1/10.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-596б",
+      "parsed_name": "ЗУ-575-2",
+      "duplicate_of": [],
+      "bytes": 40000,
+      "sha256": "9f4c011ba669c4ee7429bcba6c4e78dd6bc8d9c271da20e7c082b2b6ea6ad080"
+    },
+    {
+      "source": "zo1/35.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗУ-595а",
+      "parsed_name": "ЗК441/1",
+      "duplicate_of": [
+        "43"
+      ],
+      "bytes": 20245,
+      "sha256": "353854d5bea0a2815adfe8c4e3f7acf3dfa1cb3ac04a6c0ba3fbcf643aab7a41"
+    },
+    {
+      "source": "zo1/76.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ1116ук",
+      "parsed_name": "ЗМ-525",
+      "duplicate_of": [],
+      "bytes": 29219,
+      "sha256": "4ffe90dafed6a26c676b33ada4f3971337ec0825f51000154dd51b9b6d13a72c"
+    },
+    {
+      "source": "zo1/106.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ215стр",
+      "parsed_name": "ЗМ-574-1",
+      "duplicate_of": [],
+      "bytes": 29431,
+      "sha256": "4e9544e29cdc0878f22ec7e53ce86c829f757e5df4e26fdb63e9aefcf7bcc84a"
+    },
+    {
+      "source": "zo1/11.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУС-516ТД",
+      "parsed_name": "ЗУС-515ТД",
+      "duplicate_of": [],
+      "bytes": 8958,
+      "sha256": "cc6831711ceed40b68a3d80f5fbb0238b8c88ef6c81315926991c12aa37d16cd"
+    },
+    {
+      "source": "zo1/36.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗУ-595б",
+      "parsed_name": "ЗК441/2",
+      "duplicate_of": [
+        "44"
+      ],
+      "bytes": 20245,
+      "sha256": "507837fc71819d3a7c6fcf9b68d40cf06f9de4f0ffb0d9283196b765d94744c6"
+    },
+    {
+      "source": "zo1/57.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-594а",
+      "parsed_name": "ЗК24,231",
+      "duplicate_of": [],
+      "bytes": 19418,
+      "sha256": "b80338eebb98aadd8a02e58e4678de3beddc4039d024dd231df23728adbcd5a3"
+    },
+    {
+      "source": "zo1/12.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-576-1",
+      "parsed_name": "ЗУ-575-1",
+      "duplicate_of": [],
+      "bytes": 39452,
+      "sha256": "ad37938f8f44c95d3fca7b5eb2ac6e6d14fe6903b2312eb69203b286846c4f48"
+    },
+    {
+      "source": "zo1/58.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-594б",
+      "parsed_name": "ЗК44,431",
+      "duplicate_of": [],
+      "bytes": 19203,
+      "sha256": "dfe88296a6d04edaf6d939008fc3959b6359feeed8d28633951311b7277c3b11"
+    },
+    {
+      "source": "zo1/78.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ216стр",
+      "parsed_name": "ЗМ-5105",
+      "duplicate_of": [],
+      "bytes": 29338,
+      "sha256": "d97248c8a502673fbdb61729df6e089b53637b9b8716c31e3a2089f66b5f3238"
+    },
+    {
+      "source": "zo1/108.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ615-2эиэод",
+      "parsed_name": "ЗМ-594",
+      "duplicate_of": [],
+      "bytes": 28960,
+      "sha256": "b1da37cb861bc80f64261a8c9e713c4b393f9a6f46be62fb4af337ecc4c6de98"
+    },
+    {
+      "source": "zo1/13.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗУ-576-2",
+      "parsed_name": "ЗУ-575-2",
+      "duplicate_of": [],
+      "bytes": 39463,
+      "sha256": "a7971780c1256270147452141d7196cbac3f243e54ca863537b406d2e5532ca1"
+    },
+    {
+      "source": "zo1/79.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ416",
+      "parsed_name": "ЗМ-5155",
+      "duplicate_of": [],
+      "bytes": 28917,
+      "sha256": "e3015396276c24208de18885e6248abf40c4ba7bfb85c3d5a1decffb1c759b33"
+    },
+    {
+      "source": "zo1/109.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ615-2грэ",
+      "parsed_name": "ЗМ574-1",
+      "duplicate_of": [],
+      "bytes": 31610,
+      "sha256": "7a6ea4cc8b9572240170cc2cb8998e30fef9918f13a24f572a10f9824a0042ec"
+    },
+    {
+      "source": "zo1/14.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 8950,
+      "sha256": "13f654f0dc479c4d5cbef6eca898b6d76db09c46366cf8310b23f0b6956e7ab7"
+    },
+    {
+      "source": "zo1/39.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "...",
+      "parsed_name": "ЗК241,25",
+      "duplicate_of": [
+        "41"
+      ],
+      "bytes": 18500,
+      "sha256": "e88380b2a3bc04250cacf8c83871753d43d1623529440150ae10e700050a65f4"
+    },
+    {
+      "source": "zo1/110.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ665мен",
+      "parsed_name": "ЗМ-624",
+      "duplicate_of": [],
+      "bytes": 28243,
+      "sha256": "080e8a4b6ba81d25517b40333e8ebeff6306f3b885d59117a1da9f4c98c3df77"
+    },
+    {
+      "source": "zo1/15.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "..",
+      "duplicate_of": [],
+      "bytes": 8951,
+      "sha256": "243d18065a5ad755ca096628d1dc93cd230bf8dd329c03da2adf7f78a2dd90c5"
+    },
+    {
+      "source": "zo1/40.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "ЗК141,15",
+      "duplicate_of": [
+        "42"
+      ],
+      "bytes": 19548,
+      "sha256": "4f4bcf15f513f74452f0ce5fef240c7687a233ec8f3cfc5565d9628e497fd256"
+    },
+    {
+      "source": "zo1/61.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "...",
+      "parsed_name": "ЗК42-411",
+      "duplicate_of": [
+        "63"
+      ],
+      "bytes": 8957,
+      "sha256": "7dcafd218353a37130dc32f87240e0be1738c03052fbaed778ac86e67be4f79a"
+    },
+    {
+      "source": "zo1/81.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ6136фик",
+      "parsed_name": "ЗМ-575-1",
+      "duplicate_of": [],
+      "bytes": 29972,
+      "sha256": "92f4ff43faeb8f4bd962e60e8b9247417632c2baec5e0284e78bee88d8193e0a"
+    },
+    {
+      "source": "zo1/62.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "ЗК22-211",
+      "parsed_name": "ЗК12-111",
+      "duplicate_of": [
+        "64"
+      ],
+      "bytes": 8957,
+      "sha256": "d0018f0e7053f85c652102c5686a29c5a899f7b800da32455ab55225a0a13937"
+    },
+    {
+      "source": "zo1/82.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ616-1эиэод",
+      "parsed_name": "ЗМ-575-2",
+      "duplicate_of": [],
+      "bytes": 29970,
+      "sha256": "ed05cd73dbad806325264fcc9c77a4afe32e0006bdc5c1c83cb135214f6e5804"
+    },
+    {
+      "source": "zo1/112.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ685",
+      "parsed_name": "....",
+      "duplicate_of": [],
+      "bytes": 8954,
+      "sha256": "517e12b0e7b3eb517fb3f2ada5d12d2443373466ffa8b2993084480989e16423"
+    },
+    {
+      "source": "zo1/63.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗК42-411",
+      "parsed_name": "ЗУС-512",
+      "duplicate_of": [],
+      "bytes": 37541,
+      "sha256": "bb23af579851f4c5cc53a57f46117cf64f3b7828b528693d326f4f75daa61903"
+    },
+    {
+      "source": "zo1/83.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ616-2грэ",
+      "parsed_name": "....",
+      "duplicate_of": [],
+      "bytes": 8932,
+      "sha256": "2003e39092bc455f885a5e128740a32b9fead1b5d41d2d68dbdba614553e1a91"
+    },
+    {
+      "source": "zo1/113.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ636тб",
+      "parsed_name": "ЗМ-764",
+      "duplicate_of": [],
+      "bytes": 26965,
+      "sha256": "e7c7d8039b6c6703e8843188103da1c952cf88d7df63d26ffe93ba47e151f2a5"
+    },
+    {
+      "source": "zo1/64.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗК12-111",
+      "parsed_name": "...",
+      "duplicate_of": [],
+      "bytes": 8931,
+      "sha256": "dfeb34d68db8e4b3f281649416886a91f9d0288c2dd3f952012382bc8b729686"
+    },
+    {
+      "source": "zo1/84.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ666мен",
+      "parsed_name": "ЗМ-625",
+      "duplicate_of": [],
+      "bytes": 29001,
+      "sha256": "b6c4d2784578fa9045f114717cb03f193ba2eb7a15dc043907ffbcb4959a4971"
+    },
+    {
+      "source": "zo1/19.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "..",
+      "duplicate_of": [],
+      "bytes": 8951,
+      "sha256": "bc9707a15f290d0a73cdf82390babd7e528ab1f66a189a284df8b81712da2290"
+    },
+    {
+      "source": "zo1/85.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ686гму",
+      "parsed_name": "ЗМ-635",
+      "duplicate_of": [],
+      "bytes": 28401,
+      "sha256": "770195eb9875142ccc11e439f8117ba2ff1687000a5012277b2f1a7c97475ffa"
+    },
+    {
+      "source": "zo1/115.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ625-1ю",
+      "parsed_name": "ЗМ734",
+      "duplicate_of": [],
+      "bytes": 29723,
+      "sha256": "71cf0cabee239b9064c127ff8cb59511fc2be4598d18afb9c252a86ad14d81bd"
+    },
+    {
+      "source": "zo1/20.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "..",
+      "duplicate_of": [],
+      "bytes": 8951,
+      "sha256": "eeafc93c2d2add5b1505def049272861888b3edcc0f91ccaa3c14e7ba12e2f24"
+    },
+    {
+      "source": "zo1/116.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ625-2ю",
+      "parsed_name": "ЗМ764",
+      "duplicate_of": [],
+      "bytes": 29611,
+      "sha256": "579d7fa50d5d0452bde36d1b00ba41e3305d3c916e62158d1b0b846d97c9b224"
+    },
+    {
+      "source": "zo1/117.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ675уп",
+      "parsed_name": "ЗМ774",
+      "duplicate_of": [],
+      "bytes": 29487,
+      "sha256": "f13f6b400900da0f15ecf1cf0f516990a194c1335763cde836161eda2cf11d39"
+    },
+    {
+      "source": "zo1/22.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "..",
+      "duplicate_of": [],
+      "bytes": 8951,
+      "sha256": "9d8f51d656fdccf491d239501bbfdb7ad876c683989e01a6bb65549135bf2037"
+    },
+    {
+      "source": "zo1/88.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ676уп",
+      "parsed_name": "ЗМ-775",
+      "duplicate_of": [],
+      "bytes": 29645,
+      "sha256": "7c58f18414a61d0153d2f012792ce9f0fe58b8fa2aa586859a2704f10a12f96c"
+    },
+    {
+      "source": "zo1/23.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "ЗУ-424-1",
+      "duplicate_of": [
+        "50"
+      ],
+      "bytes": 39415,
+      "sha256": "6d2eea6f0c1db11d5457fbc5563709b9cec4fde9de9a71208440020a9de9eaae"
+    },
+    {
+      "source": "zo1/89.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ636тб",
+      "parsed_name": "....",
+      "duplicate_of": [],
+      "bytes": 8932,
+      "sha256": "1558d9da717858716b031e7d45805c1f3a1260c772a8f6a7e04de4d9d6e3d9c5"
+    },
+    {
+      "source": "zo1/119.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ325тэит",
+      "parsed_name": "ЗМ271-1",
+      "duplicate_of": [],
+      "bytes": 8957,
+      "sha256": "fc49f9e246b10486bade6ee72672df6474ef9edd7e56a310f9495840b8aceef7"
+    },
+    {
+      "source": "zo1/24.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "ЗУ-424-2",
+      "duplicate_of": [
+        "51"
+      ],
+      "bytes": 39507,
+      "sha256": "4efb35cf4884cf0607e3de3980fc73583bdf3043bbd31a140071e494a8f3281d"
+    },
+    {
+      "source": "zo1/120.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ315ээиэт",
+      "parsed_name": "ЗМ-660",
+      "duplicate_of": [],
+      "bytes": 29071,
+      "sha256": "adce2d5f51d19d78691c01db969b53d0033355c9f4e3a7501c19dbdfa882472a"
+    },
+    {
+      "source": "zo1/25.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": "..",
+      "parsed_name": "ЗУ-434-1",
+      "duplicate_of": [
+        "49"
+      ],
+      "bytes": 39690,
+      "sha256": "f853dd32655cd4aae0f1e0a2055977ed2070e1c8e054e5eb520f9d57392ab2b5"
+    },
+    {
+      "source": "zo1/121.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ535иивт",
+      "parsed_name": "ЗМ630",
+      "duplicate_of": [],
+      "bytes": 28333,
+      "sha256": "c011af36d6b4ff2f0aa623ce09d74e1a95d76227dfbc38c0a32502eac927a85f"
+    },
+    {
+      "source": "zo1/92.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ326тэит",
+      "parsed_name": "ЗМ-234",
+      "duplicate_of": [],
+      "bytes": 28561,
+      "sha256": "f524a9fd3545b59831ee51540c571c47c911e6ef6d38d46e38d27d3c595608c0"
+    },
+    {
+      "source": "zo1/122.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ565пр.инж",
+      "parsed_name": "ЗМ660",
+      "duplicate_of": [],
+      "bytes": 29339,
+      "sha256": "c326ed61f5fc8791211bc845cdb9051ae97c2d297170c08eed4dccd3b8d12fd9"
+    },
+    {
+      "source": "zo1/93.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ316ээиэт",
+      "parsed_name": "ЗМ224",
+      "duplicate_of": [],
+      "bytes": 30589,
+      "sha256": "1880314882764bcb054a95af2f9490934651aeebd71c14e600f503df437b9a24"
+    },
+    {
+      "source": "zo1/123.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ575радиотехн",
+      "parsed_name": "ЗМ420",
+      "duplicate_of": [],
+      "bytes": 18530,
+      "sha256": "ad182812a02551403c33f693da8a3503e775192e4e815ad3cc63ef667b319016"
+    },
+    {
+      "source": "zo1/94.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ536иивт",
+      "parsed_name": "ЗМ214",
+      "duplicate_of": [],
+      "bytes": 33533,
+      "sha256": "cf3bc620a398ffe9cdaf349363d25236a09f3c94190edd591c28633961c311b8"
+    },
+    {
+      "source": "zo1/124.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ274-1",
+      "parsed_name": "ЗМ-629",
+      "duplicate_of": [],
+      "bytes": 9207,
+      "sha256": "4e3e7954b8fb994a28d7e8fae97ff8438190f77db475b5ebc76532a3b28e2c47"
+    },
+    {
+      "source": "zo1/95.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ566пр.инж",
+      "parsed_name": "ЗМ224",
+      "duplicate_of": [],
+      "bytes": 30588,
+      "sha256": "61a6555b32401b6dfb324601090d3ce2a86987f06b0ffc3952b110b397fa818f"
+    },
+    {
+      "source": "zo1/96.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ576радиотехн",
+      "parsed_name": "ЗМ234",
+      "duplicate_of": [],
+      "bytes": 28366,
+      "sha256": "a4bb2755e20f6f51b1993dfde93e288091cf8bd391c901e67aa7008c5db1aa99"
+    },
+    {
+      "source": "zo2/4.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "З146ТПООП",
+      "parsed_name": "З146ТПОП",
+      "duplicate_of": [],
+      "bytes": 28551,
+      "sha256": "aa3ce57b2ba8dfe762e50392ae2c5417e15fea831a1aa45dc73faf59307adbe2"
+    },
+    {
+      "source": "zo2/155.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9202,
+      "sha256": "082371ab0d4be81906226d46fa87dc3b0d7dcdad69bbc6a98458cc04969a6a64"
+    },
+    {
+      "source": "zo2/134.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "З142ТПООП",
+      "parsed_name": "З142ТПОП",
+      "duplicate_of": [],
+      "bytes": 38224,
+      "sha256": "5012bdf0abeae57550ee3edae5fe45fc177423d8d65b5e47134bafc3fe34f3cc"
+    },
+    {
+      "source": "zo2/166.htm",
+      "reason": "duplicate_page",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": "ЗМ1116УК",
+      "duplicate_of": [
+        "165"
+      ],
+      "bytes": 9221,
+      "sha256": "052b1ce33ab35358ae97553b36dcc46265c7a93e5b78262130607571a0474850"
+    },
+    {
+      "source": "zo2/76.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 37852,
+      "sha256": "bfd2db7e31bf0321fcadf81b7d718b1c7dbc942a5cc1f4a0ef3f6ad59b7ec1e6"
+    },
+    {
+      "source": "zo2/25.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "З6166Докум.и Архив.",
+      "parsed_name": "З6146Докум.и Архив.",
+      "duplicate_of": [],
+      "bytes": 29245,
+      "sha256": "64f3b5cdbf8f60c5aff0b2ae6bf70ddb92ff4954a64d72a3dfe38d6e7fe0295e"
+    },
+    {
+      "source": "zo2/27.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 35145,
+      "sha256": "06e0a6c6b915099788cf085cc9212802587472dd2fd3086c8b7e83c6ca55e53e"
+    },
+    {
+      "source": "zo2/93.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9213,
+      "sha256": "6e0293fa5a3968d1988775c06d7c708bbba93f46f0b605bde1d05ba7055b98ae"
+    },
+    {
+      "source": "zo2/184.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ145ТПООП",
+      "parsed_name": "ЗБ311 ИСИТ",
+      "duplicate_of": [],
+      "bytes": 9211,
+      "sha256": "96ac313b8d14feaba20c522a96de0f91ac0aec7aed6d6e7c0d69c0238aba534c"
+    },
+    {
+      "source": "zo2/94.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9213,
+      "sha256": "d311f9eedbd15d091a81c868c098fff76db47f2269d35a621fb4ef50c1d21a94"
+    },
+    {
+      "source": "zo2/185.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ115Б",
+      "parsed_name": "ЗБ321 ТЛ",
+      "duplicate_of": [],
+      "bytes": 38039,
+      "sha256": "ae89cae085ea2cb95d2d0b4db8f394f75d3db9493daeb5dd8f8e35417d1cfd6f"
+    },
+    {
+      "source": "zo2/95.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": ".",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9215,
+      "sha256": "a6190beaa19af28374166b3955fb2306ce5f080823a33770f02c835e47b19cd9"
+    },
+    {
+      "source": "zo2/187.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ165Туризм",
+      "parsed_name": "ЗБ331-2ТГВ",
+      "duplicate_of": [],
+      "bytes": 9211,
+      "sha256": "fa8735e0a4e0a091ba8e733a2ad15576da02ffafd0544c1935d5b60abaa46672"
+    },
+    {
+      "source": "zo2/188.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ215Стр",
+      "parsed_name": "ЗБ331-4АД",
+      "duplicate_of": [],
+      "bytes": 9210,
+      "sha256": "f354f535715073e57ebf1b8e7b1d802409be225f46678c0c7a442a344103ef98"
+    },
+    {
+      "source": "zo2/189.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ615-2ЭИОД",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9202,
+      "sha256": "da7c78af18d0f255eacbe034c2781297264b587b6a4f4820efefc345e96897af"
+    },
+    {
+      "source": "zo2/190.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ615-2ГРЭ",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9202,
+      "sha256": "f94a5d56dfb392c2ab79b7962ff8b190eea276e5d59258251bc565d818ec121a"
+    },
+    {
+      "source": "zo2/191.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ665М",
+      "parsed_name": "З421 НТСС",
+      "duplicate_of": [],
+      "bytes": 39223,
+      "sha256": "5e2deb4acc1c87168cd54438f0e0cbd94a1892fc782659ae225eb7da80ede9eb"
+    },
+    {
+      "source": "zo2/192.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ685",
+      "parsed_name": "ЗБ421 КТОМП",
+      "duplicate_of": [],
+      "bytes": 37908,
+      "sha256": "a4de85033a978f8eb762fb23648c53896e83e1fafdca26b54e470c7e3648f4ef"
+    },
+    {
+      "source": "zo2/193.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ635ТБ",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9202,
+      "sha256": "5a84c85575bdd5ab68f8cd7d0c50d9c595ee19e24d35f4a130e11947b898ffea"
+    },
+    {
+      "source": "zo2/194.htm",
+      "reason": "source_unfilled",
+      "category": "source",
+      "expected_name": "ЗМ645СР",
+      "parsed_name": ".",
+      "duplicate_of": [],
+      "bytes": 9202,
+      "sha256": "a23b2ee26a01592c59e6e9c1cf1754dc0402e38d8b4b66ccb318d5fc6c05cb88"
+    },
+    {
+      "source": "zo2/195.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ625-1Ю",
+      "parsed_name": "З 511 ТД",
+      "duplicate_of": [],
+      "bytes": 38596,
+      "sha256": "bb383ecacc90e1e976ac25ac5cd17b78a92bbdd6b5e1cb29c05267f2a48dd2ea"
+    },
+    {
+      "source": "zo2/196.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ625-2Ю",
+      "parsed_name": "ЗБ511 Э",
+      "duplicate_of": [],
+      "bytes": 9208,
+      "sha256": "71eee2c5f4dc7d5a2dd25593d70e50674636efe65bce402512c14eab78774b8e"
+    },
+    {
+      "source": "zo2/197.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ675УП",
+      "parsed_name": "ЗБ541 ГМУ",
+      "duplicate_of": [],
+      "bytes": 9210,
+      "sha256": "9dac995a435661a5ff4f1949fd526a2d98851365b48ac426832fad8a009343d7"
+    },
+    {
+      "source": "zo2/199.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ315ЭЭиЭТ",
+      "parsed_name": "ЗБ5121 Журн.",
+      "duplicate_of": [],
+      "bytes": 9213,
+      "sha256": "5f7e285a29473226f1c1d1e016d3dbb6bb2c53d6c81ab003306ef2a17f13188a"
+    },
+    {
+      "source": "zo2/200.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ535ИВТ",
+      "parsed_name": "ЗБ5141 РСО",
+      "duplicate_of": [],
+      "bytes": 9211,
+      "sha256": "5a6a4acd4f1cede4774efb81550dd10f3dc8033c6a48f1f3afa18d1e3e7f4f16"
+    },
+    {
+      "source": "zo2/201.htm",
+      "reason": "group_name_mismatch",
+      "category": "source",
+      "expected_name": "ЗМ565ПрИ.",
+      "parsed_name": "ЗБ5151 СР",
+      "duplicate_of": [],
+      "bytes": 9210,
+      "sha256": "502977f0bab3841c3f7171f8b836622dc6ed043d75e4994c63d1a65ec7f73daf"
+    }
+  ],
+  "source_checked_at_oldest": "2026-10-16T18:40:11.653331+00:00",
+  "source_checked_at_latest": "2026-10-16T18:43:00.956287+00:00",
+  "parser_revision": "3f5db87562797f69",
+  "api_reparsed_from_sources": true
+}

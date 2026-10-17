@@ -1,6 +1,7 @@
 const {defineConfig,devices}=require('@playwright/test');
 module.exports=defineConfig({
-  testDir:'./e2e', testMatch:'**/*.spec.cjs', fullyParallel:true,
+  testDir:'./e2e', testMatch:process.env.ESSTU_CONTRACT_TESTS?'**/contract.spec.cjs':'**/*.spec.cjs', fullyParallel:true,
+  testIgnore:process.env.ESSTU_CONTRACT_TESTS?[]:['**/contract.spec.cjs'],
   retries:0, timeout:30000, reporter:'list',
   use:{baseURL:'http://127.0.0.1:8768/esstu-schedule/',trace:'retain-on-failure'},
   projects:[{name:'desktop',use:{...devices['Desktop Chrome']}},

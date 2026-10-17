@@ -22,6 +22,8 @@ jobs:
     with:
       sync_sources: true
       publish: true
+    secrets:
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
     permissions:
       contents: write
       actions: read
@@ -47,7 +49,7 @@ jobs:
             const existing = issues.find(issue => !issue.pull_request && issue.title === title);
             const run = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
             if (['failure','cancelled'].includes(process.env.SYNC_RESULT)) {
-              const body = `Синхронизация или проверка новой выгрузки завершилась ошибкой или была отменена. Предыдущая опубликованная версия сохранена.\n\n[Журнал и диагностические файлы](${run}).`;
+              const body = `Синхронизация, проверка, публикация или сохранение снимка data завершились ошибкой либо были отменены. Проверьте этап сбоя и текущий статус сайта.\n\n[Журнал и диагностические файлы](${run}).`;
               if (existing) await github.rest.issues.update({owner,repo,issue_number:existing.number,body});
               else await github.rest.issues.create({owner,repo,title,body});
             } else if (existing) {

@@ -39,6 +39,14 @@ function saveData(cache, request, response) {
   });
   return dataWrite;
 }
+async function fingerprint(response) {
+  const etag=response.headers.get('ETag');
+  if(etag)return 'etag:'+etag;
+  const stored=response.headers.get('X-ESSTU-Content-Hash');
+  if(stored)return stored;
+  const digest=await crypto.subtle.digest('SHA-256',await response.clone().arrayBuffer());
+  return Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+}
 async function migrateData(response) {
   const payload = await response.json();
   if (!payload || typeof payload !== 'object') throw Error('Unsupported saved data');
@@ -93,11 +101,16 @@ self.addEventListener('fetch', event => {
     if(!isData){const shell=await cache.match(shellURL);if(shell)return shell;}
     const saved=isData?await cache.match(request):null;
     if(saved && request.headers.get('X-ESSTU-Cache-Only')==='1')return saved;
-    const fetching=fetch(request,{cache:'reload',signal:saved?undefined:AbortSignal.timeout(12000)}).then(async response=>{
+    const fetching=fetch(request,{cache:'reload',signal:AbortSignal.timeout(saved?60000:12000)}).then(async response=>{
       if(response.ok){
         try{
-          const changed=isData && saved && await saved.clone().text()!==await response.clone().text();
-          if(isData)await saveData(cache,request,response.clone());else await cache.put(shellURL,response.clone());
+          let changed=false;
+          if(isData){
+            const hash=await fingerprint(response);
+            changed=saved && await fingerprint(saved)!==hash;
+            const headers=new Headers(response.headers);headers.set('X-ESSTU-Content-Hash',hash);
+            await saveData(cache,request,new Response(response.clone().body,{status:response.status,statusText:response.statusText,headers}));
+          }else await cache.put(shellURL,response.clone());
           if(changed)for(const client of await self.clients.matchAll({type:'window'}))client.postMessage({type:'DATA_UPDATED',url:request.url});
         }catch(error){console.warn('ESSTU cache write failed',error);}
       }

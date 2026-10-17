@@ -164,7 +164,7 @@ function renderDataQuality() {
     ageWarning.textContent=stale?'Выгрузка не обновлялась более 12 часов. Проверьте занятия на портале ВСГУТУ.':'';
   }
   const warning=document.getElementById('incompleteWarning');
-  if(warning)warning.classList.toggle('hidden',!currentSchedule?.is_incomplete);
+  if(warning){warning.classList.toggle('hidden',!currentSchedule?.is_incomplete && !currentSchedule?.incomplete_reason);warning.textContent=currentSchedule?.is_incomplete?'Данные неполные: '+scheduleIssueText(currentSchedule):'Показана сохранённая копия: '+scheduleIssueText(currentSchedule);}
   const status=document.getElementById('parseQualityStatus');
   if(status)status.textContent=catalogQuality ? `Ошибок разбора: ${catalogQuality.parse_error_count ?? 0} · Неполных расписаний: ${catalogQuality.incomplete_schedule_count ?? '—'} · Ячеек для сверки: ${catalogQuality.review_cell_count ?? catalogQuality.unparsed_cell_count ?? '—'}` : 'Статистика качества пока недоступна';
 }

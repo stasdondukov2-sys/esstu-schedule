@@ -33,6 +33,17 @@ routedTest('unreadable data is marked incomplete, not as a free day',async({page
   await expect(page.locator('#heroLessons')).toContainText('Данные неполные');
 });
 
+for(const reason of ['Источник портала содержит расписание другой группы (ЗУ-395-1).','Расписание на портале не заполнено.'])routedTest('source defect is explained: '+reason,async({page})=>{
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:{
+    mode:'student',group_name:'1146 тпуп',group_id:'1',section:'bakalavriat',weeks:{1:{},2:{}},is_incomplete:true,incomplete_reason:reason,parse_errors:[reason]
+  }}));
+  await page.goto('./');
+  await expect(page.locator('#incompleteWarning')).toContainText(reason);
+  await expect(page.locator('#pairsContainer')).toContainText(reason);
+  await expect(page.locator('#heroLessons')).toContainText(reason);
+  await expect(page.locator('#pairsContainer')).not.toContainText('занятий нет');
+});
+
 test('installation URLs stay inside the repository and the cached shell opens offline',async({page,context,request})=>{
   const manifest=await (await request.get('manifest.json')).json();
   for(const relative of [manifest.start_url,manifest.scope,...manifest.shortcuts.map(shortcut=>shortcut.url)])

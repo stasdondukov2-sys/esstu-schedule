@@ -96,7 +96,7 @@ function updateCampusHero() {
     label.textContent=state.kind==='finished'?'Занятия завершены':'Сегодня';remaining.textContent='';
     const upcoming=['finished','empty'].includes(state.kind)?nextStudyDay(currentSchedule,now):null;
     const first=upcoming?.pairs[0],rooms=first?[...new Set(first.lessons.map(lesson=>lesson.room).filter(Boolean))]:[];
-    const html=`<p>${state.kind==='finished'?'Все пары на сегодня закончились':currentSchedule.is_incomplete?'Данные неполные — проверьте источник':state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>${upcoming?`<button class="hero-upcoming" onclick="openUpcomingStudyDay()"><strong>${upcoming.offset===1?'Завтра':escapeHTML(upcoming.label)}: ${upcoming.pairs.length} ${pairWord(upcoming.pairs.length)}</strong><span>${escapeHTML(first.start)}${rooms.length?' · '+escapeHTML(rooms.map(room=>decodeEsstuRoom(room)?.online?'Онлайн':'ауд. '+room).join(', ')):''} ${uiIcon('arrowUpRight')}</span></button>`:''}`;
+    const html=`<p>${state.kind==='finished'?'Все пары на сегодня закончились':currentSchedule.is_incomplete?'Данные неполные — '+escapeHTML(scheduleIssueText(currentSchedule)):state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>${upcoming?`<button class="hero-upcoming" onclick="openUpcomingStudyDay()"><strong>${upcoming.offset===1?'Завтра':escapeHTML(upcoming.label)}: ${upcoming.pairs.length} ${pairWord(upcoming.pairs.length)}</strong><span>${escapeHTML(first.start)}${rooms.length?' · '+escapeHTML(rooms.map(room=>decodeEsstuRoom(room)?.online?'Онлайн':'ауд. '+room).join(', ')):''} ${uiIcon('arrowUpRight')}</span></button>`:''}`;
     if(lessons.dataset.content!==html){lessons.innerHTML=html;lessons.dataset.content=html;}
     return;
   }
@@ -299,3 +299,5 @@ function renderRecentSchedules(){
   }
   document.getElementById('recentSection').hidden=!box.children.length;
 }
+
+function scheduleIssueText(schedule){return schedule?.incomplete_reason || schedule?.parse_errors?.[0] || 'Расписание не удалось надёжно прочитать. Сверьте источник.';}

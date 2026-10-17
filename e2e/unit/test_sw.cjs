@@ -24,7 +24,7 @@ function store(name){
 const context={self:{addEventListener:(name,fn)=>handlers[name]=fn,location:{origin:new URL(scope).origin},registration:{scope},clients:{claim:async()=>{},matchAll:async()=>[{postMessage:message=>notifications.push(message)}]},skipWaiting:async()=>{skipped=true}},
   caches:{open:async name=>store(name),keys:async()=>[...stores.keys()],delete:async name=>{deleted.push(name);return stores.delete(name);}},
   fetch:async(request,options)=>{fetches++;assert.equal(options.cache,'reload');if(offline)throw Error('offline');if(deferred)return deferred;return new Response('network',{status});},
-  Request,Response,Headers,URL,setTimeout:(fn,ms)=>setTimeout(fn,ms===3500?10:ms),clearTimeout,AbortSignal:{timeout:ms=>{timeouts.push(ms);return AbortSignal.timeout(ms);}},console:{warn(){}}};
+  Request,Response,Headers,URL,crypto:require('crypto').webcrypto,setTimeout:(fn,ms)=>setTimeout(fn,ms===3500?10:ms),clearTimeout,AbortSignal:{timeout:ms=>{timeouts.push(ms);return AbortSignal.timeout(ms);}},console:{warn(){}}};
 vm.createContext(context);vm.runInContext(fs.readFileSync('static/sw.js','utf8'),context);
 async function lifecycle(name,event={}){let job;handlers[name]({...event,waitUntil:p=>job=p});await job;}
 async function request(path,options={}){let result;handlers.fetch({request:new Request(new URL(path,scope),options),waitUntil:p=>backgroundJobs.push(p),respondWith:p=>result=p});return result;}
@@ -47,7 +47,7 @@ async function request(path,options={}){let result;handlers.fetch({request:new R
   assert(!(await data.match('https://example.test/another-app/api/private')));
   assert.equal((await (await data.match('api/teacher')).json()).identity_ambiguous,true);
   offline=true;
-  const a=await request('api/schedule?group=A');assert.equal((await a.json()).subject,'A');assert.equal(a.headers.get('X-ESSTU-Cache'),'offline');assert.equal(timeouts.length,0,'cached request is never aborted by the response deadline');
+  const a=await request('api/schedule?group=A');assert.equal((await a.json()).subject,'A');assert.equal(a.headers.get('X-ESSTU-Cache'),'offline');assert.equal(timeouts.at(-1),60000,'background download has a one-minute limit independent of the response deadline');
   assert.equal((await (await request('api/schedule?group=B')).json()).subject,'B');
   assert.equal((await request('api/schedule?group=missing')).status,503);assert.equal(timeouts.at(-1),12000);
   const before=fetches;

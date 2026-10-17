@@ -11,32 +11,24 @@ from datetime import UTC, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
-from esstu_schedule.catalog import build_catalog, source_metadata, stamp_schedule
-from esstu_schedule.data.repository import (
-    group_schedule as parse_group_schedule_html,
-    group_identity_error,
-)
+from esstu_schedule.catalog import build_catalog, source_metadata
 from esstu_schedule.parser import (
-    SECTIONS,
     get_week_num,
-    parse_groups_list_html,
-    normalize_group_name,
 )
 from esstu_schedule.rooms import build_rooms_index
 from esstu_schedule.teachers import departments_from_teachers, teachers_from_groups
 
 from esstu_schedule.data.diagnostics import (
     parsing_status,
-    record_error,
     reset_diagnostics,
 )
 from esstu_schedule.data.store import write_json_atomic
 from esstu_schedule.data.provenance import build_provenance
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-DEMO_DIR = BASE_DIR / "demo_data"
+DEMO_DIR = Path(os.environ.get("ESSTU_SOURCE_DIR", BASE_DIR / "demo_data"))
 STATIC_DIR = BASE_DIR / "static"
-DIST_DIR = BASE_DIR / "dist"
+DIST_DIR = Path(os.environ.get("ESSTU_DIST_DIR", BASE_DIR / "dist"))
 
 
 LOGGER = logging.getLogger(__name__)
@@ -62,6 +54,8 @@ def build_id(dist: Path) -> str:
         if not path.is_file() or relative.parts[0] == "api":
             continue
         content = path.read_bytes()
+        if path.suffix in {".html", ".js", ".css", ".json", ".svg", ".txt"}:
+            content = content.replace(b"\r\n", b"\n")
         if relative == Path("index.html"):
             content = re.sub(
                 rb'content="[^"]+" name="app-version"',
@@ -87,6 +81,13 @@ def build_id(dist: Path) -> str:
 
 
 def stamp_shell(dist: Path) -> str:
+    shell_bytes = sum(
+        path.stat().st_size
+        for path in dist.rglob("*")
+        if path.is_file() and path.relative_to(dist).parts[0] != "api"
+    )
+    if shell_bytes > 5 * 1024 * 1024:
+        raise RuntimeError("Offline shell exceeds the 5 MiB budget")
     identity = build_id(dist)
     worker = dist / "sw.js"
     worker_text, worker_count = re.subn(
@@ -109,8 +110,8 @@ def stamp_shell(dist: Path) -> str:
         "const SHELL = " + json.dumps(shell_paths(dist)) + ";",
         worker_text,
     )
-    worker.write_text(worker_text, encoding="utf-8")
-    index.write_text(index_text, encoding="utf-8")
+    worker.write_text(worker_text, encoding="utf-8", newline="\n")
+    index.write_text(index_text, encoding="utf-8", newline="\n")
     return identity
 
 
@@ -151,6 +152,11 @@ def build():
     print("🚀 Starting static build for GitHub Pages...")
     start_time = time.time()
 
+    if (
+        not DIST_DIR.resolve().is_relative_to(BASE_DIR.resolve())
+        or DIST_DIR.resolve() == BASE_DIR.resolve()
+    ):
+        raise RuntimeError("Build output must stay inside the workspace")
     if DIST_DIR.exists():
         shutil.rmtree(DIST_DIR)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
@@ -161,6 +167,16 @@ def build():
             shutil.copy2(item, DIST_DIR / item.name)
         elif item.is_dir():
             shutil.copytree(item, DIST_DIR / item.name)
+    for asset in DIST_DIR.rglob("*"):
+        if asset.is_file() and asset.suffix in {
+            ".html",
+            ".js",
+            ".css",
+            ".json",
+            ".svg",
+            ".txt",
+        }:
+            asset.write_bytes(asset.read_bytes().replace(b"\r\n", b"\n"))
     print("✓ Copied static files to dist/")
 
     # 2. Create API directory structure
@@ -186,156 +202,17 @@ def build():
         **now_week,
     }
 
-    # 3. Parse and save groups list for all sections
-    from scripts.publication import previous_groups, last_good_group
+    from scripts.group_build import build_groups
 
-    previous = previous_groups(os.environ.get("ESSTU_BASELINE_DIR"))
-    group_schedules = []
-    group_expected = 0
-    group_failures = []
+    group_schedules, group_failures, catalog_repairs, group_expected = build_groups(
+        DEMO_DIR,
+        api_dir,
+        metadata=source_metadata(DEMO_DIR, with_hashes=True),
+        now=built_at,
+        baseline=os.environ.get("ESSTU_BASELINE_DIR"),
+        data_update=os.environ.get("ESSTU_DATA_UPDATE") == "1",
+    )
     metadata = source_metadata(DEMO_DIR, with_hashes=True)
-    failed_downloads = {
-        row["path"]
-        for report in DEMO_DIR.glob("*sync.json")
-        for row in json.loads(report.read_text(encoding="utf-8")).get("failed", [])
-        if "path" in row
-    }
-    for section in SECTIONS.keys():
-        rasp_file = DEMO_DIR / section / "raspisan.htm"
-        if not rasp_file.exists():
-            record_error(f"{section}/raspisan.htm", "Отсутствует каталог групп")
-            continue
-        html = rasp_file.read_bytes().decode("cp1251", errors="replace")
-        groups = parse_groups_list_html(html, section=section)
-        group_expected += len(groups)
-        payload = {"section": section, "count": len(groups), "groups": groups}
-        write_api_json(api_dir / "groups" / f"{section}.json", payload)
-        print(f"✓ Saved {len(groups)} groups for section '{section}'")
-
-        # 4. Parse group schedules
-        sec_sched_dir = api_dir / "schedule" / section
-        sec_sched_dir.mkdir(parents=True, exist_ok=True)
-        count_sched = 0
-        for group in groups:
-            gid = group["id"]
-            htm_file = DEMO_DIR / section / f"{gid}.htm"
-            if not htm_file.exists():
-                record_error(f"{section}/{gid}.htm", "Отсутствует расписание группы")
-                group_failures.append(
-                    {"source": f"{section}/{gid}.htm", "reason": "missing_file"}
-                )
-                missing = {
-                    "mode": "student",
-                    "group_id": gid,
-                    "group_name": group["name"],
-                    "section": section,
-                    "is_incomplete": True,
-                    "parse_errors": ["Отсутствует расписание группы"],
-                    "weeks": {"1": {}, "2": {}},
-                    "total_lessons": 0,
-                }
-                sched = last_good_group(
-                    missing,
-                    previous.get((section, normalize_group_name(group["name"]))),
-                    built_at,
-                )
-                group_schedules.append(sched)
-                write_api_json(sec_sched_dir / f"{gid}.json", sched)
-            if htm_file.exists():
-                try:
-                    g_html = htm_file.read_bytes().decode("cp1251", errors="replace")
-                    sched = parse_group_schedule_html(
-                        g_html, group_id=gid, section=section
-                    )
-                    identity_error = group_identity_error(sched, group["name"])
-                    if identity_error:
-                        group_failures.append(
-                            {
-                                "source": f"{section}/{gid}.htm",
-                                "reason": identity_error,
-                                "expected_name": group["name"],
-                                "parsed_name": sched["group_name"],
-                                "bytes": htm_file.stat().st_size,
-                                "sha256": metadata.get(f"{section}/{gid}.htm", {}).get(
-                                    "sha256"
-                                ),
-                            }
-                        )
-                        record_error(
-                            f"{section}/{gid}.htm",
-                            "Имя группы не совпадает с каталогом",
-                        )
-                        sched.update(
-                            group_name=group["name"],
-                            norm_group_name=group["norm_name"],
-                            weeks={"1": {}, "2": {}},
-                            total_lessons=0,
-                            is_incomplete=True,
-                            parse_errors=["Имя группы не совпадает с каталогом"],
-                        )
-                    if sched.get("is_incomplete") and not identity_error:
-                        group_failures.append(
-                            {
-                                "source": f"{section}/{gid}.htm",
-                                "reason": "table_structure",
-                                "errors": sched.get("parse_errors"),
-                                "bytes": htm_file.stat().st_size,
-                            }
-                        )
-                    sched["resolved_group_id"] = gid
-                    sched["last_modified"] = source_modified_iso(
-                        metadata.get(f"{section}/{gid}.htm", {}).get("last_modified")
-                    )
-                    sched["week_now"] = now_week
-                    sched["week_calculated_at"] = generated_at
-                    stamp_schedule(sched, metadata, generated_at)
-                    if (
-                        os.environ.get("ESSTU_DATA_UPDATE") == "1"
-                        and f"{section}/{gid}.htm" in failed_downloads
-                    ):
-                        sched.update(
-                            is_stale_fallback=True,
-                            fallback_reason=["Не удалось обновить источник"],
-                        )
-                    if os.environ.get("ESSTU_DATA_UPDATE") == "1" and not sched.get(
-                        "is_incomplete"
-                    ):
-                        from scripts.publication import source_is_recent
-
-                        if not source_is_recent(sched, built_at):
-                            sched.update(
-                                is_incomplete=True,
-                                parse_errors=[
-                                    "Источник старше 7 дней или дата проверки неизвестна"
-                                ],
-                                weeks={"1": {}, "2": {}},
-                                total_lessons=0,
-                            )
-                            group_failures.append(
-                                {
-                                    "source": f"{section}/{gid}.htm",
-                                    "reason": "source_expired",
-                                }
-                            )
-                    sched = last_good_group(
-                        sched,
-                        previous.get((section, normalize_group_name(group["name"]))),
-                        built_at,
-                    )
-                    group_schedules.append(sched)
-                    write_api_json(sec_sched_dir / f"{gid}.json", sched)
-                    count_sched += 1
-                except Exception as e:
-                    record_error(f"{section}/{gid}.htm", str(e))
-                    LOGGER.exception("Group parsing failed: %s/%s", section, gid)
-                    group_failures.append(
-                        {
-                            "source": f"{section}/{gid}.htm",
-                            "reason": "parse_exception",
-                            "error": str(e),
-                        }
-                    )
-        print(f"✓ Generated {count_sched} schedule JSON files for '{section}'")
 
     catalog, institutes, departments = build_catalog(
         DEMO_DIR, teachers_from_groups(group_schedules)
@@ -375,6 +252,20 @@ def build():
     diagnostics = {**parsing_status(), **provenance}
     diagnostics["incomplete_schedule_count"] = sum(
         bool(item.get("is_incomplete")) for item in [*group_schedules, *catalog]
+    )
+    from esstu_schedule.identity import SOURCE_REASONS
+    from scripts.parser_revision import parser_revision
+    from scripts.group_freshness import group_freshness
+
+    diagnostics.update(group_freshness(group_schedules, built_at))
+    diagnostics["parser_revision"] = parser_revision()
+    diagnostics["catalog_repairs"] = catalog_repairs
+    diagnostics["catalog_recovered_count"] = len(catalog_repairs)
+    diagnostics["pipeline_failed_count"] = sum(
+        row["reason"] not in SOURCE_REASONS for row in group_failures
+    )
+    diagnostics["source_issue_count"] = sum(
+        row["reason"] in SOURCE_REASONS for row in group_failures
     )
     diagnostics["group_failures"] = group_failures
     diagnostics["group_failure_reasons"] = dict(

@@ -371,7 +371,7 @@
 
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
-      if (currentSchedule?.is_incomplete) { container.textContent='Данные неполные — расписание не удалось надёжно прочитать.'; return; }
+      if (currentSchedule?.is_incomplete) { container.textContent='Данные неполные — '+scheduleIssueText(currentSchedule); return; }
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
       if ((hasDatedSchedule(currentSchedule) || viewMode === 'dates') && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
       if (scheduleTab === 'session') { renderSessionTimeline(container); return; }

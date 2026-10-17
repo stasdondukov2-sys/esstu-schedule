@@ -1,8 +1,10 @@
 const assert=require('assert');
 const {freshnessProblem,monitor}=require('../../scripts/freshness.cjs');
 const now=Date.parse('2026-10-17T12:00:00+08:00');
-const fresh={generated_at:new Date(now).toISOString(),source_checked_at_latest:new Date(now-3600000).toISOString()};
+const fresh={generated_at:new Date(now).toISOString(),source_checked_at_latest:new Date(now-3600000).toISOString(),group_check_dates:{'zo1/1':new Date(now-3600000).toISOString()}};
 assert.equal(freshnessProblem(fresh,now),'');
+assert(freshnessProblem({...fresh,group_check_dates:{a:fresh.generated_at,b:'2026-10-15T00:00:00Z'}},now).includes('1/2 (50.0%)'));
+assert(freshnessProblem({...fresh,group_check_dates:{a:null}},now).includes('0/1'));
 assert(freshnessProblem({...fresh,generated_at:'2026-10-16T12:00:00+08:00'},now).includes('Сборка: более 12 часов'));
 assert(freshnessProblem({...fresh,source_checked_at_latest:'2026-10-16T12:00:00+08:00'},now).includes('Проверка источников: более 12 часов'));
 assert(freshnessProblem({},now).includes('дата неизвестна'));
