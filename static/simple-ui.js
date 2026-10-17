@@ -26,12 +26,42 @@ function renderCalendarDays() {
   document.getElementById('dayTabs').innerHTML=DAY_NAMES.map(day=>{
     const meta=dayDateMeta(week[day.key],day.key,dates),active=day.key===selectedDayKey;
     const count=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length).length;
-    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" ${meta.isToday?'aria-current="date"':''} class="calendar-day"><span class="calendar-weekday">${day.short}${meta.isToday?' <span class="calendar-today" aria-label="Сегодня">•</span>':''}${hasDayChanges(selectedWeek,day.key)?`<span class="calendar-changed" aria-label="Есть изменения в расписании">${uiIcon('refresh')}</span>`:''}</span><span class="calendar-date">${escapeHTML(meta.shortLabel)}</span><span class="calendar-count ${count>0?'has-lessons':''}">${currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар'}</span></button>`;
+    const changes=hasDayChanges(selectedWeek,day.key)?scheduleChanges.filter(change=>[change.current,change.previous].some(row=>row && String(row.week)===String(selectedWeek) && row.day===day.key)).length:0;
+    const past=meta.date && !meta.isToday && meta.date<getUlanUdeNow();
+    return `<button onclick="selectDay('${day.key}')" aria-pressed="${active}" data-past="${!!past}" ${meta.isToday?'aria-current="date"':''} class="calendar-day"><span class="calendar-weekday">${day.short}${meta.isToday?' <span class="calendar-today" aria-label="Сегодня">•</span>':''}${changes?`<span class="calendar-changed" title="Изменений: ${changes}" aria-label="Изменений: ${changes}"><i aria-hidden="true"></i>${changes}</span>`:''}</span><span class="calendar-date">${escapeHTML(meta.shortLabel)}</span><span class="calendar-count ${count>0?'has-lessons':''}">${currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар'}</span></button>`;
   }).join('');
+  let legend=document.getElementById('calendarChangesLegend');
+  if(!legend){legend=document.createElement('p');legend.id='calendarChangesLegend';document.getElementById('dayTabs').after(legend);}
+  legend.hidden=viewMode!=='day' || scheduleTab==='session' || hasDatedSchedule(currentSchedule) || !DAY_KEYS.some(day=>hasDayChanges(selectedWeek,day));
+  legend.innerHTML='<span class="calendar-changed"><i aria-hidden="true"></i></span> Число рядом с днём — изменения расписания';
   const day=DAY_NAMES.find(day=>day.key===selectedDayKey),meta=dayDateMeta(week[selectedDayKey],selectedDayKey,dates);
   document.getElementById('selectedDaySummary').textContent=day?`${day.full}, ${meta.shortLabel}${meta.isToday?' · Сегодня':''}`:'';
 }
-function pairWord(count) {return count%100>=11 && count%100<=14?'пар':count%10===1?'пара':count%10>=2 && count%10<=4?'пары':'пар';}
+const pairPluralRules=new Intl.PluralRules('ru');
+function pairWord(count) {return {one:'пара',few:'пары',many:'пар',other:'пар'}[pairPluralRules.select(count)];}
+function durationText(minutes) {
+  const whole=Math.max(0,Math.ceil(minutes)),hours=Math.floor(whole/60),rest=whole%60;
+  return hours?`${hours} ч${rest?' '+rest+' мин':''}`:`${rest} мин`;
+}
+function isOnlineLesson(lesson) {
+  return !!decodeEsstuRoom(lesson.room)?.online || (!lesson.room && /онлайн[-\s]?курс|online course/i.test(lesson.subject || ''));
+}
+function displaySubject(lesson) {
+  return isOnlineLesson(lesson)?String(lesson.subject || '').replace(/\s*\((?:онлайн[-\s]?курс|online course)\)/ig,'').trim() || lesson.subject:lesson.subject;
+}
+function lessonRoomLabel(lesson) {return isOnlineLesson(lesson)?'Онлайн':lesson.room?'ауд. '+lesson.room:'';}
+function groupOnlinePairs(pairs) {
+  const groups=[];
+  const key=pair=>pair?.lessons?.length===1 && isOnlineLesson(pair.lessons[0]) && !pair.lessons[0].parse_warning && !pair.lessons[0].needs_review
+    ? JSON.stringify(['subject','type_code','type','teacher_key','teacher','room','groups','tag','source_file'].map(field=>pair.lessons[0][field] || '')):null;
+  for(let index=0;index<pairs.length;index++){
+    const previous=groups.at(-1),signature=key(pairs[index]),last=previous && pairs[previous.end];
+    const gap=last?timeToMinutes(pairs[index].start)-timeToMinutes(last.end):null;
+    if(previous && signature && signature===previous.signature && Number(pairs[index].number)===Number(last.number)+1 && gap>=0 && gap<=30)previous.end=index;
+    else groups.push({start:index,end:index,signature});
+  }
+  return groups;
+}
 function heroState(schedule,now) {
   if(schedule?.is_incomplete)return {kind:'incomplete'};
   if(hasDatedSchedule(schedule))return {kind:'dated'};
@@ -64,23 +94,25 @@ function updateCampusHero() {
   updateCurrentCards(now);
   if(!pair){
     label.textContent=state.kind==='finished'?'Занятия завершены':'Сегодня';remaining.textContent='';
-    lessons.innerHTML=`<p class="font-semibold text-sm">${state.kind==='finished'?'Все пары на сегодня закончились':currentSchedule.is_incomplete?'Данные неполные — проверьте источник':state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>`;
-    delete lessons.dataset.content;
+    const upcoming=['finished','empty'].includes(state.kind)?nextStudyDay(currentSchedule,now):null;
+    const first=upcoming?.pairs[0],rooms=first?[...new Set(first.lessons.map(lesson=>lesson.room).filter(Boolean))]:[];
+    const html=`<p>${state.kind==='finished'?'Все пары на сегодня закончились':currentSchedule.is_incomplete?'Данные неполные — '+escapeHTML(scheduleIssueText(currentSchedule)):state.kind==='dated'?'Занятия по отдельным датам — проверьте расписание ниже':'На сегодня пар нет'}</p>${upcoming?`<button class="hero-upcoming" onclick="openUpcomingStudyDay()"><strong>${upcoming.offset===1?'Завтра':escapeHTML(upcoming.label)}: ${upcoming.pairs.length} ${pairWord(upcoming.pairs.length)}</strong><span>${escapeHTML(first.start)}${rooms.length?' · '+escapeHTML(rooms.map(room=>decodeEsstuRoom(room)?.online?'Онлайн':'ауд. '+room).join(', ')):''} ${uiIcon('arrowUpRight')}</span></button>`:''}`;
+    if(lessons.dataset.content!==html){lessons.innerHTML=html;lessons.dataset.content=html;}
     return;
   }
   label.textContent=state.kind==='current'?`Сейчас · ${pair.number}-я пара`:'Следующая пара';
-  remaining.textContent=state.kind==='current'?`до конца ${state.remaining} мин`:`через ${state.remaining} мин`;
+  remaining.textContent=state.kind==='current'?`до конца ${durationText(state.remaining)}`:`Сегодня в ${pair.start} · через ${durationText(state.remaining)}`;
   // Build only when the pair changes, so keyboard focus on room actions survives clock ticks.
   const html=pair.lessons.map((lesson,index)=>{
     const room=decodeEsstuRoom(lesson.room),subtitle=appMode==='student'?lesson.teacher:lesson.groups;
-    return `<div class="hero-lesson ${index?'hero-parallel':''}"><p class="hero-lesson-meta">${escapeHTML(pair.start)}–${escapeHTML(pair.end)} · ${escapeHTML(lesson.type || 'Занятие')}${lesson.tag?' · '+escapeHTML(lesson.tag):''}</p><h3 class="hero-subject">${escapeHTML(lesson.subject)}</h3><p class="hero-teacher">${escapeHTML(subtitle || '')}</p>${room?`<div class="hero-location"><button onclick="heroRoomAction(${index})" class="hero-room" aria-label="Аудитория ${escapeHTML(room.raw)}"><span>Аудитория</span><strong>${escapeHTML(room.raw)}</strong></button>${room.building?`<span class="hero-building" title="По обозначению аудитории">${escapeHTML(room.building)}<span aria-hidden="true">${uiIcon('arrowUpRight')}</span></span>`:''}</div>`:''}</div>`;
+    return `<div class="hero-lesson ${index?'hero-parallel':''}"><p class="hero-lesson-meta">${escapeHTML(pair.start)}–${escapeHTML(pair.end)} · ${escapeHTML(lesson.type || 'Занятие')}${lesson.tag?' · '+escapeHTML(lesson.tag):''}</p><h3 class="hero-subject">${escapeHTML(displaySubject(lesson))}</h3><p class="hero-teacher">${escapeHTML(subtitle || '')}</p>${isOnlineLesson(lesson)?`<span class="online-badge">${uiIcon('link')} Онлайн</span>`:room?`<div class="hero-location"><button onclick="heroRoomAction(${index})" class="hero-room" aria-label="Аудитория ${escapeHTML(room.raw)}"><span>Аудитория</span><strong>${escapeHTML(room.raw)}</strong></button>${room.building?`<span class="hero-building" title="По обозначению аудитории">${escapeHTML(room.building)}<span aria-hidden="true">${uiIcon('arrowUpRight')}</span></span>`:''}</div>`:''}</div>`;
   }).join('');
   if(lessons.dataset.content!==html){lessons.innerHTML=html;lessons.dataset.content=html;}
   if(state.kind==='current'){
     document.getElementById('heroProgress').setAttribute('aria-valuenow',Math.round(state.progress));
     document.getElementById('heroProgressFill').style.transform=`scaleX(${state.progress/100})`;
   }
-  if(state.next)next.textContent=`Далее через ${Math.max(0,Math.ceil(timeToMinutes(state.next.start)-now.getHours()*60-now.getMinutes()-now.getSeconds()/60))} мин · ${state.next.start} · `+state.next.lessons.map(lesson=>`${lesson.subject}${lesson.room?' · ауд. '+lesson.room:''}`).join(' / ');
+  if(state.next)next.textContent=`Далее в ${state.next.start} · через ${durationText(timeToMinutes(state.next.start)-now.getHours()*60-now.getMinutes()-now.getSeconds()/60)} · `+state.next.lessons.map(lesson=>`${displaySubject(lesson)}${lessonRoomLabel(lesson)?' · '+lessonRoomLabel(lesson):''}`).join(' / ');
 }
 function heroRoomAction(index) {const pair=heroState(currentSchedule,getUlanUdeNow()).pair;if(pair?.lessons[index]?.room)openRoomsModal(pair.lessons[index].room);}
 function updateCurrentCards(now) {
@@ -93,6 +125,10 @@ function updateCurrentCards(now) {
     card.dataset.current=String(active);
     card.classList.toggle('border-teal-500',active);card.classList.toggle('border-slate-200',!active);card.classList.toggle('dark:border-slate-800',!active);
     card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
+  }
+  for(const block of document.querySelectorAll('[data-online-pair-indices]')){
+    const active=day===selectedDayKey && getWeekNum(now)===selectedWeek && block.dataset.onlinePairIndices.split(',').some(index=>pairs[index] && minutes>=timeToMinutes(pairs[index].start) && minutes<timeToMinutes(pairs[index].end));
+    block.dataset.current=String(active);block.querySelector('[data-merged-current-label]').hidden=!active;
   }
 }
 function openSimpleDialog(id) { presentDialog(id); }
@@ -143,18 +179,19 @@ function renderCompactDay(container) {
     if(previous){
       const duration=timeToMinutes(pair.start)-timeToMinutes(previous.end);
       const before=singleBuilding(previous),after=singleBuilding({...pair,lessons:visible});
-      if(duration>0)gap=`<p class="lesson-break">${formatBreak(duration)}${before && after && before!==after ? ` · <span class="text-amber-700 dark:text-amber-300">Смена корпуса по расписанию: ${escapeHTML(before)} → ${escapeHTML(after)}</span>`:''}</p>`;
+      if(duration>0)gap=`<p class="lesson-break"><span>${escapeHTML(previous.end)}–${escapeHTML(pair.start)} · ${formatBreak(duration)}${before && after && before!==after ? ` · <span class="text-amber-700 dark:text-amber-300">Смена корпуса по расписанию: ${escapeHTML(before)} → ${escapeHTML(after)}</span>`:''}</span></p>`;
     }
     previous={...pair,lessons:visible};
     const lessons=pair.lessons.map((lesson,index)=>{
       if(!visible.includes(lesson))return '';
       const room=decodeEsstuRoom(lesson.room),note=notes[makeNoteKey(lesson.subject,pair.number)];
       const subtitle=appMode==='student'?lesson.teacher:lesson.groups;
-      return `<details class="lesson-detail ${index?'lesson-parallel':''}" data-type="${escapeHTML(lesson.type_code)}">
+      const warning=!!lesson.parse_warning || lesson.type==='Требуется сверка';
+      return `<details class="lesson-detail ${warning?'lesson-warning ':''}${index?'lesson-parallel':''}" data-type="${escapeHTML(lesson.type_code)}">
         <summary class="lesson-summary">
-          <div class="lesson-kind">${lessonTypeIcon(lesson.type_code)}${escapeHTML(lesson.type || 'Занятие')}${lesson.tag ? ' · '+escapeHTML(lesson.tag):''}</div>
-          <div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(lesson.subject)}</span><span class="lesson-room">${lesson.room?'ауд. '+escapeHTML(lesson.room):''}</span></div>
-          <div class="flex justify-between items-center gap-2 mt-1"><span class="text-xs text-slate-500 dark:text-slate-400">${escapeHTML(subtitle || (appMode==='student'?'Преподаватель не указан':'Группы не указаны'))}${note?' · 📝':''}</span><span aria-hidden="true" class="detail-chevron text-slate-400 text-xs">⌄</span></div>
+          <div class="lesson-kind">${warning?uiIcon('warning'):lessonTypeIcon(lesson.type_code)}${escapeHTML(lesson.type || 'Занятие')}${lesson.tag ? ' · '+escapeHTML(lesson.tag):''}</div>
+          <div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${isOnlineLesson(lesson)?uiIcon('link')+' ':''}${escapeHTML(lessonRoomLabel(lesson))}</span></div>
+          <div class="flex justify-between items-center gap-2 mt-1"><span class="text-xs text-slate-500 dark:text-slate-400">${escapeHTML(subtitle || (warning?'Откройте для сверки с источником':appMode==='student'?'Преподаватель не указан':'Группы не указаны'))}${note?' · '+uiIcon('note'):''}</span><span aria-hidden="true" class="detail-chevron">${uiIcon('chevron')}</span></div>
         </summary>
         <div class="pt-1 pb-2 space-y-2 text-xs"><p class="text-slate-500">${escapeHTML([lesson.type,lesson.tag].filter(Boolean).join(' · '))}</p>
           ${lesson.parse_warning?`<p class="text-amber-700 dark:text-amber-300">${escapeHTML(lesson.parse_warning)}</p><p class="text-slate-500 dark:text-slate-400 whitespace-pre-wrap">${escapeHTML(lesson.raw)}</p>`:''}
@@ -162,7 +199,7 @@ function renderCompactDay(container) {
           ${renderLessonMeta(lesson,pair.number)}
           ${note?`<p class="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-200 whitespace-pre-wrap">${escapeHTML(note)}</p>`:''}
           <div class="flex flex-wrap gap-2">
-            ${lesson.room?`<button onclick="compactLessonAction('room',${pairIndex},${index})" class="px-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-300">Аудитория</button>`:''}
+            ${lesson.room && !isOnlineLesson(lesson)?`<button onclick="compactLessonAction('room',${pairIndex},${index})" class="px-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-300">Аудитория</button>`:''}
             ${appMode==='student' && lesson.teacher_key?`<button onclick="compactLessonAction('teacher',${pairIndex},${index})" class="px-3 rounded-xl bg-slate-100 dark:bg-slate-800">Преподаватель</button>`:''}
             <button onclick="compactLessonAction('note',${pairIndex},${index})" class="px-3 rounded-xl bg-slate-100 dark:bg-slate-800">${note?'Изменить заметку':'Добавить заметку'}</button>
           </div>
@@ -170,23 +207,27 @@ function renderCompactDay(container) {
     }).join('');
     return `${gap}<article data-pair-index="${pairIndex}" data-current="${current}" class="schedule-pair ${current?'border-teal-500':'border-slate-200 dark:border-slate-800'}">
       <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="${current?'':'hidden'} text-[9px] text-teal-500 font-bold">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div></article>`;
-  }).filter(Boolean);
-  container.innerHTML=rows.join('') || renderEmptyStudyDay();
+  });
+  const pairs=day.pairs || [];
+  const grouped=groupOnlinePairs(pairs).map(group=>{
+    if(group.start===group.end || !rows[group.start])return rows[group.start];
+    const first=pairs[group.start],last=pairs[group.end],lesson=first.lessons[0],count=group.end-group.start+1;
+    const gap=rows[group.start].match(/^<p class="lesson-break">[\s\S]*?<\/p>/)?.[0] || '';
+    const originals=rows.slice(group.start,group.end+1);originals[0]=originals[0].slice(gap.length);
+    const indices=Array.from({length:count},(_,i)=>group.start+i).join(',');
+    const active=isToday && pairs.slice(group.start,group.end+1).some(pair=>minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end));
+    return `${gap}<details class="merged-online-block" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
+  });
+  container.innerHTML=grouped.join('') || renderEmptyStudyDay();
 }
 function updateCompactUI() {
   if(!currentSchedule)return;
   document.getElementById('teacherIdentityWarning').hidden=!(appMode==='teacher' && currentSchedule.identity_ambiguous);
   document.getElementById('currentEntityBtnText').textContent=appMode==='student'?savedState.groupName:(currentSchedule.profile?.short_name || savedState.teacherKey);
-  const checked=currentSchedule.source_checked_at,offline=lastDelivery?.cached || !navigator.onLine;
-  const fallback=currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode);
-  const text=checked?`Проверено ${displayDate(checked)}`:`Сборка ${displayDate(currentSchedule.generated_at)}`;
-  document.getElementById('compactFreshnessText').textContent=(currentSchedule.is_incomplete?'Данные неполные · ':offline?'Офлайн · ':fallback?'Сохранённая копия · ':'')+text+' ⓘ';
   renderDaySource();
   document.querySelector('.campus-agenda').setAttribute('aria-label',viewMode==='week'?'Расписание на неделю':'Расписание на выбранный день');
   if(viewMode==='week')document.getElementById('selectedDaySummary').textContent=`Расписание на ${selectedWeek===1?'I':'II'} неделю`;
-  const sourceState=offline?'offline':fallback?'fallback':'fresh';
-  document.getElementById('compactFreshnessText').dataset.source=sourceState;
-  for(const n of [1,2]){const button=document.getElementById('btnWeek'+n);button.setAttribute('aria-pressed',String(selectedWeek===n));button.dataset.currentWeek=String(getWeekNum(getUlanUdeNow())===n);button.setAttribute('aria-label',`${n===1?'I':'II'} неделя${getWeekNum(getUlanUdeNow())===n?', текущая':''}`);}
+  for(const n of [1,2]){const button=document.getElementById('btnWeek'+n),current=getWeekNum(getUlanUdeNow())===n;button.setAttribute('aria-pressed',String(selectedWeek===n));button.dataset.currentWeek=String(current);button.setAttribute('aria-label',`${n===1?'I':'II'} неделя${current?', текущая':''}`);button.title=current?'Текущая календарная неделя':'Выбрать '+(n===1?'I':'II')+' неделю';if(current)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');}
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }
@@ -206,18 +247,20 @@ function formatBreak(minutes){
 function lessonTypeIcon(code){
   return uiIcon({lecture:'book',practice:'pen',lab:'flask',sport:'activity',exam:'check',test:'check'}[code] || 'calendar');
 }
-function nextStudyDay(schedule=currentSchedule){
+function nextStudyDay(schedule=currentSchedule,origin=getWeekRangeDates(selectedWeek)[selectedDayKey]?.date){
   if(!schedule || schedule.is_incomplete || hasDatedSchedule(schedule))return null;
-  const origin=getWeekRangeDates(selectedWeek)[selectedDayKey]?.date;if(!origin)return null;
+  if(!origin)return null;
   for(let offset=1;offset<=14;offset++){
     const date=new Date(origin);date.setDate(date.getDate()+offset);
     const day=DAY_KEYS[(date.getDay()+6)%7];if(!day)continue;
     const week=getWeekNum(date),data=schedule.weeks?.[week]?.[day];
-    if(data && !data.session_date && (data.pairs || []).some(pair=>filterLessons(pair.lessons).length))
-      return {day,week,label:date.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'}).replace(/\.$/,'')};
+    const pairs=(data?.pairs || []).map(pair=>({...pair,lessons:filterLessons(pair.lessons)})).filter(pair=>pair.lessons.length).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start));
+    if(data && !data.session_date && pairs.length)
+      return {day,week,pairs,offset,label:date.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'}).replace(/\.$/,'')};
   }
   return null;
 }
+function openUpcomingStudyDay(){const next=nextStudyDay(currentSchedule,getUlanUdeNow());if(next){selectedWeek=next.week;selectedDayKey=next.day;setViewMode('day');}}
 function renderEmptyStudyDay(){
   const next=nextStudyDay();
   return `<div class="empty-state"><p class="font-semibold">В этот день занятий нет</p>${next?`<button class="next-study-day" onclick="openNextStudyDay()">Ближайший день с парами: ${escapeHTML(next.label)} ${uiIcon('arrowUpRight')}</button>`:'<p class="mt-2 text-sm text-slate-500">Выберите другой день</p>'}</div>`;
@@ -256,3 +299,5 @@ function renderRecentSchedules(){
   }
   document.getElementById('recentSection').hidden=!box.children.length;
 }
+
+function scheduleIssueText(schedule){return schedule?.incomplete_reason || schedule?.parse_errors?.[0] || 'Расписание не удалось надёжно прочитать. Сверьте источник.';}

@@ -1,0 +1,19 @@
+{
+  "artifact": "diagnostics-38956442818",
+  "artifact_id": 12071565306,
+  "status_sha256": "541091ca5c0a127dc8a0329ae972f11b75be3f2a3d963074956d5e116bf72c27",
+  "group_expected_count": 663,
+  "group_failed_count": 132,
+  "group_failures_length": 132,
+  "reasons": {
+    "group_name_mismatch": 86,
+    "catalog_placeholder": 46
+  },
+  "sections": {
+    "zo1": 92,
+    "zo2": 40
+  },
+  "generated_at": "2026-10-16T19:44:18.698440+00:00",
+  "code_revision": "4f484819037398c82098ba1deb19a9984c34db6f",
+  "build_id": "68cdd4823902b81d"
+}

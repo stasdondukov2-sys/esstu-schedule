@@ -99,6 +99,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }
@@ -379,6 +380,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }
@@ -395,12 +397,12 @@
                 "raw": "лек.Начертательная геометрия ПРУДОВА Л.Ю. а.701 и/п",
                 "type": "Лекция",
                 "type_code": "lecture",
-                "subject": "Начертательная геометрия ПРУДОВА Л.Ю. а.701 и/п",
-                "teacher": "",
-                "teacher_key": "",
+                "subject": "Начертательная геометрия",
+                "teacher": "Прудова Л.Ю.",
+                "teacher_key": "прудова л.ю.",
                 "teacher_photo": "",
                 "teacher_caf_id": "",
-                "room": "",
+                "room": "701 и/п",
                 "tag": "",
                 "tags": [],
                 "groups": "",
@@ -641,6 +643,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }
@@ -833,6 +836,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }
@@ -1077,6 +1081,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }
@@ -1357,6 +1362,7 @@
                 ],
                 "groups": "",
                 "parse_warning": "В ячейке несколько аудиторий или неполный номер. Проверьте исходное расписание.",
+                "needs_review": true,
                 "source_type": "group_table",
                 "source_file": "bakalavriat/1.htm"
               }

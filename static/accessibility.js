@@ -63,6 +63,7 @@ function beginScheduleLoad(){
   const version=++scheduleLoadVersion;
   const container=document.getElementById('pairsContainer');container.setAttribute('aria-busy','true');container.innerHTML=scheduleSkeleton();
   document.getElementById('heroLessons').innerHTML='<div class="hero-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>';
+  delete document.getElementById('heroLessons').dataset.content;
   document.getElementById('heroStatusLabel').textContent='Загрузка расписания…';
   for(const id of ['heroRemainingTime','heroNextPairRow','heroProgressWrap'])document.getElementById(id).classList.add('hidden');
   return version;
@@ -71,10 +72,12 @@ function finishScheduleLoad(version){if(version===scheduleLoadVersion)document.g
 function scheduleUnavailable(message){
   document.getElementById('dayTabs').replaceChildren();
   document.getElementById('selectedDaySummary').textContent='';
-  document.getElementById('daySourceStatus').textContent='Источник недоступен';
+  document.getElementById('compactFreshnessText').textContent='Источник недоступен';
+  document.getElementById('daySourceStatus').dataset.source='offline';
   document.getElementById('heroNextPairRow').classList.add('hidden');
   document.getElementById('heroProgressWrap').classList.add('hidden');
   document.getElementById('heroLessons').textContent=message;
+  delete document.getElementById('heroLessons').dataset.content;
   document.getElementById('pairsContainer').innerHTML=`<div class="empty-state" role="status"><p class="font-semibold">${escapeHTML(message)}</p><p class="mt-2 text-sm text-slate-500">Проверьте соединение или выберите другое расписание.</p><button class="mt-3 px-4 rounded-xl bg-teal-600 text-white" onclick="retryScheduleLoad()">Повторить</button><button class="mt-3 px-4 rounded-xl" onclick="openSearchModal()">Выбрать расписание</button></div>`;
 }
 function retryScheduleLoad(){if(startupLinkFailed){location.reload();return;}return appMode==='teacher'?loadTeacherSchedule(savedState.teacherKey,savedState.teacherCafId,true):loadStudentSchedule(savedState.section,savedState.groupId,savedState.groupName,true);}
@@ -86,15 +89,21 @@ function relativeChecked(value,now=Date.now()){
   return `Проверено ${Math.floor(minutes/60)} ч назад`;
 }
 function daySourceText(schedule,delivery,online=true){
-  const offline=!online || delivery?.cached;
-  const source=schedule.partial?'Расписания групп':'Портал ВСГУТУ';
-  const fallback=schedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(schedule.source_mode);
-  return `${offline?'Офлайн-копия · ':fallback?'Сохранённая копия · ':''}${source} · ${relativeChecked(schedule.source_checked_at)}`;
+  const offline=!online || (delivery?.cached && !['server-error','refreshing'].includes(delivery.reason));
+  const serverError=delivery?.reason==='server-error',refreshing=delivery?.reason==='refreshing';
+  const fallback=schedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(schedule.source_mode) || serverError || refreshing;
+  const checked=relativeChecked(schedule.source_checked_at);
+  return `${schedule.is_incomplete?'Данные неполные · ':''}${offline?'Офлайн-копия · ':refreshing?'Обновляется · Сохранённая копия · ':serverError?'Ошибка сервера · Сохранённая копия · ':fallback?'Сохранённая копия · ':''}${checked.replace(/^Проверено /,offline || fallback?'':'Проверено ')}`;
 }
 function renderDaySource(){
   const target=document.getElementById('daySourceStatus');if(!target || !currentSchedule)return;
-  target.textContent=daySourceText(currentSchedule,lastDelivery,navigator.onLine);
-  target.dataset.source=(!navigator.onLine || lastDelivery?.cached)?'offline':(currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode))?'fallback':'fresh';
+  const chip=document.getElementById('compactFreshnessText');
+  chip.innerHTML=escapeHTML(daySourceText(currentSchedule,lastDelivery,navigator.onLine))+' '+uiIcon('info');
+  chip.title='Источник и время проверки: '+displayDate(currentSchedule.source_checked_at);
+  target.dataset.source=(!navigator.onLine || (lastDelivery?.cached && !['server-error','refreshing'].includes(lastDelivery.reason)))?'offline':(lastDelivery?.reason==='server-error' || currentSchedule.is_stale_fallback || ['local_fallback','saved_snapshot'].includes(currentSchedule.source_mode))?'fallback':'fresh';
+  const stamp=Date.parse(currentSchedule.source_checked_at);
+  target.dataset.stale=String(!Number.isFinite(stamp) || Date.now()-stamp>86400000 || !!currentSchedule.is_incomplete);
+  chip.dataset.source=target.dataset.source;
 }
 
 // Decorative SVG replaces emoji without changing source data or button names.

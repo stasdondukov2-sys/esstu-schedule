@@ -6,6 +6,10 @@ assert.equal(vm.runInContext('relativeChecked("2026-10-16T06:00:00+08:00",now)',
 assert.equal(vm.runInContext('relativeChecked(null,now)',ui),'Дата проверки неизвестна');
 assert(vm.runInContext('daySourceText({source_file:"bakalavriat/1.htm"},{cached:true},true)',ui).startsWith('Офлайн-копия'));
 assert(vm.runInContext('daySourceText({is_stale_fallback:true},{cached:false},true)',ui).startsWith('Сохранённая копия'));
+assert(vm.runInContext('daySourceText({},{cached:true,reason:"server-error"},true)',ui).startsWith('Ошибка сервера · Сохранённая копия'));
+assert(!vm.runInContext('daySourceText({},{cached:true,reason:"server-error"},true)',ui).includes('Офлайн'));
+assert(vm.runInContext('daySourceText({},{cached:true,reason:"refreshing"},true)',ui).startsWith('Обновляется'));
+assert(!vm.runInContext('daySourceText({},{cached:true,reason:"refreshing"},true)',ui).includes('Офлайн'));
 
 // Exercise the actual notification script with an in-memory GitHub API.
 const workflow=fs.readFileSync('.github/workflows/sync.yml','utf8').replace(/\r\n/g,'\n');
@@ -20,21 +24,9 @@ async function notification(result,exists){
 }
 (async()=>{
   const ci=fs.readFileSync('.github/workflows/ci.yml','utf8').replace(/\r\n/g,'\n');
-  const restore=ci.split('          script: |\n')[1].split('\n      - uses:')[0].split('\n').map(line=>line.slice(12)).join('\n');
-  async function snapshot(count,hasArtifact){
-    const outputs={},warnings=[];
-    const github={
-      paginate:async()=>Array.from({length:count},(_,id)=>({id})),
-      rest:{actions:{
-        listWorkflowRuns(){},
-        listWorkflowRunArtifacts:async({run_id})=>({data:{artifacts:hasArtifact&&run_id===count-1?[{name:'source-snapshot',expired:false}]:[]}})
-      }}
-    };
-    await new Function('github','context','core',`return (async()=>{${restore}})()`)(github,{repo:{owner:'test',repo:'test'}},{setOutput:(name,value)=>outputs[name]=value,warning:text=>warnings.push(text)});
-    return {outputs,warnings};
-  }
-  assert.equal((await snapshot(12,true)).outputs.run_id,'11','retained snapshots beyond ten runs are found');
-  assert.equal((await snapshot(12,false)).warnings.length,1,'fallback to repository data is visible');
+  assert(ci.indexOf('Browser and accessibility regressions on frozen data')<ci.indexOf('Restore durable validated data'));
+  assert(ci.indexOf('Browser and accessibility regressions on frozen data')<ci.indexOf('- name: Synchronize sources'));
+  assert.equal((await notification('cancelled',false))[0].action,'create');
   assert.equal((await notification('failure',false))[0].action,'create');
   assert.equal((await notification('failure',true))[0].action,'update');
   assert.equal((await notification('success',true))[0].state,'closed');

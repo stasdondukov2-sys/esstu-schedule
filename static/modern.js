@@ -36,7 +36,11 @@ function renderFavoritesBar() {
     };
     bar.append(button);
   });
-  document.getElementById('favStarBtn').textContent = getFavorites().some(f => favoriteKey(f) === favoriteKey(currentFavorite())) ? '⭐ Избранное' : '☆ Избранное';
+  const selected=getFavorites().some(f => favoriteKey(f) === favoriteKey(currentFavorite()));
+  const toggle=document.getElementById('favStarBtn');
+  toggle.innerHTML=uiIcon('star')+(selected?' В избранном':' Добавить');
+  toggle.setAttribute('aria-pressed',String(selected));
+  if(!bar.children.length)bar.innerHTML='<p class="search-empty-hint">Добавьте расписание, чтобы быстро открывать его здесь.</p>';
 }
 function activeSlots(schedule, now = getUlanUdeNow()) {
   const day = (now.getDay() + 6) % 7, minutes = now.getHours()*60 + now.getMinutes();
@@ -61,30 +65,48 @@ function setRoomPreset(preset) {
     let minutes=date.getHours()*60+date.getMinutes(), index=ROOM_BELLS.findIndex(time=>timeToMinutes(time)>minutes);
     if (index<0 || date.getDay()===0) { date.setDate(date.getDate()+1);index=0; }
     if (date.getDay()===0) date.setDate(date.getDate()+1);
-    roomCheck={week:getWeekNum(date),day:(date.getDay()+6)%7,pair:index+1};
+    roomCheck={week:getWeekNum(date),day:(date.getDay()+6)%7,pair:index+1,mode:'next'};
   }
   document.getElementById('roomTimeControls').innerHTML=roomTimeControls();renderRoomsModalList();
 }
 function setRoomManual() {
-  roomCheck={week:Number(document.getElementById('roomWeek').value),day:Number(document.getElementById('roomDay').value),pair:Number(document.getElementById('roomPair').value)};
+  roomCheck={week:Number(document.getElementById('roomWeek').value),day:Number(document.getElementById('roomDay').value),pair:Number(document.getElementById('roomPair').value) || 1,mode:'manual'};
+  document.getElementById('roomPair').value=String(roomCheck.pair);
   renderRoomsModalList();
 }
 function roomTimeControls() {
   const context=roomContext();
   const options=(values,selected)=>values.map(([value,label])=>`<option value="${value}" ${value===selected?'selected':''}>${label}</option>`).join('');
-  return `<div class="flex gap-2 text-xs my-2"><button onclick="setRoomPreset('now')">⚡ Сейчас</button><button onclick="setRoomPreset('next')">⏭ Следующая пара</button></div><div class="flex gap-2 text-xs mb-3"><select id="roomWeek" aria-label="Неделя проверки" onchange="setRoomManual()" class="rounded-lg p-2 bg-slate-100 dark:bg-slate-800">${options([[1,'I неделя'],[2,'II неделя']],context.week)}</select><select id="roomDay" aria-label="День проверки" onchange="setRoomManual()" class="rounded-lg p-2 bg-slate-100 dark:bg-slate-800">${options(['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((label,i)=>[i,label]),context.day)}</select><select id="roomPair" aria-label="Пара для проверки" onchange="setRoomManual()" class="rounded-lg p-2 bg-slate-100 dark:bg-slate-800">${options(ROOM_BELLS.map((time,i)=>[i+1,`${i+1} · ${time}`]),context.pair || 1)}</select></div>`;
+  return `<div class="segmented room-presets" role="group" aria-label="Время проверки"><button data-room-preset="now" aria-pressed="${!roomCheck}" onclick="setRoomPreset('now')">Сейчас</button><button data-room-preset="next" aria-pressed="${context.mode==='next'}" onclick="setRoomPreset('next')">Следующая пара</button></div><div class="room-selects"><select id="roomWeek" aria-label="Неделя проверки" onchange="setRoomManual()">${options([[1,'I неделя'],[2,'II неделя']],context.week)}</select><select id="roomDay" aria-label="День проверки" onchange="setRoomManual()">${options(['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((label,i)=>[i,label]),context.day)}</select><select id="roomPair" aria-label="Пара для проверки" onchange="setRoomManual()">${!context.pair?'<option value="0" selected disabled>Текущее время</option>':''}${options(ROOM_BELLS.map((time,i)=>[i+1,`${i+1} пара · ${time}`]),context.pair || 0)}</select></div>`;
 }
 function roomOccupancy(room, context) {
   const prefix=`${context.week}:${DAY_KEYS[context.day]}:`;
-  const lessons=context.day===6?[]:Object.entries(room.slots).filter(([key])=>key.startsWith(prefix)).flatMap(([,slots])=>Array.isArray(slots)?slots:[slots]);
-  return {lessons,busy:lessons.filter(l=>context.pair ? l.pair===context.pair : context.minutes>=timeToMinutes(l.start) && context.minutes<timeToMinutes(l.end))};
+  const lessons=(context.day===6?[]:Object.entries(room.slots).filter(([key])=>key.startsWith(prefix)).flatMap(([,slots])=>Array.isArray(slots)?slots:[slots])).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start) || timeToMinutes(a.end)-timeToMinutes(b.end) || String(a.subject).localeCompare(String(b.subject),'ru'));
+  return {lessons,busy:lessons.filter(l=>context.pair ? Number(l.pair)===Number(context.pair) : context.minutes>=timeToMinutes(l.start) && context.minutes<timeToMinutes(l.end))};
 }
+function roomLessonLines(lessons) {
+  // Several groups and department schedules may describe the same lesson.
+  const rows=new Map();
+  for(const lesson of lessons){
+    const key=JSON.stringify([lesson.start,lesson.end,lesson.subject]);
+    if(!rows.has(key))rows.set(key,lesson);
+  }
+  return [...rows.values()].map(lesson=>`<li><span class="room-lesson-time">${escapeHTML(lesson.start)}–${escapeHTML(lesson.end)}</span> <span>${escapeHTML(lesson.subject || 'Предмет не указан')}</span></li>`).join('');
+}
+function roomSlotTimeline(lessons,context) {
+  const count=Math.max(ROOM_BELLS.length,...lessons.map(lesson=>Number(lesson.pair)||0));
+  return `<div class="room-timeline" aria-label="Слоты дня: заполненные — есть занятия">${Array.from({length:count},(_,i)=>{
+    const number=i+1,busy=lessons.some(lesson=>Number(lesson.pair)===number),label=`${number} пара${ROOM_BELLS[i]?' · '+ROOM_BELLS[i]:''}: ${busy?'есть занятия':'нет известных занятий'}`;
+    return `<span class="room-slot ${busy?'is-busy':''}" data-selected="${Number(context.pair)===number}" title="${label}"><span class="sr-only">${label}</span>${number}</span>`;
+  }).join('')}</div>`;
+}
+function setRoomFilter(filter){roomFilter=filter;renderRoomsModalList();}
 async function openRoomsModal(prefill = '') {
   let modal = document.getElementById('roomsModal');
   if (!modal) {
     modal = document.createElement('div'); modal.id = 'roomsModal';
     modal.className = 'simple-overlay hidden';
-    modal.innerHTML = `<div class="simple-sheet"><div class="flex justify-between items-center gap-3"><h2 class="font-bold">Радар аудиторий</h2><button onclick="closeRoomsModal()" aria-label="Закрыть" class="w-10">×</button></div><p class="text-xs my-2">Занятость по известным расписаниям. Отсутствие пары не гарантирует доступ в аудиторию.</p><input id="roomSearchInput" aria-label="Поиск аудитории" placeholder="Аудитория или корпус" class="w-full rounded-xl p-2 bg-slate-100 dark:bg-slate-800" oninput="renderRoomsModalList()"><div class="flex gap-3 my-3 text-xs"><button onclick="roomFilter='all';renderRoomsModalList()">Все</button><button onclick="roomFilter='free';renderRoomsModalList()">🟢 Нет пар</button><button onclick="roomFilter='busy';renderRoomsModalList()">🔴 Есть пары</button></div><div id="roomsListContainer"></div></div>`;
+    modal.innerHTML = `<div class="simple-sheet"><div class="flex justify-between items-center gap-3"><h2 class="font-bold">Радар аудиторий</h2><button onclick="closeRoomsModal()" aria-label="Закрыть" class="w-10">${uiIcon('close')}</button></div><p class="room-hint">Корпуса определены по обозначению аудитории.</p><p class="room-hint">${uiIcon('info')} Занятость по известным расписаниям. Отсутствие пары не гарантирует доступ.</p><input id="roomSearchInput" aria-label="Поиск аудитории" placeholder="Аудитория или корпус" class="w-full rounded-xl p-2" oninput="renderRoomsModalList()"><div class="segmented room-filters" role="group" aria-label="Занятость аудитории"><button data-room-filter="all" onclick="setRoomFilter('all')">Все</button><button data-room-filter="free" onclick="setRoomFilter('free')">Нет пар</button><button data-room-filter="busy" onclick="setRoomFilter('busy')">Есть пары</button></div><div id="roomsListContainer"></div></div>`;
     document.body.append(modal);
   }
   openSimpleDialog('roomsModal'); document.getElementById('roomSearchInput').value = prefill;
@@ -99,15 +121,29 @@ function renderRoomsModalList() {
   const context = roomContext();
   let controls=document.getElementById('roomTimeControls');
   if(!controls){controls=document.createElement('div');controls.id='roomTimeControls';document.getElementById('roomSearchInput').before(controls);controls.innerHTML=roomTimeControls();}
+  // Keep time presets in sync without replacing the focused manual selectors.
+  for(const button of controls.querySelectorAll('[data-room-preset]'))button.setAttribute('aria-pressed',String(button.dataset.roomPreset==='now'?!roomCheck:context.mode==='next'));
+  for(const button of document.querySelectorAll('[data-room-filter]'))button.setAttribute('aria-pressed',String(button.dataset.roomFilter===roomFilter));
+  if(!roomCheck){document.getElementById('roomWeek').value=String(context.week);document.getElementById('roomDay').value=String(context.day);}
   const query = document.getElementById('roomSearchInput').value.toLowerCase().trim();
   const rows = (roomDirectory?.rooms || []).map(room => {
     const {lessons,busy} = roomOccupancy(room,context);
-    const location = decodeEsstuRoom(room.room)?.location || '';
-    if (!`${room.room} ${location}`.toLowerCase().includes(query) || (roomFilter==='free' && busy.length) || (roomFilter==='busy' && !busy.length)) return '';
-    return `<div class="rounded-2xl p-3 border border-slate-500/30 my-2"><b>${escapeHTML(room.room)}</b> • ${escapeHTML(location)}<div class="text-xs mt-2">${busy.length ? '🔴 По расписанию: ' + [...new Set(busy.map(l => escapeHTML(`${l.subject} • ${l.teacher} • ${l.groups}`)))].join('<br>') : `🟢 ${context.pair ? 'В выбранную пару' : 'Сейчас'} занятий по известным расписаниям нет`}</div><div class="text-xs mt-2 text-slate-400">${[...new Set(lessons.map(l => escapeHTML(`${l.start}–${l.end}: ${l.subject}`)))].join('<br>')}</div></div>`;
-  }).filter(Boolean);
-  const label=`${context.week===1?'I':'II'} неделя • ${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][context.day]} • ${context.pair ? context.pair+' пара' : 'сейчас'}`;
-  document.getElementById('roomsListContainer').innerHTML = `<p class="text-xs text-teal-600">${label}</p>`+(rows.join('') || 'Аудитории не найдены');
+    const building = decodeEsstuRoom(room.room)?.building || 'Корпус не определён';
+    return {...room,building,lessons,busy};
+  }).filter(room=>`${room.room} ${room.building}`.toLowerCase().includes(query) && (roomFilter!=='free' || !room.busy.length) && (roomFilter!=='busy' || room.busy.length))
+    .sort((a,b)=>Number(!!a.busy.length)-Number(!!b.busy.length) || a.building.localeCompare(b.building,'ru',{numeric:true}) || a.room.localeCompare(b.room,'ru',{numeric:true}));
+  let previousGroup='';
+  const cards=rows.map(room=>{
+    const busy=room.busy.length>0,group=`${busy?'busy':'free'}:${room.building}`;
+    const heading=group===previousGroup?'':`<h3 class="room-group-title">${busy?(context.pair?'Занятые в выбранную пару':'Занятые сейчас'):(context.pair?'Свободные в выбранную пару':'Свободные сейчас')} · ${escapeHTML(room.building)}</h3>`;
+    previousGroup=group;
+    const end=busy?room.busy.map(lesson=>lesson.end).sort().at(-1):'';
+    const status=busy?`Занята до ${end}`:'Свободна';
+    const busyInfo=[...new Set(room.busy.map(lesson=>[lesson.subject,lesson.teacher,lesson.groups].filter(Boolean).join(' · ')))].map(escapeHTML).join('<br>');
+    return `${heading}<article class="room-card" data-room="${escapeHTML(room.room)}"><div class="room-card-heading"><h4>${escapeHTML(room.room)}</h4><span class="chip-status chip-status--${busy?'busy':'free'}">${uiIcon(busy?'clock':'check')}${escapeHTML(status)}</span></div>${busyInfo?`<p class="room-busy-info">${busyInfo}</p>`:''}${roomSlotTimeline(room.lessons,context)}<ul class="room-day-lessons">${roomLessonLines(room.lessons)}</ul></article>`;
+  });
+  const label=`${context.week===1?'I':'II'} неделя · ${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][context.day]} · ${context.pair ? context.pair+' пара · '+ROOM_BELLS[context.pair-1] : 'сейчас'}`;
+  document.getElementById('roomsListContainer').innerHTML = `<p class="room-context">${label}</p><p class="room-hint">Слоты дня: заполненные — есть занятия.</p>`+(cards.join('') || '<p class="room-hint">Аудитории не найдены</p>');
 }
 async function shareCurrentScheduleLink() {
   const url = new URL(location.href); url.search = ''; url.hash = '';
