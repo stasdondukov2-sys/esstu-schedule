@@ -22,25 +22,17 @@
 <meta property="og:description" content="Расписание групп, преподавателей и аудиторий ВСГУТУ."/>
 <meta property="og:url" content="https://stasdondukov2-sys.github.io/esstu-schedule/"/>
 <link href="app.css" rel="stylesheet"/>
-
+<style id="stealth-cyber-glass">body{background:#050507!important;color:#e2e8f0}.lesson-card{background:rgba(15, 15, 20, 0.7);border:1px solid rgba(255, 255, 255, 0.05);backdrop-filter:blur(12px);border-radius:14px}.lesson-card.is-current{border:1px solid #10b981;box-shadow:inset 0 0 8px rgba(16, 185, 129, 0.05), 0 0 16px rgba(16, 185, 129, 0.1)}.lesson-card.is-next{border:1px solid #8b5cf6}.pulse-dot{background-color:#10b981;box-shadow:0 0 8px #10b981}.progress-bar-fill{background-color:#10b981}.lesson-card.is-past{opacity:0.35;filter:grayscale(0.5);pointer-events:none}</style>
+  
 </head>
 <body class="campus-app min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
 <!-- ===================================================================== -->
 <!-- ВЕРХНЯЯ ФИРМЕННАЯ ШАПКА ВСГУТУ MODERN                                  -->
 <!-- ===================================================================== -->
-<header class="campus-header">
-<div class="campus-header-inner">
-<div class="campus-brand"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9l12-5 12 5-12 5L4 9Zm5 3v10c5 5 9 5 14 0V12M28 9v12"/></svg><span>ВСГУТУ<span>Расписание</span></span></div><button aria-label="Сменить расписание" class="min-w-0 text-left flex-1" onclick="openSearchModal()">
-<h1 class="font-extrabold text-lg truncate" id="currentEntityBtnText">Выберите расписание</h1>
-<p class="text-[11px] text-slate-500 mt-0.5">ВСГУТУ · <span id="weekBadge">I неделя</span></p>
-</button>
-<button class="campus-change" onclick="openSearchModal()">Выбрать</button>
-<button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h1m6 0h1m6 0h1"/></svg></button>
-</div></header>
-<div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button onclick="applyAppUpdate()">Обновить</button></div>
+<header class="campus-header"><div class="campus-header-inner flex items-center justify-between gap-3 px-4 py-2"><button aria-label="Сменить расписание" class="flex items-center gap-2 min-w-0 cursor-pointer border-none bg-transparent text-left p-0" onclick="openSearchModal()"><span class="font-extrabold text-sm truncate" id="currentEntityBtnText">Выберите расписание</span><span class="text-xs opacity-60" id="weekBadge">I неделя</span></button><span class="text-xs opacity-70 whitespace-nowrap" id="campusDate">Расписание занятий</span><div class="flex items-center gap-2"><button class="campus-change cursor-pointer" onclick="openSearchModal()" aria-label="Поиск" title="Поиск">🔍</button><button aria-label="Настройки" class="campus-more cursor-pointer" onclick="openSimpleDialog('moreMenuModal')" title="Настройки">⚙️</button></div></div></header>
+  <div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button onclick="applyAppUpdate()">Обновить</button></div>
 <!-- ОСНОВНОЙ КОНТЕНТ -->
 <main class="campus-shell">
-<div class="campus-page-heading"><div><h2>Мой день</h2><p id="campusDate">Расписание занятий</p></div><span class="campus-city">Улан-Удэ · UTC+8</span></div>
 <p id="teacherIdentityWarning" hidden role="status" class="campus-warning">Возможны данные нескольких преподавателей: одинаковые фамилия и инициалы встречаются в разных кафедрах. Сверьте занятия с источником.</p>
 <div class="campus-layout"><aside class="campus-overview" aria-label="Ближайшее занятие">
 <section id="liveHeroCard" class="glass-panel campus-hero">
