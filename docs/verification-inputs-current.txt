@@ -1927,7 +1927,7 @@ SHA-256: 27dd927e76131928df8cf169cb7dcc63d1109c614b7f55fc114c4fa89c699180
 
 
 ===== docs/source-quality-current.json =====
-SHA-256: 68b7968144f8fb3cac306b76f5486859c58c2cd139acc02979aa9c82d19ca960
+SHA-256: 0aea9d5ee33b118f2113191b3c3986d6dfa59f7062da6ce9baa298844f9a73dd
 
 {
   "group_expected_count": 663,
@@ -3180,7 +3180,7 @@ SHA-256: 68b7968144f8fb3cac306b76f5486859c58c2cd139acc02979aa9c82d19ca960
   ],
   "source_checked_at_oldest": "2026-10-16T18:40:11.653331+00:00",
   "source_checked_at_latest": "2026-10-16T18:43:00.956287+00:00",
-  "parser_revision": "4776cd88b4bdd4e6",
+  "parser_revision": "3f5db87562797f69",
   "api_reparsed_from_sources": true
 }
 
@@ -8018,7 +8018,7 @@ def parser_revision():
 
 
 ===== scripts/publication.py =====
-SHA-256: 0d92e06231e2a87d010d12b0302c1deb6505cca2dc53ae63cdd174285e528ad5
+SHA-256: 4b892abae3fbdff8110e87cdba458dbd0b0011caac04ebb9cefc5bf5e3dcf21b
 
 """Select per-group fallbacks and keep code-only releases independent of data quality."""
 
@@ -8155,9 +8155,7 @@ if __name__ == "__main__":
         and (args.baseline / "api/status.json").exists()
     ):
         reuse_api(args.site, args.baseline, args.expected_build)
-        print(
-            "Code release: tested shell prepared; source check dates preserved"
-        )
+        print("Code release: tested shell prepared; source check dates preserved")
     elif (
         args.mode == "code"
         and __import__("os").environ.get("GITHUB_REF") == "refs/heads/main"
