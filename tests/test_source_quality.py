@@ -281,3 +281,42 @@ def test_bootstrap_only_accepts_matching_source_artifact(tmp_path, monkeypatch):
     assert source_artifact.restore_artifact("owner/repo", target, expected)
     assert calls == ["1", "2"]
     assert json.loads((target / "sources.json").read_text()) == expected
+
+
+@pytest.mark.parametrize("code,retry", [(503, True), (429, True), (404, False)])
+def test_published_api_retries_transient_errors_without_hiding_missing_files(
+    monkeypatch, code, retry
+):
+    import urllib.error
+    import urllib.request
+    from scripts.published_data import read_published_json
+
+    calls = []
+    delays = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def read(self):
+            return b'{"ok":true}'
+
+    def urlopen(request, timeout):
+        calls.append(timeout)
+        if len(calls) <= 2:
+            raise urllib.error.HTTPError(request.full_url, code, "temporary", {}, None)
+        return Response()
+
+    monkeypatch.setattr("urllib.request.urlopen", urlopen)
+    monkeypatch.setattr("scripts.published_data.time.sleep", delays.append)
+    request = urllib.request.Request("https://example.invalid/api/status.json")
+    if retry:
+        assert read_published_json(request) == {"ok": True}
+        assert delays == [1, 2] and calls == [20, 20, 20]
+    else:
+        with pytest.raises(urllib.error.HTTPError):
+            read_published_json(request)
+        assert len(calls) == 1 and not delays

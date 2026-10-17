@@ -2,10 +2,32 @@
 
 import json
 import urllib.request
+import urllib.error
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from esstu_schedule.data.store import write_json_atomic
+
+
+def read_published_json(request):
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                return json.loads(response.read())
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            if isinstance(error, urllib.error.HTTPError) and error.code not in (
+                408,
+                429,
+                500,
+                502,
+                503,
+                504,
+            ):
+                raise
+            if attempt == 4:
+                raise
+            time.sleep(2**attempt)
 
 
 def bootstrap(directory, base):
@@ -16,8 +38,7 @@ def bootstrap(directory, base):
             base.rstrip("/") + "/" + path,
             headers={"Cache-Control": "no-cache", "User-Agent": "ESSTU-Schedule/2.5"},
         )
-        with urllib.request.urlopen(request, timeout=20) as response:
-            return json.loads(response.read())
+        return read_published_json(request)
 
     status = fetch("api/status.json")
     paths = [

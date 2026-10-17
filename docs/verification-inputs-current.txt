@@ -2,22 +2,23 @@ verification-inputs-current.txt
 Ветка codex/reliable-data-updates, PR #19. Снимок исходников перед фиксацией коммита.
 Main и Pages не изменялись. Результаты ниже локальные; удалённый CI и репетиция — в Checks PR.
 Build_id: 6c995ea048620380
-Python: 142 passed + 9 subtests, один полный прогон.
+Python: 145 passed + 9 subtests, один полный прогон.
 Браузер: итог одного полного прогона в приложенном журнале, без сложения повторов.
 Контракт прежнего опубликованного API: 8 passed.
-Внешний монитор не настроен: регистрационное письмо не доставлено.
+Cronitor настроен: период 3 часа + запас 1 час; секрет GitHub сохранён; ожидается первый пинг после проверенного деплоя.
 
 
 ===== preview/pytest-final.txt =====
-SHA-256: 29f566525227c14ec19e5622d43b9581c71046934c62e623c616d7b4a88bebb2
+SHA-256: 72ee7afd77799ce27f371027de9cf37ff7cc2ccc17086b48b74580a338fc71e0
 
-.................................................................. [ 46%]
-............................................................................                                                                  [100%]
-142 passed, 9 subtests passed in 5.93s
+.................................................................. [ 45%]
+........................................................................ [ 95%]
+.......                                                               [100%]
+145 passed, 9 subtests passed in 5.41s
 
 
 ===== preview/python-list-final.txt =====
-SHA-256: b751c8530919f43a66e1504f7e48cd36629af938a0f7f52a1f25ba5b9d2ce0d2
+SHA-256: 12ec9704bb40c1b77085da8fe6dce479ecfedc87e4a4a31c534d360a927aa9c2
 
 tests/test_audit.py::ReliabilityTests::test_ambiguous_room_assignments_are_explicit
 tests/test_audit.py::ReliabilityTests::test_cache_coalesces_concurrent_work
@@ -149,6 +150,9 @@ tests/test_source_quality.py::test_real_saved_correspondence_pages[97-\u0417\u04
 tests/test_source_quality.py::test_real_saved_correspondence_pages[3-\u0417\u0423-436-1-duplicate_page]
 tests/test_source_quality.py::test_real_saved_correspondence_pages[68-\u0417\u041c126\u043f\u043f\u0440\u0441-source_unfilled]
 tests/test_source_quality.py::test_bootstrap_only_accepts_matching_source_artifact
+tests/test_source_quality.py::test_published_api_retries_transient_errors_without_hiding_missing_files[503-True]
+tests/test_source_quality.py::test_published_api_retries_transient_errors_without_hiding_missing_files[429-True]
+tests/test_source_quality.py::test_published_api_retries_transient_errors_without_hiding_missing_files[404-False]
 tests/test_study.py::test_teacher_only_chunks_keep_identity_without_inventing_subject
 tests/test_study.py::test_teacher_suffix_does_not_hide_a_real_subject
 tests/test_study.py::test_teacher_and_room_with_panel_annotation[\u042d\u043a\u043e\u043d\u043e\u043c\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0442\u0435\u043e\u0440\u0438\u044f \u0410\u041b\u0415\u041a\u0421\u0415\u0415\u0412\u0410 \u0413.\u0415. \u0430.701 \u0438/\u043f-\u042d\u043a\u043e\u043d\u043e\u043c\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0442\u0435\u043e\u0440\u0438\u044f-\u0410\u043b\u0435\u043a\u0441\u0435\u0435\u0432\u0430 \u0413.\u0415.]
@@ -162,7 +166,7 @@ tests/test_teachers.py::TeacherIndexTest::test_official_cell_without_type
 tests/test_teachers.py::TeacherIndexTest::test_official_priority_and_group_supplement
 tests/test_teachers.py::TeacherIndexTest::test_preserves_source_and_deduplicates
 
-142 tests collected in 0.25s
+145 tests collected in 0.23s
 
 
 ===== preview/unit-final.txt =====
@@ -648,7 +652,7 @@ jobs:
 
 
 ===== README.md =====
-SHA-256: 8843f1a433a550ca56ee35ee394e581b0c424f1d0e0d6eb7a4ec10701030b6be
+SHA-256: c4f11b7b1f16bc1bac14b148ea60ac181c15a2796c4fdf07ef90f5520940f440
 
 # ВСГУТУ Расписание Live
 
@@ -723,7 +727,7 @@ SHA-256 опубликованного API. Обновление интерфе�
 - Образ CI закреплён на `ubuntu-24.04`; Actions закреплены на SHA, обновления отслеживает Dependabot. Node.js приложения — 22. Выпуск приложения — 2.5.0, имя кэша оболочки определяется хешем ресурсов. Данные хранятся отдельно в `data-v2`, до 200 ответов; прежние копии переносятся с сохранением предупреждений.
 - `.github/workflows/sync.yml`: отдельный запуск каждые три часа (UTC) и вручную через Actions. Планировщик GitHub может задерживать запуск. Cron скачивает кафедры и группы, проверяет отчёты и вызывает тот же проверенный процесс публикации.
 - При ошибке или отмене синхронизации/проверок бот открывает один Issue, при повторении обновляет его, после восстановления закрывает. Telegram-токен не требуется. Доставка личного уведомления зависит от ваших настроек GitHub.
-- Внешний монитор требует отдельной регистрации и секрета `HEALTHCHECK_URL`. Пинг отправляется только после проверенного деплоя синхронизации. Для Healthchecks: период 3 часа, допустимая задержка 1 час. Без секрета CI явно сообщает, что внешний монитор не настроен. Регистрация и доставка оповещения пока не подтверждены.
+- Внешний монитор требует отдельной регистрации и секрета `HEALTHCHECK_URL`. Пинг отправляется только после проверенного деплоя синхронизации. Для Healthchecks: период 3 часа, допустимая задержка 1 час. Без секрета CI явно сообщает, что внешний монитор не настроен. Создан Cronitor heartbeat с тем же периодом и запасом, HEALTHCHECK_URL сохранён. Он ждёт первый пинг после проверенного деплоя main; доставка аварийного оповещения ещё не проверена.
 - Неполная загрузка не считается успешной: прежний сайт и последние рабочие файлы сохраняются. Диагностические JSON и браузерные трассы прикладываются к запуску. Артефакт диагностики хранится 14 дней, а проверенные API и исходники — в отдельной ветке `data` без срока удаления.
 - `api/status.json`: дата сборки, ревизия кода, агрегированный SHA-256 источников, диапазон дат проверки, число источников без даты, ошибки структуры, неполные расписания и неразобранные ячейки. `api/sources.json` содержит дату и SHA-256 каждого исходного файла.
 
@@ -3186,7 +3190,7 @@ SHA-256: 0aea9d5ee33b118f2113191b3c3986d6dfa59f7062da6ce9baa298844f9a73dd
 
 
 ===== docs/verification-review-current.md =====
-SHA-256: 85fd1c31ed8769df3164a746409677f1073a0f895374b0cba9faa27aa23454e7
+SHA-256: 75b8b24ac5869ba73569dad8f32363bfdaf940935fc250172c9b97f452ec4f9d
 
 # Проверка PR #19 после разбора 4f48481
 
@@ -3270,15 +3274,14 @@ status содержит group_check_dates, число/долю проверен�
 
 ## Проверки и оставшиеся ограничения
 
-Ruff и форматирование прошли. Python: 142 passed, 9 subtests passed в одном
+Ruff и форматирование прошли. Python: 145 passed, 9 subtests passed в одном
 полном прогоне. Playwright: 69 passed, 1 skipped (из 70), один полный прогон. Полный браузерный журнал и поимённый список Python включены
 в verification-inputs-current.txt. Локальные проверки не являются CI;
 удалённые Checks и ручная репетиция указываются отдельными ссылками в PR.
 
-Внешний монитор НЕ подключён. Пинг HEALTHCHECK_URL подготовлен после
-проверенного деплоя sync; без секрета CI сообщает об отсутствии настройки.
-Для Healthchecks: период 3 часа, допустимая задержка 1 час. Пользователь начал
-регистрацию, но письмо не пришло; доставка уведомлений не подтверждена.
+Внешний монитор Cronitor создан после входа пользователя через Google. Период 3 часа, запас 1 час, Alerts On, список Default. HEALTHCHECK_URL сохранён в секрете репозитория; значение не входит в исходники. Проверено состояние Waiting for first event. Первый рабочий пинг ожидается после успешного деплоя main и проверки build_id; доставка аварийного уведомления ещё не проверена. Регистрация Healthchecks не завершилась из-за отсутствия писем на Mail.ru и Gmail.
+
+Первая удалённая репетиция обнаружила HTTP 503 при bootstrap опубликованного API. Добавлены до пяти попыток с отступом для 408/429/5xx и сетевых сбоев, без повторов для 404; это покрыто отдельными тестами. Итоговая репетиция должна быть проверена в Checks нового коммита.
 
 История data сохраняется целиком. Политика обслуживания: ежемесячная проверка
 размера; перед ротацией — скачанный git bundle и проверка восстановления.
@@ -8174,16 +8177,38 @@ if __name__ == "__main__":
 
 
 ===== scripts/published_data.py =====
-SHA-256: 4665ebac113785cfc2a48e4b992f7859fd7e782663e1a4f0acc4b2c3c5948842
+SHA-256: 190f0441b028129b5be2d34b4a077b51725904011679c1accdae741b76d1bd77
 
 """Bootstrap an immutable API snapshot from the currently published Pages site."""
 
 import json
 import urllib.request
+import urllib.error
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from esstu_schedule.data.store import write_json_atomic
+
+
+def read_published_json(request):
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                return json.loads(response.read())
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            if isinstance(error, urllib.error.HTTPError) and error.code not in (
+                408,
+                429,
+                500,
+                502,
+                503,
+                504,
+            ):
+                raise
+            if attempt == 4:
+                raise
+            time.sleep(2**attempt)
 
 
 def bootstrap(directory, base):
@@ -8194,8 +8219,7 @@ def bootstrap(directory, base):
             base.rstrip("/") + "/" + path,
             headers={"Cache-Control": "no-cache", "User-Agent": "ESSTU-Schedule/2.5"},
         )
-        with urllib.request.urlopen(request, timeout=20) as response:
-            return json.loads(response.read())
+        return read_published_json(request)
 
     status = fetch("api/status.json")
     paths = [
@@ -13397,7 +13421,7 @@ def test_smoke_rejects_truncated_publication(tmp_path):
 
 
 ===== tests/test_source_quality.py =====
-SHA-256: 2eec146702bb198116f53e8a2edae2f15742fd8995301c7bce5521d9a9294e93
+SHA-256: 9d740425ccb66eae1f56e2dbc3f2ad8fadbd88c322bdaf1668ddfc119cb8f931
 
 import json
 from datetime import UTC, datetime, timedelta
@@ -13682,6 +13706,45 @@ def test_bootstrap_only_accepts_matching_source_artifact(tmp_path, monkeypatch):
     assert source_artifact.restore_artifact("owner/repo", target, expected)
     assert calls == ["1", "2"]
     assert json.loads((target / "sources.json").read_text()) == expected
+
+
+@pytest.mark.parametrize("code,retry", [(503, True), (429, True), (404, False)])
+def test_published_api_retries_transient_errors_without_hiding_missing_files(
+    monkeypatch, code, retry
+):
+    import urllib.error
+    import urllib.request
+    from scripts.published_data import read_published_json
+
+    calls = []
+    delays = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def read(self):
+            return b'{"ok":true}'
+
+    def urlopen(request, timeout):
+        calls.append(timeout)
+        if len(calls) <= 2:
+            raise urllib.error.HTTPError(request.full_url, code, "temporary", {}, None)
+        return Response()
+
+    monkeypatch.setattr("urllib.request.urlopen", urlopen)
+    monkeypatch.setattr("scripts.published_data.time.sleep", delays.append)
+    request = urllib.request.Request("https://example.invalid/api/status.json")
+    if retry:
+        assert read_published_json(request) == {"ok": True}
+        assert delays == [1, 2] and calls == [20, 20, 20]
+    else:
+        with pytest.raises(urllib.error.HTTPError):
+            read_published_json(request)
+        assert len(calls) == 1 and not delays
 
 
 ===== tests/test_study.py =====
