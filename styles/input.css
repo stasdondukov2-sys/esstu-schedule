@@ -1,7 +1,7 @@
 @import "tailwindcss" source(none);
 @import "./fonts.css";
 @import "./campus.css";
-@import "./stealth.css";
+@import "./liquid.css";
 @source "../static";
 @config "../tailwind.config.cjs";
 @custom-variant dark (&:where(.dark, .dark *));

@@ -48,3 +48,27 @@ test('compact header fits 320px with one heading and distinct search controls',a
   }
   const h=await page.locator('.campus-header').boundingBox();expect(h.height).toBeLessThanOrEqual(80);
 });
+
+test('type colours preserve mixed parallel lessons and accessible day counts',async({page})=>{
+  const data=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
+  const lesson=code=>({subject:'Предмет '+code,type:{practice:'Практика',lab:'Лабораторная',lecture:'Лекция'}[code],type_code:code,teacher:'Преподаватель И.О.',room:'0427'});
+  const types=['practice','lab','lecture','mixed'];
+  const pairs=types.map((type,i)=>({number:i+1,start:['09:00','10:45','13:00','14:45'][i],end:['10:35','12:20','14:35','16:20'][i],lessons:type==='mixed'?[lesson('lab'),lesson('lecture')]:[lesson(type)]}));
+  data.is_incomplete=false;data.weeks={'1':{saturday:{pairs}},'2':{}};
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:data}));
+  await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+  await page.getByRole('button',{name:/Суббота,.*4 пары/}).click();
+  const cards=page.locator('#pairsContainer>.lesson-card');await expect(cards).toHaveCount(4);
+  for(const [i,type] of types.entries())await expect(cards.nth(i)).toHaveAttribute('data-type',type);
+  await expect(cards.last().locator('.lesson-detail[data-type="lab"]')).toHaveCount(1);
+  await expect(cards.last().locator('.lesson-detail[data-type="lecture"]')).toHaveCount(1);
+  for(const theme of ['dark','light']){
+    await page.evaluate(theme=>{themeMode=theme;applyTheme();},theme);
+    const backgrounds=await cards.evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).backgroundImage));
+    expect(new Set(backgrounds).size).toBe(4);
+  }
+  await expect(page.locator('#dayTabs [aria-pressed="true"] .calendar-dots i')).toHaveCount(4);
+  await cards.last().locator('summary').last().click();
+  await cards.last().getByRole('button',{name:'Добавить заметку'}).last().click();
+  await expect(page.locator('#noteModal')).toBeVisible();
+});
