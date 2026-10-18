@@ -4,6 +4,10 @@ import re
 
 
 def normalize_room(raw):
+    if re.fullmatch(
+        r"online|онлайн|дист\.?|д\.о\.?", str(raw or "").strip(), re.IGNORECASE
+    ):
+        return ""
     return re.sub(
         r"\s+", " ", re.sub(r"\s*и/[пд]", "", str(raw or ""), flags=re.IGNORECASE)
     ).strip()

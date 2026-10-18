@@ -222,6 +222,7 @@ function renderCompactDay(container) {
         <div class="pt-1 pb-2 space-y-2 text-xs"><p class="text-slate-500">${escapeHTML([lesson.type,lesson.tag].filter(Boolean).join(' · '))}</p>
           ${lesson.parse_warning?`<p class="text-amber-700 dark:text-amber-300">${escapeHTML(lesson.parse_warning)}</p><p class="text-slate-500 dark:text-slate-400 whitespace-pre-wrap">${escapeHTML(lesson.raw)}</p>`:''}
           ${room?`<p class="text-teal-600 dark:text-teal-300">${escapeHTML(room.location)}</p>`:''}
+          ${lesson.room_note || lesson.teacher_note?`<p class="text-slate-500 dark:text-slate-400">Пометки источника: ${escapeHTML([lesson.room_note,lesson.teacher_note].filter(Boolean).join('; '))}</p>`:''}
           ${renderLessonMeta(lesson,pair.number)}
           ${note?`<p class="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-200 whitespace-pre-wrap">${escapeHTML(note)}</p>`:''}
           <div class="flex flex-wrap gap-2">
