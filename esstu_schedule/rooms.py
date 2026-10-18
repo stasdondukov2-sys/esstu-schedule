@@ -5,7 +5,7 @@ import re
 
 def normalize_room(raw):
     return re.sub(
-        r"\s+", " ", re.sub(r"\s*и/д", "", str(raw or ""), flags=re.IGNORECASE)
+        r"\s+", " ", re.sub(r"\s*и/[пд]", "", str(raw or ""), flags=re.IGNORECASE)
     ).strip()
 
 
@@ -40,5 +40,22 @@ def build_rooms_index(schedules):
                         )
                         if entry not in entries:
                             entries.append(entry)
+    for room in rooms.values():
+        room["slots"] = dict(
+            sorted(
+                room["slots"].items(),
+                key=lambda item: (
+                    item[0].rsplit(":", 1)[0],
+                    int(item[0].rsplit(":", 1)[1]),
+                ),
+            )
+        )
+        for entries in room["slots"].values():
+            entries.sort(
+                key=lambda entry: tuple(
+                    str(entry.get(key, ""))
+                    for key in ("start", "end", "subject", "teacher", "groups")
+                )
+            )
     result = sorted(rooms.values(), key=lambda item: item["room"])
     return {"count": len(result), "rooms": result, "coverage": "known_schedules"}

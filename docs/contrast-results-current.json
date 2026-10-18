@@ -1,0 +1,122 @@
+[
+  {
+    "theme": "dark",
+    "selector": ".calendar-count",
+    "minContrast": 8.445095428315183,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".pair-time>div:nth-child(3)",
+    "minContrast": 6.429984209962141,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".lesson-warning .lesson-kind",
+    "minContrast": 7.207213379437639,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": "#compactFreshnessText",
+    "minContrast": 8.165736282593732,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".hero-lesson-meta",
+    "minContrast": 7.114467074410084,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".calendar-count",
+    "minContrast": 7.182549575298191,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".pair-time>div:nth-child(3)",
+    "minContrast": 5.896791569363521,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".lesson-warning .lesson-kind",
+    "minContrast": 5.826651234482185,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": "#compactFreshnessText",
+    "minContrast": 6.372192160784525,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".hero-lesson-meta",
+    "minContrast": 6.144285983474243,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".calendar-count",
+    "minContrast": 8.328664264681532,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".pair-time>div:nth-child(3)",
+    "minContrast": 6.504408801926336,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".lesson-warning .lesson-kind",
+    "minContrast": 7.207213379437639,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": "#compactFreshnessText",
+    "minContrast": 8.156181862224157,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "dark",
+    "selector": ".hero-lesson-meta",
+    "minContrast": 7.114467074410084,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".calendar-count",
+    "minContrast": 6.8350082655282085,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".pair-time>div:nth-child(3)",
+    "minContrast": 5.896791569363521,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".lesson-warning .lesson-kind",
+    "minContrast": 5.826651234482185,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": "#compactFreshnessText",
+    "minContrast": 6.330296105128406,
+    "fontSize": "12px"
+  },
+  {
+    "theme": "light",
+    "selector": ".hero-lesson-meta",
+    "minContrast": 6.160372083372981,
+    "fontSize": "12px"
+  }
+]

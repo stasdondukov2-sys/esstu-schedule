@@ -4,8 +4,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-<meta content="2.5.0" name="app-version"/>
-<meta content="#10131d" name="theme-color"/>
+<meta content="__BUILD_ID__" name="app-version"/>
+<meta content="2.5.0" name="app-release"/>
+<meta content="#050507" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="manifest.json" rel="manifest"/>
@@ -22,18 +23,23 @@
 <meta property="og:description" content="Расписание групп, преподавателей и аудиторий ВСГУТУ."/>
 <meta property="og:url" content="https://stasdondukov2-sys.github.io/esstu-schedule/"/>
 <link href="app.css" rel="stylesheet"/>
-<style id="stealth-cyber-glass">body{background:#050507!important;color:#e2e8f0}.lesson-card{background:rgba(15, 15, 20, 0.7);border:1px solid rgba(255, 255, 255, 0.05);backdrop-filter:blur(12px);border-radius:14px}.lesson-card.is-current{border:1px solid #10b981;box-shadow:inset 0 0 8px rgba(16, 185, 129, 0.05), 0 0 16px rgba(16, 185, 129, 0.1)}.lesson-card.is-next{border:1px solid #8b5cf6}.pulse-dot{background-color:#10b981;box-shadow:0 0 8px #10b981}.progress-bar-fill{background-color:#10b981}.lesson-card.is-past{opacity:0.35;filter:grayscale(0.5);pointer-events:none}</style>
-  
+
 </head>
 <body class="campus-app min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
 <!-- ===================================================================== -->
 <!-- ВЕРХНЯЯ ФИРМЕННАЯ ШАПКА ВСГУТУ MODERN                                  -->
 <!-- ===================================================================== -->
-<header class="campus-header"><div class="campus-header-inner flex items-center justify-between gap-3 px-4 py-2"><button aria-label="Сменить расписание" class="flex items-center gap-2 min-w-0 cursor-pointer border-none bg-transparent text-left p-0" onclick="openSearchModal()"><sph1an class="font-extrabold text-sm truncate" id="currentEntityBtnText">Выберите расписание</span><span class="text-xs opacity-60" id="weekBadge">I неделя</span></button><span class="text-xs opacity-70 whitespace-nowrap" id="campusDate">Расписание занятий</span><div class="flex items-center gap-2"><button class="campus-change cursor-pointer" onclick="openSearchModal()" aria-label="Поиск" title="Поиск">🔍</button><button aria-label="Настройки" class="campus-more cursor-pointer" onclick="openSimpleDialog('moreMenuModal')" title="Настройки">⚙️</button></div></div></header>
-  <div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button onclick="applyAppUpdate()">Обновить</button></div>
+<header class="campus-header">
+<div class="campus-header-inner">
+<h1 class="header-group"><button aria-label="Сменить расписание" onclick="openSearchModal()"><i class="header-dot" aria-hidden="true"></i><span id="currentEntityBtnText">Выберите расписание</span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></button></h1>
+<div class="header-date"><span id="campusDate">Расписание занятий</span><span id="weekBadge">I неделя</span></div>
+<div class="header-actions"><button class="campus-more" onclick="openSearchModal()" aria-label="Поиск расписания" title="Поиск расписания"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></button><button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')" title="Настройки и инструменты"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 3-1 3-3 1-2 4 2 2 1 3 3 1 1 3h4l1-3 3-1 2-4-2-2-1-3-3-1-1-3Z"/><circle cx="11" cy="11.5" r="3"/></svg></button></div>
+</div></header>
+<div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button id="applyAppUpdateButton">Обновить</button></div>
 <!-- ОСНОВНОЙ КОНТЕНТ -->
 <main class="campus-shell">
 <p id="teacherIdentityWarning" hidden role="status" class="campus-warning">Возможны данные нескольких преподавателей: одинаковые фамилия и инициалы встречаются в разных кафедрах. Сверьте занятия с источником.</p>
+<p id="publicationFreshnessWarning" hidden role="status" class="campus-warning"></p>
 <div class="campus-layout"><aside class="campus-overview" aria-label="Ближайшее занятие">
 <section id="liveHeroCard" class="glass-panel campus-hero">
 <div class="flex justify-between items-center gap-2"><span id="heroStatusLabel" class="text-xs font-semibold text-slate-600 dark:text-slate-300">Загрузка расписания…</span><span id="heroRemainingTime" class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800"></span></div>
@@ -41,7 +47,6 @@
 <div id="heroProgressWrap" class="hidden mt-3"><div id="heroProgress" role="progressbar" aria-label="Прошло времени занятия" aria-valuemin="0" aria-valuemax="100" class="h-1 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden"><div id="heroProgressFill" class="h-full bg-teal-500 rounded-full"></div></div></div>
 <div id="heroNextPairRow" class="hidden mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400"></div>
 </section>
-<button class="campus-freshness" id="compactFreshnessText" onclick="openSimpleDialog('freshnessModal')">Обновление данных…</button>
 
 </aside><section class="campus-agenda glass-panel" aria-label="Расписание на выбранный день">
 <section id="weekControls" class="flex items-center justify-between gap-2"><div class="inline-flex rounded-xl bg-slate-200/60 dark:bg-slate-800/60 p-1"><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek1" onclick="selectWeek(1)">I неделя</button><button class="px-3 py-1 rounded-lg text-xs font-bold transition" id="btnWeek2" onclick="selectWeek(2)">II неделя</button></div><button class="px-3 text-xs font-semibold text-teal-600 dark:text-teal-400" onclick="bottomNavToday()">Сегодня</button></section>
@@ -51,7 +56,7 @@
 <button id="activeSubgroupChip" class="hidden text-xs text-teal-600 dark:text-teal-300" onclick="openSimpleDialog('moreMenuModal')"></button>
 <p id="selectedDaySummary" class="text-xs font-semibold text-slate-500 dark:text-slate-400"></p>
 <div id="incompleteWarning" class="hidden text-sm text-amber-600 dark:text-amber-300" role="alert">Данные неполные: структура источника не распознана. Сверьте расписание с порталом.</div>
-<p id="daySourceStatus" class="text-[11px] text-slate-500 dark:text-slate-400"></p>
+<div id="daySourceStatus"><button class="campus-freshness" id="compactFreshnessText" onclick="openSimpleDialog('freshnessModal')">Обновление данных…</button></div>
 <section class="space-y-2.5" id="pairsContainer" aria-busy="true"><div class="schedule-skeleton" role="status" aria-label="Загрузка расписания"><span class="sr-only">Загрузка расписания…</span><div class="skeleton-card" aria-hidden="true"><i></i><i></i><i></i></div></div></section>
 <footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
 
@@ -98,7 +103,8 @@
     function decodeEsstuRoom(rawRoom) {
       if (!rawRoom || !String(rawRoom).trim()) return null;
       const raw = String(rawRoom).trim(), board = /и\/д/i.test(raw);
-      const clean = raw.replace(/\s*и\/д/ig, '').trim();
+      const clean = raw.replace(/\s*и\/[пд]/ig, '').trim();
+      if(/^(?:online|онлайн|дист\.?|д\.о\.?)$/i.test(clean))return {raw,badge:'Онлайн',building:null,location:'Онлайн-занятие',online:true};
       const dash = clean.match(/^(\d{1,2})-(?:\d{2,4}[а-яa-z]?|спорт\d*)$/i);
       const zero = clean.match(/^0([1-9])\d{2}[а-яa-z]?$/i);
       const four = clean.match(/^([1-9])\d{3}[а-яa-z]?$/i);
@@ -147,8 +153,8 @@
 
     function getUlanUdeNow() {
       const now = new Date();
-      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-      const uuDate = new Date(utcMs + 8 * 3600000);
+      const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Irkutsk',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(now).map(part=>[part.type,part.value]));
+      const uuDate = new Date(+parts.year,+parts.month-1,+parts.day,+parts.hour,+parts.minute,+parts.second);
       if (simOverride) {
         const currentDayIdx = (uuDate.getDay() + 6) % 7;
         uuDate.setDate(uuDate.getDate() + (simOverride.dayIndex - currentDayIdx));
@@ -361,7 +367,7 @@
 
     function renderPairsList() {
       const container = document.getElementById('pairsContainer');
-      if (currentSchedule?.is_incomplete) { container.textContent='Данные неполные — расписание не удалось надёжно прочитать.'; return; }
+      if (currentSchedule?.is_incomplete) { container.textContent='Данные неполные — '+scheduleIssueText(currentSchedule); return; }
       if (!currentSchedule) { container.textContent='Загрузка расписания…'; return; }
       if ((hasDatedSchedule(currentSchedule) || viewMode === 'dates') && scheduleTab !== 'session') { renderDatedTimetable(container); return; }
       if (scheduleTab === 'session') { renderSessionTimeline(container); return; }
@@ -377,19 +383,20 @@
           .map((p) => ({ ...p, filtered: filterLessons(p.lessons) }))
           .filter((p) => p.filtered.length > 0);
 
-        const rowsHtml = activePairs.map((p) => {
+        const rowsHtml = groupOnlinePairs(activePairs).map((block) => {
+          const p=activePairs[block.start],last=activePairs[block.end],count=block.end-block.start+1;
           const l = p.filtered[0];
           const extraCount = p.filtered.length > 1 ? ` (+${p.filtered.length - 1})` : '';
           return `
             <div class="flex items-start justify-between gap-2 py-1.5 border-b border-slate-100 dark:border-slate-800/60 last:border-0 text-xs">
               <div class="flex items-start gap-2 min-w-0">
-                <span class="font-mono font-bold text-teal-600 dark:text-teal-400 shrink-0">${p.number}) ${p.start}</span>
+                <span class="font-semibold text-teal-600 dark:text-teal-400 shrink-0">${count>1?`${p.start}–${last.end} · ${count} ${pairWord(count)}`:`${p.number} пара · ${p.start}`}</span>
                 <div class="min-w-0">
-                  <div class="font-bold truncate">${l.subject}${extraCount}</div>
+                  <div class="font-bold truncate">${escapeHTML(displaySubject(l))}${extraCount}</div>
                   <div class="text-[11px] text-slate-400 truncate">${l.type} ${l.teacher ? '• ' + l.teacher : (l.groups || '')}</div>
                 </div>
               </div>
-              ${l.room ? `<span class="shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-teal-600 dark:text-teal-300">а.${l.room}</span>` : ''}
+              ${lessonRoomLabel(l) ? `<span class="shrink-0 text-xs font-semibold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-teal-600 dark:text-teal-300">${escapeHTML(lessonRoomLabel(l))}</span>` : ''}
             </div>
           `;
         }).join('');
@@ -400,7 +407,7 @@
               <button onclick="selectDayAndSwitch('${d.key}')" class="font-extrabold text-sm text-teal-600 dark:text-teal-400 hover:underline">
                 ${dayData?.day_title || d.full} →
               </button>
-              <span class="text-[11px] font-semibold text-slate-400">${activePairs.length} пар</span>
+              <span class="text-xs font-semibold text-slate-400">${activePairs.length} ${pairWord(activePairs.length)}</span>
             </div>
             ${rowsHtml || '<div class="text-xs text-slate-400 italic py-2">Выходной / пар нет</div>'}
           </div>
@@ -658,7 +665,7 @@
         if (selectedCourseFilter !== 0 && g.course !== selectedCourseFilter) return false;
         if (q && !g.name.toLowerCase().includes(q)) return false;
         return true;
-      });
+      }).sort((a,b)=>(Number(a.course)||99)-(Number(b.course)||99) || a.name.localeCompare(b.name,'ru',{numeric:true}));
 
       if (!filtered.length) {
         container.innerHTML = `<div class="col-span-2 text-center text-xs text-slate-400 py-6">Группы не найдены</div>`;
@@ -668,14 +675,15 @@
       container.innerHTML = filtered.map((g) => `
         <button
           onclick="chooseGroup('${g.section}', '${g.id}', '${g.name.replace(/'/g, "\\'")}')"
+          aria-pressed="${g.section===savedState.section && g.name===savedState.groupName && appMode==='student'}"
           class="p-2.5 rounded-2xl border text-left transition ${
             g.name === savedState.groupName && appMode === 'student'
               ? 'bg-teal-600/15 border-teal-500'
               : 'bg-slate-100/70 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/70 hover:border-teal-500/50'
           }"
         >
-          <div class="font-extrabold text-xs truncate">${g.name}</div>
-          <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">${g.course} курс • ${g.section_title}</div>
+          <div class="group-name">${escapeHTML(g.name)}${g.section===savedState.section && g.name===savedState.groupName && appMode==='student'?`<span class="group-current">${uiIcon('check')}<span class="sr-only">Выбрана</span></span>`:''}</div>
+          <div class="group-course">${g.course} курс</div>
         </button>
       `).join('');
     }
@@ -844,7 +852,7 @@
 <div aria-labelledby="searchTitle" aria-modal="true" class="simple-overlay hidden" id="searchModal" role="dialog">
 <div class="simple-sheet"><div class="flex justify-between items-center gap-2"><h2 class="font-bold" id="searchTitle">Выбрать расписание</h2><button aria-label="Закрыть поиск" class="w-10 text-xl" onclick="closeSearchModal()">×</button></div>
 <div aria-label="Каталог" class="flex gap-2 my-2" role="group"><button class="px-4 rounded-xl" id="searchStudentTab" onclick="openSearchModal('student')">Группы</button><button class="px-4 rounded-xl" id="searchTeacherTab" onclick="openSearchModal('teacher')">Преподаватели</button></div>
-<div id="searchInputSlot" class="search-input-slot"></div><details id="recentSection" hidden><summary class="text-xs font-semibold py-2 cursor-pointer">Недавние</summary><div id="recentSchedules"></div></details><details class="border-y border-slate-200 dark:border-slate-800 py-1 mb-2" id="favoritesSection"><summary class="text-xs font-semibold py-2 cursor-pointer">Избранное</summary><div class="py-2 space-y-2" id="favoritesSlot"><div class="flex gap-2 overflow-x-auto text-xs" id="favoritesBar"></div><button aria-label="Избранное" id="favStarBtn" onclick="toggleCurrentFavorite()">☆ Избранное</button></div></details>
+<div id="searchInputSlot" class="search-input-slot"></div><section id="favoritesSection" aria-label="Избранное"><div class="search-section-heading"><h3>Избранное</h3><button aria-label="Избранное" id="favStarBtn" onclick="toggleCurrentFavorite()">☆ Избранное</button></div><div id="favoritesSlot"><div id="favoritesBar"></div></div></section><section id="recentSection" hidden aria-label="Недавние"><h3>Недавние</h3><div id="recentSchedules"></div></section>
 <div class="min-h-0 flex-1 overflow-y-auto" id="searchPanes"><div class="search-pane hidden" id="groupModal">
 <div class="flex flex-col min-h-0">
 

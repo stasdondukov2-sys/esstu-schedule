@@ -1,0 +1,12 @@
+[
+  {
+    "source": "demo_data/zo1/24.htm",
+    "fixture": "zo1-24.htm",
+    "sha256": "4efb35cf4884cf0607e3de3980fc73583bdf3043bbd31a140071e494a8f3281d"
+  },
+  {
+    "source": "demo_data/spezialitet/Caf48.htm",
+    "fixture": "spezialitet-Caf48.htm",
+    "sha256": "2de8c22309e771a869d96d06d07d6578ee9ae80cd25cf740623f29904cf810e9"
+  }
+]
