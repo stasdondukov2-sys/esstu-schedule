@@ -47,6 +47,14 @@ function isOnlineLesson(lesson) {
   return !!decodeEsstuRoom(lesson.room)?.online || (!lesson.room && /онлайн[-\s]?курс|online course/i.test(lesson.subject || ''));
 }
 function displaySubject(lesson) {
+  if(lesson.parse_warning && /^(?:Несколько занятий|Не удалось разобрать занятие)/.test(lesson.subject || '') && lesson.raw){
+    const raw=String(lesson.raw).replace(/^(?:лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.|конс\.)\s*/i,'');
+    const boundary=raw.search(/[А-ЯЁ][А-ЯЁа-яё-]+\s+[А-ЯЁ]\.(?:\s*[А-ЯЁ]\.)?|(?:^|\s)а\.\s*\d/);
+    let title=(boundary>=0?raw.slice(0,boundary):raw).trim().replace(/[-–—\s]+$/,'');
+    const languages=title.match(/Иностранный язык(?:\s+\d+)?\s*\([^)]*\)/g);
+    if(languages && languages.join(' ')===title)title=[...new Set(languages)].join(' / ');
+    return title || 'Предмет не указан в источнике';
+  }
   return isOnlineLesson(lesson)?String(lesson.subject || '').replace(/\s*\((?:онлайн[-\s]?курс|online course)\)/ig,'').trim() || lesson.subject:lesson.subject;
 }
 function lessonRoomLabel(lesson) {return isOnlineLesson(lesson)?'Онлайн':lesson.room?'ауд. '+lesson.room:'';}

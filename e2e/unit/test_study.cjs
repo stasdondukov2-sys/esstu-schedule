@@ -4,6 +4,12 @@ const context={console,Date,Intl,URL,URLSearchParams,localStorage:{getItem:key=>
 vm.createContext(context);vm.runInContext(inline.at(-1)[1],context);
 for(const file of ['modern.js','experience.js','simple-ui.js','study-tools.js'])vm.runInContext(fs.readFileSync('static/'+file,'utf8'),context);
 const run=code=>vm.runInContext(code,context);
+context.lesson={subject:'Несколько занятий — сверьте с источником',parse_warning:'Требуется сверка',raw:'лаб.Физика ПЕТРОВ И.И. ИВАНОВ П.П. - а.0105- а.0107'};
+assert.equal(run('displaySubject(lesson)'),'Физика');
+context.lesson={subject:'Несколько занятий — сверьте с источником',parse_warning:'Требуется сверка',raw:'Иностранный язык (немецкий) Иностранный язык (английский) Иностранный язык (английский) ПЕТРОВ И.И. - а.0105- а.0107'};
+assert.equal(run('displaySubject(lesson)'),'Иностранный язык (немецкий) / Иностранный язык (английский)');
+context.lesson={subject:'Несколько занятий — сверьте с источником',parse_warning:'Требуется сверка',raw:'ПЕТРОВ И.И. ИВАНОВ П.П. - а.0105- а.0107'};
+assert.equal(run('displaySubject(lesson)'),'Предмет не указан в источнике');
 for(const [raw,one,two] of [['1 п/г',true,false],['2подгр.',false,true],['Физика 1',true,true],['11 п/г',true,true],['1-я подгруппа',true,false],['1 и 2 п/г',true,true],['1/2 п/г',true,true],['проект 2',true,true],['',true,true]]){
   context.lesson={raw};assert.equal(run('matchesSubgroup(lesson,"1")'),one,raw);assert.equal(run('matchesSubgroup(lesson,"2")'),two,raw);
 }
