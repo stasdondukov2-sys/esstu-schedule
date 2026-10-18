@@ -25,16 +25,15 @@
 <link href="app.css" rel="stylesheet"/>
 
 </head>
-<body class="campus-app min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
+<body class="campus-app replica-mode min-h-screen pb-28 bg-slate-100 text-slate-900 dark:bg-[#080f1a] dark:text-slate-100 transition-colors duration-200">
 <!-- ===================================================================== -->
 <!-- ВЕРХНЯЯ ФИРМЕННАЯ ШАПКА ВСГУТУ MODERN                                  -->
 <!-- ===================================================================== -->
 <header class="campus-header">
-<div class="campus-header-inner">
-<h1 class="header-group"><button aria-label="Сменить расписание" onclick="openSearchModal()"><i class="header-dot" aria-hidden="true"></i><span id="currentEntityBtnText">Выберите расписание</span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></button></h1>
-<div class="header-date"><span id="campusDate">Расписание занятий</span><span id="weekBadge">I неделя</span></div>
-<div class="header-actions"><button class="campus-more" onclick="openSearchModal()" aria-label="Поиск расписания" title="Поиск расписания"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></button><button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')" title="Настройки и инструменты"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 3-1 3-3 1-2 4 2 2 1 3 3 1 1 3h4l1-3 3-1 2-4-2-2-1-3-3-1-1-3Z"/><circle cx="11" cy="11.5" r="3"/></svg></button></div>
-</div></header>
+<div class="campus-header-inner replica-header">
+<div class="replica-header-left"><h1 class="header-group"><button aria-label="Сменить расписание" onclick="openSearchModal('student')"><span id="currentEntityBtnText">Группа</span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 10 5 5 5-5"/></svg></button></h1><button id="replicaSubgroup" class="liquid-pill" onclick="cycleReplicaSubgroup()" aria-label="Подгруппа">Все п/г</button></div>
+<div class="header-actions"><button id="replicaParity" class="liquid-pill" onclick="selectWeek(selectedWeek===1?2:1)">I неделя</button><button class="campus-more" aria-label="Поиск преподавателя" onclick="openReplicaTeachers()" title="Преподаватели (T / Е)"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2"/></svg></button><button class="campus-more" aria-label="Аудитории" onclick="openRoomsModal()" title="Аудитории (/)"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></button></div>
+</div><div class="sr-only"><span id="campusDate"></span><span id="weekBadge"></span></div></header>
 <div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button id="applyAppUpdateButton">Обновить</button></div>
 <!-- ОСНОВНОЙ КОНТЕНТ -->
 <main class="campus-shell">
@@ -58,18 +57,14 @@
 <div id="incompleteWarning" class="hidden text-sm text-amber-600 dark:text-amber-300" role="alert">Данные неполные: структура источника не распознана. Сверьте расписание с порталом.</div>
 <div id="daySourceStatus"><button class="campus-freshness" id="compactFreshnessText" onclick="openSimpleDialog('freshnessModal')">Обновление данных…</button></div>
 <section class="space-y-2.5" id="pairsContainer" aria-busy="true"><div class="schedule-skeleton" role="status" aria-label="Загрузка расписания"><span class="sr-only">Загрузка расписания…</span><div class="skeleton-card" aria-hidden="true"><i></i><i></i><i></i></div></div></section>
-<footer class="text-center text-[11px] text-slate-400 py-5">Данные portal.esstu.ru</footer>
+<footer class="replica-footer"><a href="https://portal.esstu.ru/raspisan.htm" target="_blank" rel="noopener">portal.esstu.ru</a><div><button onclick="openReplicaTeachers()" aria-label="Открыть поиск преподавателя">Преподаватели</button><button class="replica-tools" aria-label="Ещё" onclick="openSimpleDialog('moreMenuModal')" title="Настройки и инструменты"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h1m6 0h1m6 0h1"/></svg></button></div></footer>
 
 </section></div>
 </main>
 <!-- ===================================================================== -->
 <!-- НИЖНЯЯ НАВИГАЦИОННАЯ ПАНЕЛЬ (BOTTOM BAR ПОД БОЛЬШОЙ ПАЛЕЦ)            -->
 <!-- ===================================================================== -->
-<nav class="campus-nav" aria-label="Основная навигация"><div class="grid grid-cols-3 gap-2">
-<button class="flex flex-col items-center gap-1 py-1 text-teal-600 dark:text-teal-400" onclick="closeSearchModal();bottomNavToday()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z M4 9h16 M9 9v11"/></svg><span class="text-[11px] font-semibold">Расписание</span></button>
-<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openSearchModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 15l6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0"/></svg><span class="text-[11px] font-semibold">Поиск</span></button>
-<button class="flex flex-col items-center gap-1 py-1 text-slate-500" onclick="openRoomsModal()"><svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 21V3h12v18 M3 21h18 M14 12h1"/></svg><span class="text-[11px] font-semibold">Аудитории</span></button>
-</div></nav>
+
 <!-- ===================================================================== -->
 <!-- МОДАЛЬНОЕ ОКНО 1: ВЫБОР ГРУППЫ (110+ ГРУПП, 1-6 КУРС)                 -->
 <!-- ===================================================================== -->
@@ -82,7 +77,7 @@
 <div class="simple-overlay hidden" id="noteModal">
 <div class="simple-sheet space-y-3">
 <div class="flex items-center justify-between">
-<h3 class="font-bold text-sm" id="noteModalTitle">Заметка к предмету</h3>
+<h2 class="font-bold text-sm" id="noteModalTitle">Заметка к предмету</h2>
 <button aria-label="Закрыть заметку" class="text-slate-400 hover:text-teal-700 dark:hover:text-teal-200" onclick="closeNoteModal()"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
 </div>
 <textarea class="w-full bg-slate-100 dark:bg-[#080f1a] border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:border-teal-500" id="noteTextarea" placeholder="Например: Сдать реферат, принести лабораторную тетрадь..." rows="3"></textarea>
@@ -849,10 +844,11 @@
 <script src="simple-ui.js"></script>
 <script src="study-tools.js"></script>
 <script src="accessibility.js"></script>
+<script src="replica.js"></script>
 <div aria-labelledby="searchTitle" aria-modal="true" class="simple-overlay hidden" id="searchModal" role="dialog">
 <div class="simple-sheet"><div class="flex justify-between items-center gap-2"><h2 class="font-bold" id="searchTitle">Выбрать расписание</h2><button aria-label="Закрыть поиск" class="w-10 text-xl" onclick="closeSearchModal()">×</button></div>
 <div aria-label="Каталог" class="flex gap-2 my-2" role="group"><button class="px-4 rounded-xl" id="searchStudentTab" onclick="openSearchModal('student')">Группы</button><button class="px-4 rounded-xl" id="searchTeacherTab" onclick="openSearchModal('teacher')">Преподаватели</button></div>
-<div id="searchInputSlot" class="search-input-slot"></div><section id="favoritesSection" aria-label="Избранное"><div class="search-section-heading"><h3>Избранное</h3><button aria-label="Избранное" id="favStarBtn" onclick="toggleCurrentFavorite()">☆ Избранное</button></div><div id="favoritesSlot"><div id="favoritesBar"></div></div></section><section id="recentSection" hidden aria-label="Недавние"><h3>Недавние</h3><div id="recentSchedules"></div></section>
+<div id="searchInputSlot" class="search-input-slot"></div><section id="favoritesSection" aria-label="Избранное"><div class="search-section-heading"><h3>Избранное</h3><button aria-label="Избранное" id="favStarBtn" onclick="toggleCurrentFavorite()">Избранное</button></div><div id="favoritesSlot"><div id="favoritesBar"></div></div></section><section id="recentSection" hidden aria-label="Недавние"><h3>Недавние</h3><div id="recentSchedules"></div></section>
 <div class="min-h-0 flex-1 overflow-y-auto" id="searchPanes"><div class="search-pane hidden" id="groupModal">
 <div class="flex flex-col min-h-0">
 
@@ -895,11 +891,11 @@
 <button class="menu-action" onclick="shareCurrentScheduleLink()">Поделиться расписанием</button>
 <button aria-label="Сменить тему" class="menu-action" id="themeToggleBtn" onclick="cycleTheme()">Тема</button>
 <div class="flex gap-2 py-2" id="viewControls"><button class="px-2.5 py-1 rounded-lg text-xs font-bold transition" id="btnViewDay" onclick="setViewMode('day')">
-            📅 День
+            День
           </button><button class="px-2.5 py-1 rounded-lg text-xs font-bold transition" id="btnViewWeek" onclick="setViewMode('week')">
-            🗂 Неделя
+            Неделя
           </button></div>
-<div id="changesControl"><button class="px-3 rounded-xl bg-amber-500/15 text-amber-600" id="btnToggleDiff" onclick="toggleDiffHighlightMode()">⚡ Изменения (0)</button><section class="hidden rounded-2xl p-3 text-xs bg-amber-500/10 border border-amber-500/30" id="scheduleChanges"></section></div>
+<div id="changesControl"><button class="px-3 rounded-xl bg-amber-500/15 text-amber-600" id="btnToggleDiff" onclick="toggleDiffHighlightMode()">Изменения (0)</button><section class="hidden rounded-2xl p-3 text-xs bg-amber-500/10 border border-amber-500/30" id="scheduleChanges"></section></div>
 <button class="menu-action" onclick="closeSimpleDialog('moreMenuModal');openSimpleDialog('freshnessModal')">Данные и обновления</button>
 </div><div id="profileSlot"><section class="hidden rounded-3xl p-4 bg-white dark:bg-[#101c2e] border border-slate-200 dark:border-slate-800 shadow-sm" id="teacherProfileCard">
 <div class="flex items-center gap-3.5">

@@ -176,7 +176,7 @@ async function handleUrlShortcuts() {
   if(action==='rooms')await openRoomsModal();
   if(action==='session')setScheduleTab('session');
   if(action==='campus')await openCampusMapModal();
-  if(action==='now'){bottomNavToday();document.getElementById('liveHeroCard').scrollIntoView({behavior:'smooth',block:'center'});}
+  if(action==='now'){bottomNavToday();(document.querySelector('#pairsContainer>.is-current') || document.getElementById('pairsContainer')).scrollIntoView({behavior:'smooth',block:'center'});}
 }
 
 function filterCampusRoom(value){

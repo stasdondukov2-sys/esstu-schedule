@@ -70,7 +70,7 @@ test('finished hero uses tomorrow from actual date, independent of selected agen
   await expect(page.locator('#heroStatusLabel')).toHaveText('Занятия завершены');
   await expect(page.locator('.hero-upcoming')).toContainText('Завтра: 1 пара');
   await expect(page.locator('.hero-upcoming')).toContainText('09:00 · ауд. 0105');
-  await page.locator('.hero-upcoming').click();
+  await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.locator('.hero-upcoming').click();await page.keyboard.press('Escape');
   await expect(page.locator('#selectedDaySummary')).toContainText('Суббота');
 });
 
@@ -82,17 +82,17 @@ test('warning source stays collapsed and break identifies both adjacent times',a
     selectedWeek=1;selectedDayKey='friday';renderAll();
   });
   const warning=page.locator('.lesson-warning');
-  await expect(warning.locator('summary')).toContainText('Требуется сверка');
-  await expect(warning.locator('summary')).not.toContainText('ДАНЗАНОВА');
+  await expect(warning.locator('.lesson-summary')).toContainText('Требуется сверка');
+  await expect(warning.locator('.lesson-summary')).not.toContainText('ДАНЗАНОВА');
   await expect(warning.locator('.whitespace-pre-wrap')).toBeHidden();
-  await warning.locator('summary').click();
-  await expect(warning.locator('.whitespace-pre-wrap')).toHaveText('ДАНЗАНОВА С.В. -');
+  await warning.locator('.lesson-subject').first().click();
+  await expect(page.locator('#replicaNoteContext .replica-source-raw')).toHaveText('ДАНЗАНОВА С.В. -');
   await expect(page.locator('.lesson-break')).toHaveText('10:35–10:45 · Перерыв 10 мин');
 });
 
 test('picker sorts courses and names, exposes favorites and marks current group',async({page})=>{
   await ready(page);
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.evaluate(()=>{
     allGroups=[{name:'1146 тпуп',id:'1',section:'bakalavriat',course:2},{name:'245',id:'2',section:'bakalavriat',course:1},{name:'244',id:'3',section:'bakalavriat',course:1}];
     savedState.groupName='1146 тпуп';savedState.section='bakalavriat';setCourseFilter(0);
@@ -126,7 +126,7 @@ test('radar accessibility, readable labels and responsive views in both themes',
   await page.setViewportSize({width:testInfo.project.name==='mobile'?390:1440,height:1000});
   fs.mkdirSync('preview/design-review',{recursive:true});
   await page.screenshot({path:`preview/design-review/day-${testInfo.project.name}.png`,fullPage:true,animations:'disabled'});
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.screenshot({path:`preview/design-review/search-${testInfo.project.name}.png`,animations:'disabled'});
   await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'Аудитории',exact:true}).click();

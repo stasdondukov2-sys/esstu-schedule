@@ -19,12 +19,12 @@ test('new shell reads a published group and source details',async({page})=>{
   expect(errors).toEqual([]);
 });
 test('new shell can search the published group catalog',async({page})=>{
-  await ready(page);await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await ready(page);await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.locator('#groupSearchInput').fill(group.name);
   await expect(page.locator('#groupsListContainer')).toContainText(group.name);
 });
 test('new shell opens a published teacher',async({page})=>{
-  await ready(page);await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await ready(page);await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.getByRole('button',{name:'Преподаватели',exact:true}).click();
   await page.locator('#teacherSearchInput').fill(teacherName);
   await page.locator('#teacherModalContent button').filter({hasText:teacherName}).first().click();

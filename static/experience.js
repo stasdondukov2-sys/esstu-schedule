@@ -53,10 +53,10 @@ function hasDayChanges(week,day) {
 }
 function renderLessonMeta(lesson,pair) {
   const file = lesson.source_file;
-  const label = lesson.source_type === 'official_caf' ? '🏛 Расписание кафедры' : '📄 Расписание группы';
+  const label = lesson.source_type === 'official_caf' ? 'Расписание кафедры' : 'Расписание группы';
   const source = file ? `<a class="text-teal-600 dark:text-teal-400 text-[11px] underline" target="_blank" rel="noopener" href="https://portal.esstu.ru/${file.split('/').map(encodeURIComponent).join('/')}">${label}: ${escapeHTML(file)}</a>` : '<span class="text-[11px] text-slate-400">Источник не указан</span>';
   const changes = highlightChanges ? scheduleChanges.filter(c => c.current && String(c.current.week)===String(selectedWeek) && c.current.day===selectedDayKey && c.current.pair===pair && c.current.subject===lesson.subject) : [];
-  return `<div class="mt-2">${source}${changes.map(c=>`<div class="text-xs text-amber-600 dark:text-amber-300 mt-1">⚡ ${escapeHTML(c.label)}</div>`).join('')}</div>`;
+  return `<div class="mt-2">${source}${changes.map(c=>`<div class="text-xs text-amber-600 dark:text-amber-300 mt-1">${escapeHTML(c.label)}</div>`).join('')}</div>`;
 }
 function displayDate(value) {
   if (!value || Number.isNaN(Date.parse(value))) return 'дата неизвестна';
@@ -70,7 +70,7 @@ function updateExperienceUI() {
   document.getElementById('freshnessBadge').textContent = cached ? '💾 Сохранённая копия' : '🌐 Загружено с сайта';
   const checked = currentSchedule.source_checked_at;
   document.getElementById('freshnessTimestamp').textContent = `${currentSchedule.source_file || (currentSchedule.partial ? 'Расписания групп' : 'Сводный каталог')} • Проверка источника: ${displayDate(checked)} • Сборка: ${displayDate(currentSchedule.generated_at)}${lastDelivery ? ' • Получено: '+displayDate(lastDelivery.at) : ''}`;
-  document.getElementById('btnToggleDiff').textContent = `⚡ Изменения (${scheduleChanges.length})${highlightChanges ? '' : ' · скрыты'}`;
+  document.getElementById('btnToggleDiff').textContent = `Изменения (${scheduleChanges.length})${highlightChanges ? '' : ' · скрыты'}`;
   const panel = document.getElementById('scheduleChanges');
   panel.classList.toggle('hidden',!highlightChanges || !scheduleChanges.length);
   panel.innerHTML = '<b>Изменения относительно предыдущей загруженной версии</b>' + scheduleChanges.map(c=>{

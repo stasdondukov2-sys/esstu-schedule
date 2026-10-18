@@ -21,7 +21,7 @@ routedTest('recent schedules are local and search precedes filters',async({page}
   const groups=JSON.parse(fs.readFileSync('dist/api/groups/bakalavriat.json','utf8')).groups;
   const target=groups.find(group=>{try{return group.id!=='1'&&!JSON.parse(fs.readFileSync(`dist/api/schedule/bakalavriat/${group.id}.json`,'utf8')).is_incomplete;}catch{return false;}});
   expect(target).toBeTruthy();await ready(page);await ready(page,'./?group='+encodeURIComponent(target.name));
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await expect(page.locator('#searchInputSlot #groupSearchInput')).toBeVisible();
   const input=await page.locator('#groupSearchInput').boundingBox(),filters=await page.locator('#sectionTabs').boundingBox();expect(input.y).toBeLessThan(filters.y);
   await expect(page.locator('#recentSection')).toBeVisible();await expect(page.locator('#recentSchedules')).toContainText(target.name);
@@ -70,7 +70,7 @@ test('a real worker update preserves saved data and the new shell opens offline'
     await page.evaluate(()=>fetch('api/groups/bakalavriat.json').then(response=>response.json()));
     release=2;await page.evaluate(async()=>{const registration=await navigator.serviceWorker.getRegistration();await registration.update();});
     await expect(page.locator('#appUpdateBanner')).toBeVisible();
-    const banner=await page.locator('#appUpdateBanner').boundingBox(),nav=await page.locator('.campus-nav').boundingBox();expect(banner.y+banner.height).toBeLessThan(nav.y);
+    const banner=await page.locator('#appUpdateBanner').boundingBox();expect(banner.y+banner.height).toBeLessThanOrEqual(page.viewportSize().height);await expect(page.locator('.campus-nav')).toHaveCount(0);
     await Promise.all([page.waitForEvent('load'),peer.waitForEvent('load'),page.locator('#appUpdateBanner button').click()]);
     await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
     await expect(page.locator('meta[name="app-version"]')).toHaveAttribute('content','browser-test-2');
@@ -109,12 +109,12 @@ routedTest('online pairs stay compact with readable time and preserved original 
   await page.screenshot({path:`preview/online-${testInfo.project.name}.png`,fullPage:true});
   await expect(block.locator(':scope > summary')).not.toContainText('(онлайн-курс)');await block.locator(':scope > summary').click();
   await expect(block.locator('article')).toHaveCount(2);await expect(block.locator('article').last()).toContainText('18:05');
-  await block.locator('article').last().locator('summary').click();await expect(block.getByRole('button',{name:'Добавить заметку',exact:true})).toBeVisible();
+  await block.locator('article').last().locator('.lesson-subject').first().click();await expect(page.locator('#noteModal')).toBeVisible();await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.locator('#btnViewWeek').click();
   await expect(page.locator('#moreMenuModal')).toBeHidden();
   await expect(page.locator('#pairsContainer')).toContainText('2 пары');await expect(page.locator('#pairsContainer')).not.toContainText(/2 пар(?:\s|$)/);
   await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
-  const content=await page.locator('#pairsContainer').boundingBox(),nav=await page.locator('.campus-nav').boundingBox();expect(content.y+content.height).toBeLessThanOrEqual(nav.y);
+  const content=await page.locator('#pairsContainer').boundingBox(),footer=await page.locator('.replica-footer').boundingBox();expect(content.y+content.height).toBeLessThanOrEqual(footer.y);await expect(page.locator('.campus-nav')).toHaveCount(0);
   await page.screenshot({path:`preview/online-week-bottom-${testInfo.project.name}.png`});
 });
 

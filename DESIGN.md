@@ -1,6 +1,6 @@
 ---
-name: "ВСГУТУ — Dark Liquid Glass"
-description: "Чёрное стекло, глянцевые грани и читаемое расписание с честными состояниями."
+name: "ВСГУТУ — Compact Liquid Glass"
+description: "Компактная стеклянная лента реального расписания с контекстными панелями."
 colors:
   light-campus-bg: "#f3f5f5"
   light-campus-ink: "#182321"
@@ -70,6 +70,17 @@ colors:
   light-current-room-fill: "#a5f3cf"
   error: "#fda4af"
   light-error: "#9f1239"
+  replica-practice-ink: "#ede9fe"
+  replica-lab-ink: "#fef9c3"
+  replica-lecture-ink: "#ffe4e6"
+  replica-current-tag-ink: "#d1fae5"
+  replica-current-room-top: "#a7f3d0"
+  replica-current-room-mid: "#34d399"
+  replica-current-room-bottom: "#10b981"
+  replica-practice-fill: "rgba(139,92,246,.24)"
+  replica-lab-fill: "rgba(234,179,8,.24)"
+  replica-lecture-fill: "rgba(244,63,94,.2)"
+  replica-current-fill: "rgba(16,185,129,.22)"
 typography:
   body:
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
@@ -78,9 +89,9 @@ typography:
     lineHeight: 1.5
   lesson:
     fontFamily: "Inter, sans-serif"
-    fontSize: ".9375rem"
+    fontSize: "15.5px"
     fontWeight: 750
-    lineHeight: 1.4
+    lineHeight: 1.35
     letterSpacing: "-.018em"
   hero-subject:
     fontFamily: "Inter, sans-serif"
@@ -105,27 +116,23 @@ typography:
     fontWeight: 650
   sheet-title:
     fontFamily: "Inter, sans-serif"
-    fontSize: "1.25rem"
+    fontSize: "15px"
     fontWeight: 600
+    lineHeight: 1.4
     letterSpacing: "-.02em"
 rounded:
   card: "22px"
-  header-control: "18px"
+  header-control: "16px"
   day: "16px"
   input: "16px"
-  nav: "24px"
-  nav-item: "17px"
   sheet: "28px"
-  type: "7px"
+  type: "8px"
   pill: "999px"
 spacing:
-  card: "15px"
-  card-mobile: "13px"
+  card: "13px"
   agenda-gap: "10px"
   day-gap: "6px"
-  columns: "24px"
-  sheet: "24px"
-  sheet-mobile: "20px"
+  sheet: "16px"
 components:
   button-primary:
     backgroundColor: "{colors.dark-campus-solid}"
@@ -135,7 +142,7 @@ components:
   button-glass:
     textColor: "{colors.dark-campus-ink}"
     rounded: "{rounded.header-control}"
-    height: "44px"
+    height: "32px"
   search-field:
     backgroundColor: "{colors.dark-campus-control}"
     textColor: "{colors.dark-campus-ink}"
@@ -149,96 +156,121 @@ components:
   room-chip:
     typography: "{typography.room-chip}"
     rounded: "{rounded.pill}"
-    padding: "2px 10px"
+    padding: "2px 11px"
   day-pill:
     rounded: "{rounded.day}"
-    padding: "9px 1px"
-  floating-nav:
-    rounded: "{rounded.nav}"
-    padding: "7px"
+    padding: "7px 1px"
+  footer-navigation:
+    padding: "20px 2px 0"
+    typography: "{typography.label}"
+  teacher-search-field:
+    backgroundColor: "{colors.dark-campus-control}"
+    textColor: "{colors.dark-campus-ink}"
+    rounded: "{rounded.input}"
+    padding: "10px 12px"
+    height: "42px"
+  type-chip:
+    rounded: "{rounded.type}"
+    padding: "2px 10px"
+    typography: "{typography.label}"
   sheet:
     backgroundColor: "{colors.dark-campus-glass}"
     rounded: "{rounded.sheet}"
     padding: "{spacing.sheet}"
 ---
 
-# Design System: ВСГУТУ — Dark Liquid Glass
+# Design System: ВСГУТУ — Compact Liquid Glass
 
 ## Overview
 
-**Creative North Star: "Dark Liquid Glass"**
+**Creative North Star: "Compact Liquid Glass"**
 
-True black, a static neutral ambient wash and glossy bevels turn the timetable into compact glass objects. This world follows the user's pinned ai_studio_code.html and replaces Stealth Cyber-Glass. Its material serves a working schedule: source uncertainty, room identity and long subjects remain readable.
+Black glass, a static silver ambient wash and glossy upper bevels make the real day schedule a compact stack. The approved reference supplies material and narrow composition; actual portal data supplies dates, people, rooms and uncertainty. Light mode keeps the same geometry with pale glass and darker ink.
 
-The shipped source is styles/liquid.css after styles/campus.css, with local fonts, utility adjustments in styles/input.css, and card/day markup in static/simple-ui.js. Dark and light themes share geometry with separate inks and glass. Final dark mobile, desktop and light mobile captures show the implementation; their visible test-clock state is not a claim about the live schedule.
+The current system is the final cascade of styles/campus.css, styles/liquid.css and styles/replica.css, with local fonts and utilities in styles/input.css. static/replica.js adapts the existing service-backed interface. Context stays close to the selected lesson, teacher or room.
 
 **Key Characteristics:**
-- Black glass with bright upper bevels and darker lower edges.
-- Type-tinted cards, informational room droplets and compact mono numerals.
-- Emerald current state, readable neutral past state and truthful source status.
-- Glossy controls and sheets with keyboard, motion and transparency alternatives.
+- One narrow agenda column on phones and desktop.
+- Neutral glass bodies with silver bevels and categorical borders, shadows and labels.
+- Emerald current state and room with independently meaningful lesson-type labels.
+- Contextual bottom sheets, truthful source status and keyboard alternatives.
 
 ## Colors
 
 ### Primary
 
-Emerald handles selection and current lessons. Current cards override their type material, room fill and ink; progress uses emerald-to-mint. Next-state aliases remain violet, but do not universally repaint a next card: its lesson type still controls material/labels. The overview's next border and status use next aliases.
+Emerald marks the active day, current lesson state, current room and important actions. The current room uses the three replica-current-room gradient stops. Its pair number uses replica-current-tag-ink over replica-current-fill. Progress runs from dark emerald toward mint. Current status remains textual as well as chromatic.
 
 ### Secondary
 
-Violet practice, amber laboratory and rose lecture tint the bevel, room droplet and type chip. Light mode uses darker type inks. Calendar dots carry matching categorical hues with actual counts available to assistive technology. Text labels remain present.
+Violet practice, amber laboratory and rose lecture distinguish category borders, shadows, room droplets and labels. Replica type inks and fills record the final dark labels; inherited light type inks remain active in light mode. Current card framing and room use emerald while lesson labels keep their real category. Mixed and parallel slots preserve each child's actual identity.
 
 ### Neutral
 
-Dark canvas is true black with near-white ink and cool grey secondary text. Light canvas is pale grey with green-grey ink and white glass. Mixed, unknown and review card materials remain neutral, while parallel children preserve distinct labels/rooms. Past cards and all child labels/rooms become neutral without whole-card opacity.
+Dark canvas remains true black, with near-white ink and cool grey secondary text. Light mode uses pale grey, white glass and green-grey ink. The final agenda body gradient is neutral glass, including current and categorised cards: state/type border and shadow carry the surrounding colour. Preview cards retain their own neutral control fill. Legacy campus, cyber and liquid primitives stay because inherited controls, light surfaces, source notices and the overview consume them; they are aliases within this world.
 
-**The State Before Type Rule.** Current emerald and past neutral override categorical tint. A mixed card never invents a dominant lesson type; preserve each actual label.
-
-Frontmatter keys preserve source token names with light/dark prefixes. The inherited --cyber-* aliases are legacy names still consumed by this world, not a separate visual identity. In particular --cyber-card/current-bg/next-bg remain declared, but final card backgrounds come from liquid gradients; record the final cascade rather than treating old background aliases as active material. --cyber-past supplies past ink. The --liquid-rgb channels are type/state dependent, not fixed global colours.
+**The State With Meaning Rule.** Current framing and room may turn emerald; the lesson-type label must retain the actual category and readable text.
 
 ## Typography
 
-Inter is locally hosted variable text (100–900); JetBrains Mono is locally hosted (400–700) for times, calendar dates and room chips. Cyrillic and Latin WOFF2 subsets use font-display: swap. Both fonts ship SIL OFL licences in static/fonts/. Large overview room text remains Inter.
+Inter is locally hosted variable text (100–900) with platform fallbacks. JetBrains Mono is locally hosted (400–700) for times, calendar numerals and room chips. Cyrillic and Latin subsets use font-display: swap; licences ship with the fonts.
 
-Closed lesson titles clamp to two lines; opening the native disclosure reveals the full subject. The overview subject becomes (1rem) and room (1.5rem) on mobile, using frontmatter sizes on desktop. Form text stays (1rem). Functional labels and global 10px/11px text utilities use a (.75rem / 12px) minimum. Sheet headings use the title role; ordinary headings do not gain decorative emoji.
+The compact subject uses the lesson role. Teacher, time, day, type and freshness labels predominantly use (12px); some supporting preview rows use (11px). Sheet headings use (15px); sheet search/editor fields remain (16px). The inherited overview keeps its own larger type inside More. Agenda subjects clamp to two lines; opening the card or subject opens the note sheet with the full subject, source and metadata. Merged online blocks retain native disclosure.
 
-**The Readable Past Rule.** Quiet past text remains readable, expandable and annotatable. Never fade the complete card.
+**The Meaning Survives Density Rule.** Compact presentation keeps full subjects, parallel lessons, source warnings and text labels available.
 
 ## Layout
 
-The desktop shell caps at (1120px), with a sticky (300px) left summary and flexible agenda separated by (24px). At (850px) the column shrinks to (260px) and gap to (20px). At (700px) and below, agenda comes first and summary follows below the lessons; shell side margins are (14px). Header, week selector, six day pills, selected date and one source-status chip lead into the agenda.
+The agenda keeps the approved (430px) outer composition and maximum (402px) content width on desktop and phone. Header and main use width:min(402px,calc(100% - 28px)); the main begins (5px) below the header. At (360px) and below they use calc(100% - 20px). Header controls occupy one row; six day pills, one source-status chip, the lesson stack and a quiet footer follow. The approved first screen has no sidebar, hero or floating navigation.
 
-Cards use (15px) padding, (13px) on mobile, with (10px) agenda gaps. At (360px) and below room badges return to normal flow to avoid time collisions. Controls retain at least (44px) touch height; navigation actions use (52px). Long subjects and room strings wrap. Fixed bottom navigation respects the safe area and page bottom padding keeps content reachable.
+Cards use (13px) padding and (10px) gaps. Days have (6px) gaps and (46px) minimum height. At the narrow breakpoint single-lesson rooms return to normal flow. Header controls and footer buttons use (32px) minimum height; sheet buttons use at least (36px). Other inherited actions retain their own sizes. These are observed compact dimensions rather than a universal touch-target claim.
+
+All overlays align to the bottom. Sheets cap at (430px) width and (88dvh) height, with (16px) padding and internal scrolling. Group selection, teacher search, rooms and notes are four primary sheets. More retains secondary tools, week controls and the overview. Footer links to the source portal and teachers and opens More. Update banners share the content cap and reserve bottom space when visible.
 
 ## Elevation & Depth
 
-Radial type tint, a layered glass gradient, bright inset upper bevel and darker lower edge create the liquid surface. Soft chromatic and black shadows supply depth. Room droplets use a smaller bevel/shadow. Dark cards derive the upper gradient from type RGB at (.12) alpha; past cards use a restrained neutral upper surface. These are diffuse material shadows rather than hard offsets.
+Dark cards use a radial reflection, layered neutral gradient, bright inset upper bevel, darker lower edge and diffuse shadows. Practice, laboratory, lecture and current states retain coloured borders and shadows over that final neutral body. Cards blur at (28px) with (185%) saturation; day pills blur at (20px), liquid pills at (24px). Sheets have a separate near-opaque dark gradient, top edge and upward shadow over a (4px) blurred overlay.
 
-Cards, day pills and group control use (28px) blur with (185%) saturation where supported; inherited sheets/navigation use (22px) blur. Reduced transparency substitutes the opaque panel and disables blur on major surfaces; unsupported card backdrop filtering also gets an opaque fallback. Readability must survive without transparency.
+The sidecar records exact shadow recipes. Reduced transparency replaces major cards and sheets with the opaque campus panel and removes blur. Inherited unsupported-backdrop styling supplies a card fallback. Ambient light remains static.
 
 **The Material Has Edges Rule.** Keep the upper highlight, darker lower edge and translucent body together; flat tint alone does not reproduce this world.
 
 ## Shapes
 
-Lesson and overview cards use the card radius. Header controls, day pills, navigation/items and type/number chips retain their distinct radii in frontmatter. Rooms/countdowns are pills. Sheets use (28px) corners on desktop and top corners only on mobile; fields use (16px). Existing banners, dialogs and utility buttons keep their own shapes: (22px) is not a universal overlay radius.
+Lessons, empty slots and preview cards share the (22px) silhouette. Header pills, directory rows and fields use (16px); pair/type chips use (8px); preview timeline rows use (12px). Room droplets and filter chips are fully rounded. Sheets use (28px) upper corners and square lower corners on every screen. Empty slots have a dashed border and restrained inset depth.
 
 ## Components
 
-Glossy global controls combine a reflective upper edge with glass fill. Filled sheet actions use the solid accent. Pointer press scales to (.98) with (120ms) feedback; colour/border changes take (160ms). Visible focus uses a (2px) outline with (2px) offset; text fields use zero offset. Disabled buttons retain their wait cursor and opacity.
+### Buttons and fields
 
-Six day pills show dates/type dots and expose real counts. Selection is emerald border/soft fill plus inset shine. Lesson cards use native disclosure for source, teacher/room actions and notes. The room droplet is informational. Current text, countdown and progress accompany colour; past cards retain actions. Adjacent online entries preserve original disclosures.
+Glossy header controls combine a silver upper edge with glass fill. Filled actions use the campus solid accent; the full-schedule action has (16px) corners. Teacher search is at least (42px) high with (10px 12px) padding. Other search fields retain inherited geometry, while all sheet fields use (16px) text. Inherited campus focus outlines remain visible. Pointer feedback and reduced-motion alternatives stay available.
 
-The fixed three-action navigation keeps Schedule highlighted while tool sheets open. Sheets retain focus containment, Escape and focus return; mobile handles supplement visible controls. Existing pointer sheet entry takes (200ms), from opacity (.5), translateY (12px) and scale (.985); keyboard opening and day/week changes remain immediate. Reduced motion disables transitions/animations. Ambient wash is static; loading skeletons may pulse at (1.5s) when motion is allowed. The declared drawer easing token has no current consumer.
+### Day pills and type chips
+
+Six actual days display dates and categorical dots with real accessible counts. Active selection combines emerald fill, border and inset shine. Type chips retain explicit labels and category-specific dark inks/fills inside current cards.
+
+### Cards and room droplets
+
+Agenda lesson sections have independent actions: the card or subject opens a note sheet containing the full subject, source and metadata. Teacher names open teacher previews; physical room droplets open room details. Only merged online blocks retain native disclosure. Online labels remain informational. Notes preview below the summary. Clock-driven current status and progress appear only on the matching date/week. Past cards use the approved faded neutral treatment: whole-card opacity (.62), increasing to (.85) on hover. Keep text readable in this intentionally quiet reference treatment.
+
+Empty slots preserve actual source times, explain subgroup availability where known and open slot notes. Parallel records retain separate labels, people and rooms.
+
+### Contextual sheets and footer
+
+Teacher search combines department filters, directory rows, a selected-teacher day timeline and an explicit full-schedule action. Rooms combine known-building filters and room timelines; occupancy means known scheduled lessons. Map links search known building notation. Notes keep slot context, room/teacher actions and source details. The in-flow footer keeps source, teachers and More reachable without a floating bar.
+
+Sheets retain focus containment, Escape, focus return and visible close controls. Existing pointer entry takes (200ms); keyboard opening and day/week changes remain immediate. Card feedback takes (220ms), days (200ms), liquid pills (180ms). Reduced motion disables movement. Skeleton pulsing remains limited to loading.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** preserve truthful source status, dates, lesson types and room identities.
-- **Do** use local Inter text and JetBrains Mono for compact functional numerals.
-- **Do** retain native disclosure, keyboard focus and readable light/opaque/reduced-motion states.
+- **Do** preserve truthful source status, real dates, lesson categories and room identities.
+- **Do** retain the narrow agenda geometry on desktop and phone.
+- **Do** use local Inter and JetBrains Mono for their established roles.
+- **Do** retain access to full lesson/source details, focus, light mode and reduced-motion/transparency alternatives.
 
 ### Don't:
-- **Don't** import demo timetable data or infer occupancy beyond known scheduled lessons.
-- **Don't** fade past cards or present informational room droplets as standalone navigation.
-- **Don't** flatten the bevel, add continuous ambient animation, or apply card corners to every overlay.
-- **Don't** replace text labels or source warnings with colour alone.
+- **Don't** import demonstration schedules, invent floors or addresses, or infer physical occupancy.
+- **Don't** restore a sidebar, hero above the agenda or floating navigation to the approved first screen.
+- **Don't** repaint current lesson-type labels emerald or replace source warnings with colour alone.
+- **Don't** flatten the bevel or add continuous ambient animation.
