@@ -215,7 +215,7 @@ Dark canvas remains true black, with near-white ink and cool grey secondary text
 
 Inter is locally hosted variable text (100–900) with platform fallbacks. JetBrains Mono is locally hosted (400–700) for times, calendar numerals and room chips. Cyrillic and Latin subsets use font-display: swap; licences ship with the fonts.
 
-The compact subject uses the lesson role. Teacher, time, day, type and freshness labels predominantly use (12px); some supporting preview rows use (11px). Sheet headings use (15px); sheet search/editor fields remain (16px). The inherited overview keeps its own larger type inside More. Agenda subjects clamp to two lines; opening the card or subject opens the note sheet with the full subject, source and metadata. Merged online blocks retain native disclosure.
+The compact subject uses the lesson role. Teacher, time, day, type and freshness labels predominantly use (12px); some supporting preview rows use (11px). Sheet headings use (15px); sheet search/editor fields remain (16px). The inherited overview keeps its own larger type inside More. Agenda subjects clamp to two lines; opening the card or subject opens the note sheet with the full subject, source and metadata. Each source pair remains separate, including consecutive online lessons.
 
 **The Meaning Survives Density Rule.** Compact presentation keeps full subjects, parallel lessons, source warnings and text labels available.
 
@@ -251,7 +251,7 @@ Six actual days display dates and categorical dots with real accessible counts. 
 
 ### Cards and room droplets
 
-Agenda lesson sections have independent actions: the card or subject opens a note sheet containing the full subject, source and metadata. Teacher names open teacher previews; physical room droplets open room details. Only merged online blocks retain native disclosure. Online labels remain informational. Notes preview below the summary. Clock-driven current status and progress appear only on the matching date/week. Past cards use the approved faded neutral treatment: whole-card opacity (.62), increasing to (.85) on hover. Keep text readable in this intentionally quiet reference treatment.
+Agenda lesson sections have independent actions: the card or subject opens a note sheet containing the full subject, source and metadata. Teacher names open teacher previews; physical room droplets open room details. Each source pair remains separate, including consecutive online lessons. Online labels remain informational. Notes preview below the summary. Clock-driven current status and progress appear only on the matching date/week. Past cards use the approved faded neutral treatment: whole-card opacity (.62), increasing to (.85) on hover. Keep text readable in this intentionally quiet reference treatment.
 
 Empty slots preserve actual source times, explain subgroup availability where known and open slot notes. Parallel records retain separate labels, people and rooms.
 

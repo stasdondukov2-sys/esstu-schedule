@@ -27,7 +27,7 @@ function updateStudyUI() {
   const dated=hasDatedSchedule(currentSchedule) || viewMode==='dates';
   document.getElementById('datedViewBtn').classList.toggle('hidden',!hasDatedRows(currentSchedule));
   document.getElementById('weekControls').classList.toggle('hidden',session || dated);
-  document.getElementById('dayTabs').classList.toggle('hidden',session || dated || viewMode==='week');
+  document.getElementById('dayTabs').classList.toggle('hidden',session || dated);
   document.getElementById('selectedDaySummary').classList.toggle('hidden',session || dated);
   const subgroup=activeSubgroup(),wrap=document.getElementById('subgroupFilterWrap');
   wrap.classList.toggle('hidden',appMode!=='student');

@@ -41,11 +41,5 @@ assert.equal(run('formatBreak(120)'), 'Окно 2 ч');
 assert.equal(run('durationText(868)'),'14 ч 28 мин');
 for(const [n,word] of [[0,'пар'],[1,'пара'],[2,'пары'],[3,'пары'],[4,'пары'],[5,'пар'],[11,'пар'],[21,'пара']])assert.equal(run(`pairWord(${n})`),word);
 context.onlinePairs=[{number:5,start:'16:25',end:'18:00',lessons:[{subject:'Основы проектной деятельности (онлайн-курс)',room:'онлайн',teacher:'Иванов И.И.'}]},{number:6,start:'18:05',end:'19:40',lessons:[{subject:'Основы проектной деятельности (онлайн-курс)',room:'онлайн',teacher:'Иванов И.И.'}]}];
-const original=JSON.stringify(context.onlinePairs);
-assert.equal(run('groupOnlinePairs(onlinePairs).length'),1);assert.equal(run('groupOnlinePairs(onlinePairs)[0].end'),1);assert.equal(JSON.stringify(context.onlinePairs),original);
 assert.equal(run('displaySubject(onlinePairs[0].lessons[0])'),'Основы проектной деятельности');
-for(const changes of [{teacher:'Другой П.П.'},{room:'0410'},{tag:'другая подгруппа'},{source_file:'other.htm'},{needs_review:true},{parse_warning:'Сверьте'}]){
- context.changed=structuredClone(context.onlinePairs);Object.assign(context.changed[1].lessons[0],changes);assert.equal(run('groupOnlinePairs(changed).length'),2);
-}
-context.changed=structuredClone(context.onlinePairs);context.changed.forEach(pair=>{pair.lessons[0].room='0410';});assert.equal(run('groupOnlinePairs(changed).length'),2);
-console.log('Russian counts, hours, conservative online merging and intact source lessons OK');
+console.log('Russian counts, hours and compact online labels OK');

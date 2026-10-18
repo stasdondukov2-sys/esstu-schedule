@@ -14,8 +14,11 @@ test('day controls fit small screens and future lessons never get a current labe
     for(const button of await page.locator('#dayTabs button').all())await expect(button).toBeInViewport();
   }
   await page.evaluate(()=>setViewMode('week'));
-  await expect(page.locator('#dayTabs')).toBeHidden();
-  await expect(page.locator('#selectedDaySummary')).toContainText('неделю');
+  await expect(page.locator('#dayTabs')).toBeVisible();
+  await expect(page.locator('#viewControls,#btnViewWeek,#btnViewDay')).toHaveCount(0);
+  await page.evaluate(()=>localStorage.setItem('esstu_view_mode','week'));await page.reload();
+  await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');await expect(page.locator('#dayTabs')).toBeVisible();
+  expect(await page.evaluate(()=>localStorage.getItem('esstu_view_mode'))).toBe('day');
 });
 
 test('glass search remains accessible in dark mode and keyboard motion is immediate',async({page})=>{

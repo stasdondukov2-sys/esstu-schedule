@@ -96,7 +96,7 @@ routedTest('a room search highlights its building on the conditional campus diag
   await expect(page.locator('#roomsModal')).toBeVisible();await expect(page.locator('#roomSearchInput')).toHaveValue('0427');
 });
 
-routedTest('online pairs stay compact with readable time and preserved original entries',async({page},testInfo)=>{
+routedTest('consecutive online lessons remain separate cards with their own times and notes',async({page},testInfo)=>{
   await page.clock.setFixedTime(new Date('2026-10-17T01:57:00+08:00'));
   const data=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
   data.is_incomplete=false;data.weeks={'1':{},'2':{}};
@@ -105,14 +105,15 @@ routedTest('online pairs stay compact with readable time and preserved original 
   await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:data}));await ready(page);
   await expect(page.locator('#heroRemainingTime')).toContainText('Сегодня в 16:25 · через 14 ч 28 мин');
   await expect(page.locator('.hero-lesson .online-badge')).toHaveText('Онлайн');await expect(page.locator('.hero-room')).toHaveCount(0);
-  const block=page.locator('.merged-online-block');await expect(block).toHaveCount(1);await expect(block.locator(':scope > summary')).toContainText('16:25–19:40 · 2 пары');
+  await expect(page.locator('.merged-online-block')).toHaveCount(0);
+  const cards=page.locator('#pairsContainer>article.schedule-pair');await expect(cards).toHaveCount(2);
+  await expect(cards.first()).toContainText('5 пара');await expect(cards.first()).toContainText('16:25');await expect(cards.first()).toContainText('18:00');
+  await expect(cards.last()).toContainText('6 пара');await expect(cards.last()).toContainText('18:05');await expect(cards.last()).toContainText('19:40');
+  for(const card of await cards.all()){await expect(card.locator('.replica-room')).toHaveText('Онлайн');await expect(card.locator('.lesson-subject')).not.toContainText('(онлайн-курс)');}
+  await cards.last().locator('.lesson-subject').click();await expect(page.locator('#noteModal')).toBeVisible();await expect(page.locator('#replicaNoteContext')).toContainText('6 пара');
+  await page.locator('#noteTextarea').fill('Только для шестой пары');await page.getByRole('button',{name:'Сохранить',exact:true}).click();
+  await expect(cards.last()).toContainText('Только для шестой пары');await expect(cards.first()).not.toContainText('Только для шестой пары');
   await page.screenshot({path:`preview/online-${testInfo.project.name}.png`,fullPage:true});
-  await expect(block.locator(':scope > summary')).not.toContainText('(онлайн-курс)');await block.locator(':scope > summary').click();
-  await expect(block.locator('article')).toHaveCount(2);await expect(block.locator('article').last()).toContainText('18:05');
-  await block.locator('article').last().locator('.lesson-subject').first().click();await expect(page.locator('#noteModal')).toBeVisible();await page.keyboard.press('Escape');
-  await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.locator('#btnViewWeek').click();
-  await expect(page.locator('#moreMenuModal')).toBeHidden();
-  await expect(page.locator('#pairsContainer')).toContainText('2 пары');await expect(page.locator('#pairsContainer')).not.toContainText(/2 пар(?:\s|$)/);
   await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
   const content=await page.locator('#pairsContainer').boundingBox(),footer=await page.locator('.replica-footer').boundingBox();expect(content.y+content.height).toBeLessThanOrEqual(footer.y);await expect(page.locator('.campus-nav')).toHaveCount(0);
   await page.screenshot({path:`preview/online-week-bottom-${testInfo.project.name}.png`});

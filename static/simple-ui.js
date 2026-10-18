@@ -56,18 +56,6 @@ function displaySubject(lesson) {
   return isOnlineLesson(lesson)?String(lesson.subject || '').replace(/\s*\((?:онлайн[-\s]?курс|online course)\)/ig,'').trim() || lesson.subject:lesson.subject;
 }
 function lessonRoomLabel(lesson) {return isOnlineLesson(lesson)?'Онлайн':lesson.room?'ауд. '+lesson.room:'';}
-function groupOnlinePairs(pairs) {
-  const groups=[];
-  const key=pair=>pair?.lessons?.length===1 && isOnlineLesson(pair.lessons[0]) && !pair.lessons[0].parse_warning && !pair.lessons[0].needs_review
-    ? JSON.stringify(['subject','type_code','type','teacher_key','teacher','room','groups','tag','source_file'].map(field=>pair.lessons[0][field] || '')):null;
-  for(let index=0;index<pairs.length;index++){
-    const previous=groups.at(-1),signature=key(pairs[index]),last=previous && pairs[previous.end];
-    const gap=last?timeToMinutes(pairs[index].start)-timeToMinutes(last.end):null;
-    if(previous && signature && signature===previous.signature && Number(pairs[index].number)===Number(last.number)+1 && gap>=0 && gap<=30)previous.end=index;
-    else groups.push({start:index,end:index,signature});
-  }
-  return groups;
-}
 function heroState(schedule,now) {
   if(schedule?.is_incomplete)return {kind:'incomplete'};
   if(hasDatedSchedule(schedule))return {kind:'dated'};
@@ -157,11 +145,7 @@ function updateCurrentCards(now) {
   for(const card of document.querySelectorAll('[data-pair-index]')){
     applyPairVisualState(card,states[Number(card.dataset.pairIndex)]);
   }
-  for(const block of document.querySelectorAll('[data-online-pair-indices]')){
-    const members=block.dataset.onlinePairIndices.split(',').map(index=>states[Number(index)]);
-    const state=members.find(state=>state?.kind==='current') || members.find(state=>state?.kind==='next') || {kind:members.every(state=>state?.kind==='past')?'past':'upcoming'};
-    applyPairVisualState(block,state);block.querySelector('[data-merged-current-label]').hidden=state.kind!=='current';
-  }
+
 }
 function openSimpleDialog(id) { presentDialog(id); }
 function closeSimpleDialog(id) { dismissDialog(id); }
@@ -243,17 +227,7 @@ function renderCompactDay(container) {
       <div class="pair-state" data-pair-state hidden><span class="pair-state-name"><i class="pulse-dot" aria-hidden="true"></i><span data-pair-state-name></span></span><span class="pair-countdown" data-pair-countdown></span></div>
       <div class="pair-time"><div class="pair-start font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="pair-end text-xs">${escapeHTML(pair.end)}</div><div class="pair-number text-xs">${pair.number} пара</div><span data-current-label class="sr-only ${current?'':'hidden'}">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div><div class="pair-progress" data-pair-progress hidden role="progressbar" aria-label="Прошло времени пары ${escapeHTML(pair.number)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar-fill"></div></div></article>`;
   });
-  const pairs=day.pairs || [];
-  const grouped=groupOnlinePairs(pairs).map(group=>{
-    if(group.start===group.end || !rows[group.start])return rows[group.start];
-    const first=pairs[group.start],last=pairs[group.end],lesson=first.lessons[0],count=group.end-group.start+1;
-    const gap=rows[group.start].match(/^<p class="lesson-break">[\s\S]*?<\/p>/)?.[0] || '';
-    const originals=rows.slice(group.start,group.end+1);originals[0]=originals[0].slice(gap.length);
-    const indices=Array.from({length:count},(_,i)=>group.start+i).join(',');
-    const active=isToday && pairs.slice(group.start,group.end+1).some(pair=>minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end));
-    return `${gap}<details class="merged-online-block lesson-card" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
-  });
-  container.innerHTML=grouped.join('') || renderEmptyStudyDay();
+  container.innerHTML=rows.join('') || renderEmptyStudyDay();
   updateCurrentCards(now);
 }
 function updateCompactUI() {
@@ -261,8 +235,7 @@ function updateCompactUI() {
   document.getElementById('teacherIdentityWarning').hidden=!(appMode==='teacher' && currentSchedule.identity_ambiguous);
   document.getElementById('currentEntityBtnText').textContent=appMode==='student'?savedState.groupName:(currentSchedule.profile?.short_name || savedState.teacherKey);
   renderDaySource();
-  document.querySelector('.campus-agenda').setAttribute('aria-label',viewMode==='week'?'Расписание на неделю':'Расписание на выбранный день');
-  if(viewMode==='week')document.getElementById('selectedDaySummary').textContent=`Расписание на ${selectedWeek===1?'I':'II'} неделю`;
+  document.querySelector('.campus-agenda').setAttribute('aria-label','Расписание на выбранный день');
   for(const n of [1,2]){const button=document.getElementById('btnWeek'+n),current=getWeekNum(getUlanUdeNow())===n;button.setAttribute('aria-pressed',String(selectedWeek===n));button.dataset.currentWeek=String(current);button.setAttribute('aria-label',`${n===1?'I':'II'} неделя${current?', текущая':''}`);button.title=current?'Текущая календарная неделя':'Выбрать '+(n===1?'I':'II')+' неделю';if(current)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');}
   const theme=document.getElementById('themeToggleBtn');
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
@@ -273,7 +246,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
   document.getElementById('debugTools').hidden=new URLSearchParams(location.search).get('debug')!=='1';
   for(const overlay of document.querySelectorAll('.simple-overlay'))overlay.addEventListener('click',event=>{if(event.target===overlay)closeSimpleDialog(overlay.id);});
-  for(const id of ['btnViewDay','btnViewWeek'])document.getElementById(id).addEventListener('click',()=>closeSimpleDialog('moreMenuModal'));
 });
 
 function formatBreak(minutes){
