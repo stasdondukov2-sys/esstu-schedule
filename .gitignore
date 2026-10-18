@@ -20,3 +20,4 @@ playwright-report/
 
 .pytest_cache/
 .ruff_cache/
+.impeccable/review/
