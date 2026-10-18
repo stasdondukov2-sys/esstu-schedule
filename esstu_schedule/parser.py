@@ -379,6 +379,81 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
     }
 
 
+def parse_parallel_cell(text: str) -> list[dict[str, Any]] | None:
+    """Split interleaved teacher/room pairs, never zip independent lists."""
+    teachers = list(re.finditer(r"[А-ЯЁ][А-ЯЁа-яё-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.", text))
+    rooms = list(re.finditer(r"\bа\.\s*", text))
+    if len(rooms) < 2 or len(teachers) != len(rooms):
+        return None
+    for index, (teacher, room) in enumerate(zip(teachers, rooms)):
+        if teacher.end() > room.start() or (
+            index and teacher.start() < rooms[index - 1].end()
+        ):
+            return None
+    boundaries = [0]
+    for index, room in enumerate(rooms[:-1]):
+        between = text[room.end() : teachers[index + 1].start()]
+        ends = [match.start() for match in re.finditer(r"\s+", between)] + [
+            len(between)
+        ]
+        valid = []
+        for end in ends:
+            value = between[:end].strip()
+            plain = re.fullmatch(r"\d[0-9А-Яа-яA-Za-z/-]*(?:\s+и/[пд])?", value)
+            if (
+                value
+                and not value.endswith(("-", "/"))
+                and (plain or parse_room_suffix(value))
+            ):
+                valid.append(end)
+        if not valid:
+            return None
+        boundaries.append(room.end() + max(valid))
+    boundaries.append(len(text))
+    chunks = [text[start:end].strip() for start, end in zip(boundaries, boundaries[1:])]
+    first = parse_single_lesson_chunk(chunks[0])
+    if first["parse_warning"] or not first["teacher"] or not first["room"]:
+        return None
+    prefix = re.match(
+        r"^(лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.|конс\.)", chunks[0], re.IGNORECASE
+    )
+    result = []
+    for index, chunk in enumerate(chunks):
+        candidate, inherited_subject, inherited_type = chunk, False, False
+        if index:
+            teacher_only = re.match(
+                r"^[А-ЯЁ][А-ЯЁа-яё-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.\s*[-–—]?\s*а\.", chunk
+            )
+            explicit_type = re.match(
+                r"^(лек\.|пр\.|лаб\.|сем\.|экз\.|зач\.|конс\.)", chunk, re.IGNORECASE
+            )
+            if (
+                not teacher_only
+                and not explicit_type
+                and not re.match(r"[А-ЯЁA-Z(]", chunk)
+            ):
+                return None
+            if teacher_only:
+                if any(tag.endswith("п/г") for tag in extract_tags(first["subject"])):
+                    return None
+                candidate = first["subject"] + " " + chunk
+                inherited_subject = True
+            if not explicit_type and prefix:
+                candidate = prefix[0] + candidate
+                inherited_type = True
+        lesson = parse_single_lesson_chunk(candidate)
+        if lesson["parse_warning"] or not lesson["teacher"] or not lesson["room"]:
+            return None
+        lesson["raw"] = chunk
+        lesson["source_cell_raw"] = text
+        if inherited_subject:
+            lesson["subject_inherited"] = True
+        if inherited_type:
+            lesson["type_inherited"] = True
+        result.append(lesson)
+    return result
+
+
 def parse_cell_lessons(cell_text: str) -> list[dict[str, Any]]:
     text = clean_text(cell_text)
     if not text or text in ("_", "-", "—"):
@@ -415,7 +490,12 @@ def parse_cell_lessons(cell_text: str) -> list[dict[str, Any]]:
                     sc_clean = base_prefix + sc_clean
             expanded_parts.append(sc_clean)
     final_parts = expanded_parts if expanded_parts else [text]
-    return [parse_single_lesson_chunk(p) for p in final_parts]
+    result = [parse_single_lesson_chunk(p) for p in final_parts]
+    if any(lesson["parse_warning"] for lesson in result):
+        parallel = parse_parallel_cell(text)
+        if parallel is not None:
+            return parallel
+    return result
 
 
 def parse_teacher_cell_lessons(
