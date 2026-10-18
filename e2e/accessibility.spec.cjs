@@ -20,7 +20,7 @@ test('dialogs trap focus, close with Escape and return to the launcher',async({p
 test('dark and light views and the search dialog pass accessibility checks',async({page},testInfo)=>{
   await ready(page);
   for(const theme of ['dark','light']){
-    await page.getByRole('button',{name:'Выбрать',exact:true}).hover();
+    await page.getByRole('button',{name:'Сменить расписание',exact:true}).hover();
     const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     expect(result.violations).toEqual([]);
     if(process.env.CAPTURE_SCREENSHOTS && theme==='dark'){

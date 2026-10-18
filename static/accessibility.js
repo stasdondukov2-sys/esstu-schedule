@@ -125,6 +125,7 @@ const ICON_PATHS={
   building:'M3 21h18M5 21V8h14v13M3 8l9-5 9 5M9 11v7m6-7v7',
   check:'m4 12 5 5L20 6', warning:'m12 3 10 18H2ZM12 9v5m0 3v1',
   info:'M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM12 11v6m0-10v1',chevron:'m7 10 5 5 5-5',
+  settings:'M9 3h6l1 3 3 1 2 5-2 2-1 3-3 1-1 3H9l-1-3-3-1-2-5 2-2 1-3 3-1 1-3ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
   dot:'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z', close:'m6 6 12 12M6 18 18 6', more:'M4 12h1m6 0h1m6 0h1'
 };
 function uiIcon(name){return `<svg class="ui-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICON_PATHS[name] || ICON_PATHS.dot}"/></svg>`;}
@@ -147,7 +148,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const title=dialog.querySelector('h2,h3');if(title){title.id ||=dialog.id+'Title';dialog.setAttribute('aria-labelledby',title.id);}
     for(const button of dialog.querySelectorAll('button'))if(/^[×✕]$/.test(button.textContent.trim())){button.setAttribute('aria-label',button.getAttribute('aria-label') || 'Закрыть окно');button.innerHTML=uiIcon('close');}
   }
-  document.querySelector('button[aria-label="Ещё"]').innerHTML=uiIcon('more');
+  document.querySelector('button[aria-label="Ещё"]').innerHTML=uiIcon('settings');
   document.getElementById('groupSearchInput').setAttribute('aria-label','Поиск учебной группы');
   document.getElementById('teacherSearchInput').setAttribute('aria-label','Поиск преподавателя');
   document.getElementById('noteTextarea').setAttribute('aria-label','Текст заметки');

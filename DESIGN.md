@@ -1,210 +1,72 @@
 ---
-name: "ВСГУТУ — Campus Glass"
-description: "A calm glass schedule interface with an immediately readable nearest lesson and room."
+name: "ВСГУТУ — Stealth Cyber-Glass"
+description: "Обсидиановое расписание с изумрудной текущей и фиолетовой следующей парой."
 colors:
-  graphite: "#10131d"
-  ink: "#f1f2f8"
-  muted: "#b2b9cd"
-  glass: "rgba(29,33,48,.82)"
-  panel: "#1c2030"
-  line: "rgba(213,219,255,.15)"
-  control: "rgba(205,214,255,.07)"
-  lavender: "#cfbfff"
-  solid: "#7252be"
-  accent-soft: "rgba(169,135,247,.17)"
-  focus: "#d5c7ff"
-  warning: "#f4cb8e"
-  fresh: "#9edac8"
-  light-bg: "#eef0f6"
-  light-ink: "#252a3b"
-  light-muted: "#4d586b"
-  light-glass: "rgba(255,255,255,.84)"
-  light-panel: "#f9faff"
-  light-line: "rgba(64,72,100,.17)"
-  light-control: "rgba(87,94,129,.075)"
-  light-accent: "#6140a8"
-  light-solid: "#6846af"
-  light-accent-soft: "#ece6f8"
-  light-focus: "#6b46b5"
-  light-warning: "#86510a"
-  light-fresh: "#176253"
+  dark-bg: "#050507"
+  dark-ink: "#f3f5f8"
+  dark-muted: "#a7b2c3"
+  current: "#10b981"
+  next: "#8b5cf6"
+  glass: "rgba(15,15,20,.7)"
+  light-bg: "#f3f5f5"
+  light-ink: "#182321"
+  light-current: "#008260"
 typography:
-  room:
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
-    fontSize: "2.5rem"
-    fontWeight: 500
-    lineHeight: 1.1
-    letterSpacing: "-.035em"
-  headline:
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
-    fontSize: "2rem"
-    fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "-.03em"
-  title:
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
-    fontSize: "1.375rem"
-    fontWeight: 600
-    lineHeight: 1.32
-    letterSpacing: "-.025em"
-  body:
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
-    fontSize: "1rem"
-    lineHeight: 1.5
-  lesson:
-    fontSize: "1rem"
-    fontWeight: 600
-    lineHeight: 1.45
+  body: "Inter, locally hosted variable WOFF2 with Cyrillic and Latin subsets"
+  time: "ui-monospace; tabular numerals"
 rounded:
-  panel: "16px"
-  control: "10px"
-  calendar: "11px"
-  chip: "6px"
-  nav: "18px"
-  nav-item: "12px"
-  sheet: "20px"
-spacing:
-  nav-inset: "8px"
-  hero-inset: "24px"
-  agenda-inset: "24px 26px"
-  column-gap: "30px"
-  mobile-hero-inset: "22px"
-  mobile-agenda-inset: "20px 18px"
-components:
-  button-primary:
-    backgroundColor: "{colors.solid}"
-    textColor: "#fff"
-    rounded: "9px"
-    height: "44px"
-  button-secondary:
-    backgroundColor: "{colors.control}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.control}"
-    padding: "0 18px"
-    height: "44px"
-  glass-panel:
-    backgroundColor: "{colors.glass}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.panel}"
-  room-chip:
-    backgroundColor: "{colors.accent-soft}"
-    textColor: "{colors.lavender}"
-    rounded: "{rounded.chip}"
-    padding: "4px 7px"
-  floating-nav:
-    backgroundColor: "{colors.glass}"
-    rounded: "{rounded.nav}"
-    padding: "{spacing.nav-inset}"
-    width: "390px"
-  search-field:
-    backgroundColor: "{colors.control}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.control}"
-    height: "48px"
+  card: "14px"
+  control: "12px"
 ---
 
-# Design System: ВСГУТУ — Campus Glass
+# Stealth Cyber-Glass
 
-## Overview
+User-approved reference: stealth_cyber_glass.html, supplied 18 October 2026.
+Mode: Operate. Preserve real source data, incomplete-source warnings, filters,
+notes, teachers, rooms, offline use and keyboard operation.
 
-**Creative North Star: "Campus Glass"**
+## Visual language
 
-The user chose a dark schedule interface with a glass effect. Graphite, translucent panels and muted lavender support a calm, practical student tool. The nearest lesson and its room supply the strongest visual emphasis; this is an operating screen with real schedule data.
+AMOLED #050507 background with faint emerald/violet ambient gradients. Dark
+obsidian cards use a 1px border and 12px backdrop blur, with opaque fallbacks.
+The current lesson gets an emerald outline, subtle glow, countdown and progress;
+the next visible lesson gets a violet outline and countdown. The chosen reference
+explicitly earns these neon accents. Inter is served locally with its OFL licence;
+there are no runtime font or CSS CDN requests.
 
-The system remains usable in light and system themes and without transparency. Freshness, source uncertainty and incomplete data remain readable parts of the interface. This document records the 2.5.0 source implementation in `styles/campus.css`, `static/index.html`, `static/simple-ui.js` and `static/accessibility.js` (including dynamic sheets in `static/modern.js`); it does not claim independent visual or contrast verification.
+## Composition
 
-**Key Characteristics:**
-- Dark graphite canvas with restrained lavender emphasis.
-- Large room typography and a compact readable day agenda.
-- Translucent bordered surfaces with opaque fallbacks.
-- Quiet state changes and immediate keyboard interaction.
+One compact header row: group selector, campus date/week, SVG search and settings.
+The group is the sole h1. Search controls have distinct accessible names.
+The page has no repeated brand/title banner. Desktop keeps a 300px nearest-lesson
+column and a flexible agenda; mobile stacks them with compact spacing. The agenda
+uses standalone 14px lesson cards and a dashed break row. Each time range is
+inline, while subject, teacher, lesson type and room remain readable.
 
-## Colors
+Styles live in styles/stealth.css, after the shared campus layout. Light theme has
+its own ink, card and state colours. Inputs, selection, scrollbars, focus outlines,
+dialogs and bottom navigation inherit the same tokens. Touch actions stay at
+least 44px. Native details retain the full subject, source details and notes.
 
-The palette combines cool graphite neutrals with a soft lavender accent; light theme uses the paired light tokens in the frontmatter. CSS custom properties in `styles/campus.css` are the implementation source of truth; the frontmatter captures their current values.
+## State contract
 
-### Primary
-- **Lavender:** status, room links and current selection text.
-- **Solid violet:** filled actions and the selected I/II week control, with white text.
-- **Soft lavender:** selected day, navigation item and small status backgrounds.
+visualPairStates derives current/next/past from the selected campus date, the
+actual start/end times and the active lesson filter. The end is exclusive;
+seconds advance progress. During a break there is no current pair and the next
+visible slot stays violet. A different future day and ambiguous dated sessions
+never receive a fabricated current/next state. Existing clock updates set the
+classes directly; no MutationObserver watches or reparses visible text.
 
-### Secondary
-- **Warning amber:** saved-source fallback, offline copies, source problems, incomplete data and scheduled building changes. It supplements text, never replaces it.
-- **Fresh green:** source status marked fresh; light and dark themes have dedicated readable green values. The label reflects the delivery state and does not guarantee that the source is complete or recently changed.
+Past lessons use quieter, contrasting text rather than whole-card opacity or
+pointer-events:none. Users can still read, expand and annotate them. Adjacent
+online lessons retain their original entries and controls inside the disclosure.
+Current/next are labelled in words as well as colour. Source warnings and the
+single freshness chip remain visible. Reduced motion and opaque glass fallbacks
+are preserved.
 
-### Neutral
-- **Graphite:** app canvas; **Ink:** primary content; **Muted:** timestamps and supporting labels.
-- **Glass:** major surfaces; **Panel:** opaque fallback and toast surface.
-- **Line:** quiet separators; **Control:** fields and neutral controls.
+## Verification
 
-**The Truth Stays Visible Rule.** Never use low contrast or decoration to hide data age, saved/offline delivery, incomplete parsing or ambiguous teacher identity.
-
-## Typography
-
-Use the platform system sans-serif stack in the frontmatter. There are no external font downloads. Times, dates and remaining minutes use tabular numerals where specified in CSS.
-
-CSS font sizes use rem so they respond to the root text size. At the browser default root of 16px, body text, agenda subjects and dialog fields are 1rem (16px). The room role increases to 2.6875rem on mobile; the page headline reduces to 1.75rem. Hero subjects retain the title role. Supporting labels on the agenda, schedule picker and room radar use at least .75rem (12px), including calendar counts, source age, pair numbers and current-state labels.
-
-Long subjects wrap with `overflow-wrap:anywhere`. Closed agenda disclosures clamp the subject to two lines; opening the disclosure reveals its full title. Avoid shrinking the title or forcing a single line. Keep room identifiers as source strings rather than inventing a shorter number.
-
-## Layout
-
-The current schedule screen uses a maximum 1120px container with 32px side clearance, a sticky header and a two-column grid: a 340px overview and flexible agenda, separated by 30px. At 850px and below, the overview becomes 285px and the gap 20px. At 700px and below, the layout stacks, the overview stops sticking, and the container has 16px side clearance. The 360px breakpoint reduces clearance to 12px.
-
-The overview precedes the agenda in DOM order. The agenda combines I/II week selection, six equal day controls and time-aligned lesson rows. Parallel lessons remain inside the same time slot. Secondary functions live in dialogs and the More menu.
-
-The floating navigation has three actions: Расписание, Поиск, Аудитории. Its width is capped by the viewport, and its bottom offset respects safe-area insets. Body bottom padding (116px) reserves space for it. The page honors left/right safe-area insets, and the sticky header honors the top inset. The fixed update snackbar sits above the navigation, with an 84px additional bottom offset and the corresponding safe-area-aware nav offset. Mobile sheets also protect the bottom inset. This composition describes the schedule screen; new surfaces should inherit the visual language without copying this grid mechanically.
-
-## Elevation & Depth
-
-Depth comes from tonal layers, fine borders and restrained ambient radial gradients behind the app. The main hero explicitly has no shadow. Glass panels, header, navigation and simple dialog sheets use a 22px backdrop blur where supported. A dark overlay separates dialogs from the background.
-
-**The Readable Glass Rule.** Glass must stay readable without blur. Reduced-transparency preferences use the opaque panel token and disable blur; unsupported backdrop filtering also uses the opaque panel. Never depend on a background image for contrast.
-
-Notes and dynamically created room dialogs share the same simple-sheet and overlay classes. Legacy utility names can remain in markup, but Campus Glass overrides define their canonical surface. This source scan does not independently establish complete visual parity of every secondary state.
-
-## Shapes
-
-Major surfaces use the panel radius. Controls are more compact, chips have a smaller curve, and navigation and dialog sheets have their own larger curves from the frontmatter. Thin borders and spacious internal padding establish the surface shape. Lesson rows share separators within the agenda rather than becoming individual floating cards.
-
-## Components
-
-### Buttons and fields
-
-Buttons, including the week selector, use a 44px minimum height. Primary actions use solid violet and white text; neutral actions use the control surface. Focus-visible uses a 2px focus outline with a 2px offset. Inputs and textareas have a single outline at zero offset with no shadow. Fine-pointer hover changes background or text; pointer-active press scales to .98; keyboard activation does not scale. Fields use the accent caret and muted placeholders. Dialog fields use 1rem text; the relocated search field has a 48px minimum height. Disabled buttons reduce opacity and display a waiting cursor. Scrollable lists use thin, muted scrollbars.
-
-### Nearest lesson and day rows
-
-The hero displays current or next lesson metadata, subject, teacher/groups and a large clickable room only when a room can be decoded. It preserves parallel lessons. A progress indicator uses `scaleX` during a current lesson. Clock updates preserve the hero's content node while the lesson is unchanged, protecting keyboard focus. Dated session records and incomplete sources do not receive a fabricated current lesson.
-
-Day rows use native details/summary for expanded metadata, notes, teacher and room actions. The whole summary is interactive; its SVG chevron has a 44px square area. Lesson types pair a semantic color and inline SVG symbol with the written label. Parse warnings use an amber frame, smaller subject text and a warning icon; the raw source cell remains inside the disclosure. Current rows receive the soft accent background. Gaps appear between adjacent rows with both boundary times. Missing data and a known empty day use distinct messages. The compact finished-day hero offers tomorrow or the nearest teaching day, including its pair count, first time and known rooms, only when a recurring, complete schedule supports that calculation.
-
-Source freshness appears once, as an interactive chip above the agenda. Saved and offline copies retain their explicit label and relative check age. Unknown or older-than-24-hour checks receive an amber background; an unknown check date is never substituted with the build date. Opening the chip reveals full source diagnostics.
-
-### Selection and navigation
-
-Day and week buttons expose selected state with `aria-pressed`; today's calendar day also uses `aria-current="date"`. The floating navigation keeps the schedule item visually selected; search and rooms launch dialogs rather than changing the underlying route selection. Calendar days also support left/right keyboard keys and horizontal touch swipes without animated content replacement. Small markers distinguish days with lessons and the current week.
-
-The search dialog places the active search input before filters. Favorites and recent chips are visible above the list. Groups sort by course, then by natural name order, and the current group has a checkmark and pressed state. Course labels do not repeat the selected study level. Recent selections are stored locally, deduplicated and capped at six across student/teacher entries, with only the active search mode shown. Incomplete schedules do not enter the recent list. Past calendar dates use muted text while preserving contrast; changed days use an amber dot and count, explained by a visible legend.
-
-The room radar uses filled segmented controls for time presets and occupancy filters. In the Now preset, the pair selector explicitly shows current time; a manual pair determines occupancy and the context heading. Room lessons sort by start and end and merge identical time/subject rows. Rooms group by occupancy and building, with free rooms first. Green free and amber busy-until badges describe known schedule entries. A numbered slot timeline repeats those entries without claiming physical access. Building notation and access limitations appear once above the list.
-
-### Dialogs and motion
-
-Simple sheets are centered with a 560px maximum width on desktop (620px for search) and become bottom-aligned on mobile. They remain scrollable within 88dvh, increasing to 90dvh on mobile. Opening a simple sheet by pointer uses a 200ms entrance with opacity and a 12px translation / .985 scale, using the CSS ease-out curve. Keyboard opening is immediate. Closing is immediate. A mobile drag handle is pointer-only and hidden from assistive technology. A downward drag exceeding 80px closes the sheet; shorter or cancelled drags reset with a 160ms transform transition. Reduced motion makes the reset immediate, while direct dragging still follows the pointer. Keyboard users retain immediate close controls and Escape. The focus stack contains keyboard focus, makes background content inert, supports Escape, and returns focus to the launcher or its replacement.
-
-**The Quiet Schedule Rule.** Frequent day/week switches and clock ticks do not animate content entrances. Reduced motion disables button transitions, press scaling and dialog entrances. General button state transitions use 160ms for color and border and 120ms for press transforms. The drawer easing token exists in CSS but no documented component currently consumes it.
-
-## Do's and Don'ts
-
-### Do:
-- **Do** keep source status and warnings readable alongside the schedule.
-- **Do** use the existing system font and let long subject names wrap.
-- **Do** preserve native details, selected-state semantics and dialog focus behavior.
-- **Do** verify dark, light, opaque fallback and reduced-motion states when extending components.
-
-### Don't:
-- **Don't** animate frequent day changes or delay keyboard dialog access.
-- **Don't** fabricate rooms, dates or a current lesson when source data cannot establish them.
-- **Don't** introduce blur-dependent readability or promote legacy dialog shadows into the canonical surface style.
-- **Don't** replace functional warnings with color-only signals.
+Check 320px mobile and desktop, both themes, every lesson state and the break
+boundary. Exercise notes on a past lesson, selection/filter changes, teacher and
+room search, dialogs, offline loading and worker upgrades. Use axe and rendered
+pixel contrast checks; a screenshot alone does not establish accessibility.

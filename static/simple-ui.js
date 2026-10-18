@@ -79,7 +79,8 @@ function heroState(schedule,now) {
 let campusDayStamp='';
 function updateCampusHero() {
   const now=getUlanUdeNow(),week=getWeekNum(now);
-  document.getElementById('campusDate').textContent=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+(simOverride?' · Тест времени':'');
+  document.getElementById('campusDate').textContent=now.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'}).replace(/\.$/,'')+(simOverride?' · Тест':'');
+  document.getElementById('campusDate').title=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · Улан-Удэ, UTC+8'+(simOverride?' · Тест времени':'');
   document.getElementById('weekBadge').textContent=week===1?'I неделя':'II неделя';
   document.getElementById('clockDisplay').textContent=now.toLocaleString('ru-RU')+' · Улан-Удэ'+(simOverride?' · ТЕСТ':'');
   const stamp=now.toDateString();
@@ -115,20 +116,45 @@ function updateCampusHero() {
   if(state.next)next.textContent=`Далее в ${state.next.start} · через ${durationText(timeToMinutes(state.next.start)-now.getHours()*60-now.getMinutes()-now.getSeconds()/60)} · `+state.next.lessons.map(lesson=>`${displaySubject(lesson)}${lessonRoomLabel(lesson)?' · '+lessonRoomLabel(lesson):''}`).join(' / ');
 }
 function heroRoomAction(index) {const pair=heroState(currentSchedule,getUlanUdeNow()).pair;if(pair?.lessons[index]?.room)openRoomsModal(pair.lessons[index].room);}
+function visualPairStates(now) {
+  const day=currentSchedule?.weeks?.[selectedWeek]?.[selectedDayKey];
+  const pairs=day?.pairs || [],minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const date=day?.session_date?null:getWeekRangeDates(selectedWeek,now)[selectedDayKey]?.date;
+  const sameDay=date?.toDateString()===now.toDateString();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const next=sameDay?pairs.filter(pair=>filterLessons(pair.lessons).length && timeToMinutes(pair.start)>minutes).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start))[0]:null;
+  return pairs.map(pair=>{
+    const start=timeToMinutes(pair.start),end=timeToMinutes(pair.end);
+    const current=!!sameDay && minutes>=start && minutes<end;
+    const kind=current?'current':pair===next?'next':date && (date<today || sameDay && minutes>=end)?'past':'upcoming';
+    return {kind,remaining:current?Math.ceil(end-minutes):Math.ceil(start-minutes),progress:current?Math.min(100,Math.max(0,100*(minutes-start)/(end-start))):0};
+  });
+}
+function applyPairVisualState(card,state) {
+  const kind=state?.kind || 'upcoming',active=kind==='current';
+  card.dataset.current=String(active);card.dataset.state=kind;
+  for(const name of ['current','next','past'])card.classList.toggle('is-'+name,kind===name);
+  if(card.dataset.pairIndex===undefined)return;
+  card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
+  const status=card.querySelector('[data-pair-state]');
+  if(status){
+    status.hidden=!['current','next'].includes(kind);
+    card.querySelector('[data-pair-state-name]').textContent=active?'Идёт сейчас':'Следующая пара';
+    card.querySelector('[data-pair-countdown]').textContent=active?'ост. '+durationText(state.remaining):'через '+durationText(state.remaining);
+  }
+  const progress=card.querySelector('[data-pair-progress]');
+  if(progress){progress.hidden=!active;progress.setAttribute('aria-valuenow',Math.round(state?.progress || 0));progress.firstElementChild.style.transform=`scaleX(${(state?.progress || 0)/100})`;}
+}
 function updateCurrentCards(now) {
   if(viewMode!=='day')return;
-  const day=DAY_KEYS[(now.getDay()+6)%7],minutes=now.getHours()*60+now.getMinutes();
-  const pairs=currentSchedule?.weeks?.[selectedWeek]?.[selectedDayKey]?.pairs || [];
+  const states=visualPairStates(now);
   for(const card of document.querySelectorAll('[data-pair-index]')){
-    const pair=pairs[Number(card.dataset.pairIndex)];
-    const active=pair && !currentSchedule.weeks[selectedWeek][selectedDayKey].session_date && day===selectedDayKey && getWeekNum(now)===selectedWeek && minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end);
-    card.dataset.current=String(active);
-    card.classList.toggle('border-teal-500',active);card.classList.toggle('border-slate-200',!active);card.classList.toggle('dark:border-slate-800',!active);
-    card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
+    applyPairVisualState(card,states[Number(card.dataset.pairIndex)]);
   }
   for(const block of document.querySelectorAll('[data-online-pair-indices]')){
-    const active=day===selectedDayKey && getWeekNum(now)===selectedWeek && block.dataset.onlinePairIndices.split(',').some(index=>pairs[index] && minutes>=timeToMinutes(pairs[index].start) && minutes<timeToMinutes(pairs[index].end));
-    block.dataset.current=String(active);block.querySelector('[data-merged-current-label]').hidden=!active;
+    const members=block.dataset.onlinePairIndices.split(',').map(index=>states[Number(index)]);
+    const state=members.find(state=>state?.kind==='current') || members.find(state=>state?.kind==='next') || {kind:members.every(state=>state?.kind==='past')?'past':'upcoming'};
+    applyPairVisualState(block,state);block.querySelector('[data-merged-current-label]').hidden=state.kind!=='current';
   }
 }
 function openSimpleDialog(id) { presentDialog(id); }
@@ -205,8 +231,9 @@ function renderCompactDay(container) {
           </div>
         </div></details>`;
     }).join('');
-    return `${gap}<article data-pair-index="${pairIndex}" data-current="${current}" class="schedule-pair ${current?'border-teal-500':'border-slate-200 dark:border-slate-800'}">
-      <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="${current?'':'hidden'} text-[9px] text-teal-500 font-bold">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div></article>`;
+    return `${gap}<article data-pair-index="${pairIndex}" data-current="${current}" class="schedule-pair lesson-card">
+      <div class="pair-state" data-pair-state hidden><span class="pair-state-name"><i class="pulse-dot" aria-hidden="true"></i><span data-pair-state-name></span></span><span class="pair-countdown" data-pair-countdown></span></div>
+      <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="sr-only ${current?'':'hidden'}">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div><div class="pair-progress" data-pair-progress hidden role="progressbar" aria-label="Прошло времени пары ${escapeHTML(pair.number)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar-fill"></div></div></article>`;
   });
   const pairs=day.pairs || [];
   const grouped=groupOnlinePairs(pairs).map(group=>{
@@ -216,9 +243,10 @@ function renderCompactDay(container) {
     const originals=rows.slice(group.start,group.end+1);originals[0]=originals[0].slice(gap.length);
     const indices=Array.from({length:count},(_,i)=>group.start+i).join(',');
     const active=isToday && pairs.slice(group.start,group.end+1).some(pair=>minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end));
-    return `${gap}<details class="merged-online-block" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
+    return `${gap}<details class="merged-online-block lesson-card" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
   });
   container.innerHTML=grouped.join('') || renderEmptyStudyDay();
+  updateCurrentCards(now);
 }
 function updateCompactUI() {
   if(!currentSchedule)return;
@@ -232,7 +260,7 @@ function updateCompactUI() {
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }
 const simpleApplyTheme=applyTheme;
-applyTheme=function(){simpleApplyTheme();document.querySelector('meta[name="theme-color"]').content=document.documentElement.classList.contains('dark')?'#10131d':'#eef0f6';const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
+applyTheme=function(){simpleApplyTheme();document.querySelector('meta[name="theme-color"]').content=document.documentElement.classList.contains('dark')?'#050507':'#f3f5f5';const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
 document.addEventListener('DOMContentLoaded',()=>{
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
   document.getElementById('debugTools').hidden=new URLSearchParams(location.search).get('debug')!=='1';

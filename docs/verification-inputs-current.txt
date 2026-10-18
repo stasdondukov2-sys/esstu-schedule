@@ -1,20 +1,20 @@
 verification-inputs-current.txt
 Ветка codex/reliable-data-updates, PR #19. Снимок исходников перед фиксацией коммита.
 Main и Pages не изменялись. Результаты ниже локальные; удалённый CI и репетиция — в Checks PR.
-Build_id: 6c995ea048620380
+Build_id: 215c65425d0cccc8
 Python: 145 passed + 9 subtests, один полный прогон.
 Браузер: итог одного полного прогона в приложенном журнале, без сложения повторов.
 Контракт прежнего опубликованного API: 8 passed.
 Cronitor настроен: период 3 часа + запас 1 час; секрет GitHub сохранён; ожидается первый пинг после проверенного деплоя.
 
 
-===== preview/pytest-final.txt =====
-SHA-256: 72ee7afd77799ce27f371027de9cf37ff7cc2ccc17086b48b74580a338fc71e0
+===== preview/cyber-python.txt =====
+SHA-256: 40062c2640178dc92c2d000d8310e6db5ac34b5e7011250ae8a5b09468d9663a
 
 .................................................................. [ 45%]
 ........................................................................ [ 95%]
 .......                                                               [100%]
-145 passed, 9 subtests passed in 5.41s
+145 passed, 9 subtests passed in 5.74s
 
 
 ===== preview/python-list-final.txt =====
@@ -169,7 +169,7 @@ tests/test_teachers.py::TeacherIndexTest::test_preserves_source_and_deduplicates
 145 tests collected in 0.23s
 
 
-===== preview/unit-final.txt =====
+===== preview/cyber-unit.txt =====
 SHA-256: 3a12894fbd06bbb462015f654ecb38c97bce934e18eb60553b18e86a3c78fc6f
 
 Local stylesheet, offline shell, dark rules, metadata and image sources OK
@@ -187,123 +187,130 @@ Worker peers, first installation, visible polling and update fallback OK
 Workflows: valid YAML, SHA pins, timeouts, frozen-before-live order, durable data restore, browser cache and freshness triggers OK
 
 
-===== preview/e2e-final.txt =====
-SHA-256: 18d571fc692ec4db5e8099ee3515d23d0e8161b99ab4c67604ccf7057e253c7e
+===== preview/cyber-e2e-final.txt =====
+SHA-256: 49553a70a19194af08c64e7028844309b2da68e1060224c19dfd9152daee5dd5
 
 
-Running 70 tests using 2 workers
+Running 76 tests using 2 workers
 
-(node:6624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:5660) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:28428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:25964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ok  2 [desktop] › e2e\accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher (3.2s)
-  ok  3 [desktop] › e2e\accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it (2.2s)
-  ok  4 [desktop] › e2e\accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group (297ms)
-  ok  5 [desktop] › e2e\accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure (1.4s)
+  ok  2 [desktop] › e2e\accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher (3.0s)
+  ok  3 [desktop] › e2e\accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it (2.8s)
+  ok  4 [desktop] › e2e\accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group (922ms)
+  ok  5 [desktop] › e2e\accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure (1.3s)
   ok  6 [desktop] › e2e\accessibility.spec.cjs:66:1 › restoring a saved group resolves its name when the file number changes (1.2s)
-  ok  7 [desktop] › e2e\accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh (2.1s)
-  ok  1 [desktop] › e2e\accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks (13.9s)
+  ok  7 [desktop] › e2e\accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh (1.8s)
+  ok  1 [desktop] › e2e\accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks (11.6s)
   ok  8 [desktop] › e2e\accessibility.spec.cjs:91:1 › possible teacher identity collision is visible and clears for a group (4.0s)
-  ok 10 [desktop] › e2e\accessibility.spec.cjs:132:1 › server-error cached response is not labeled offline (1.4s)
-  ok 11 [desktop] › e2e\accessibility.spec.cjs:140:1 › stale publication warns without relying on the GitHub scheduler (2.7s)
-  ok 12 [desktop] › e2e\contrast.spec.cjs:5:1 › small labels meet 4.5 contrast against rendered gradients in both themes (4.8s)
-  ok 13 [desktop] › e2e\design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label (4.1s)
-  ok 14 [desktop] › e2e\design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate (6.2s)
-  ok 15 [desktop] › e2e\design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note (3.0s)
-  ok 16 [desktop] › e2e\release.spec.cjs:6:1 › an empty day links to the next known teaching day (1.6s)
-  ok 17 [desktop] › e2e\release.spec.cjs:20:1 › recent schedules are local and search precedes filters (2.8s)
-  -  18 [desktop] › e2e\release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus
-  ok 19 [desktop] › e2e\release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline (8.2s)
-  ok 20 [desktop] › e2e\release.spec.cjs:88:1 › a room search highlights its building on the conditional campus diagram (2.6s)
-  ok 21 [desktop] › e2e\release.spec.cjs:99:1 › online pairs stay compact with readable time and preserved original entries (3.4s)
-  ok 22 [desktop] › e2e\release.spec.cjs:121:1 › a slow API response refreshes the visible schedule in the background and remains offline (8.1s)
-  ok 23 [desktop] › e2e\review-fixes.spec.cjs:18:1 › room manual slot determines status, sorted deduplicated rows and active filters (3.0s)
-  ok 24 [desktop] › e2e\review-fixes.spec.cjs:42:1 › single saved source chip keeps age and warning visible after reload failure and recovery (2.4s)
-  ok 25 [desktop] › e2e\review-fixes.spec.cjs:63:1 › finished hero uses tomorrow from actual date, independent of selected agenda day (1.9s)
-  ok 26 [desktop] › e2e\review-fixes.spec.cjs:77:1 › warning source stays collapsed and break identifies both adjacent times (1.9s)
-  ok  9 [desktop] › e2e\accessibility.spec.cjs:110:1 › secondary dialogs pass axe in dark and light themes (1.0m)
-  ok 27 [desktop] › e2e\review-fixes.spec.cjs:93:1 › picker sorts courses and names, exposes favorites and marks current group (1.9s)
-  ok 29 [desktop] › e2e\schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix (3.1s)
-  ok 30 [desktop] › e2e\schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day (1.4s)
-  ok 31 [desktop] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Источник портала содержит расписание другой группы (ЗУ-395-1). (1.3s)
-  ok 32 [desktop] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Расписание на портале не заполнено. (1.4s)
-  ok 33 [desktop] › e2e\schedule.spec.cjs:47:1 › installation URLs stay inside the repository and the cached shell opens offline (2.6s)
-  ok 28 [desktop] › e2e\review-fixes.spec.cjs:110:1 › radar accessibility, readable labels and responsive views in both themes (12.1s)
-  ok 34 [desktop] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-18T23:30:00+08:00 on a New York device (1.5s)
-(node:36984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+  ok 10 [desktop] › e2e\accessibility.spec.cjs:132:1 › server-error cached response is not labeled offline (1.2s)
+  ok 11 [desktop] › e2e\accessibility.spec.cjs:140:1 › stale publication warns without relying on the GitHub scheduler (2.9s)
+  ok 12 [desktop] › e2e\contrast.spec.cjs:5:1 › small labels meet 4.5 contrast against rendered gradients in both themes (4.5s)
+  ok 13 [desktop] › e2e\cyber.spec.cjs:14:1 › lesson states and progress follow the clock, including the break boundary (1.6s)
+  ok 14 [desktop] › e2e\cyber.spec.cjs:30:1 › past lesson notes remain usable and another day is not marked current or next (1.8s)
+  ok 15 [desktop] › e2e\cyber.spec.cjs:40:1 › compact header fits 320px with one heading and distinct search controls (1.6s)
+  ok 16 [desktop] › e2e\design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label (3.6s)
+  ok 17 [desktop] › e2e\design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate (5.3s)
+  ok 18 [desktop] › e2e\design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note (2.6s)
+  ok 19 [desktop] › e2e\release.spec.cjs:6:1 › an empty day links to the next known teaching day (1.3s)
+  ok 20 [desktop] › e2e\release.spec.cjs:20:1 › recent schedules are local and search precedes filters (2.4s)
+  -  21 [desktop] › e2e\release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus
+  ok 22 [desktop] › e2e\release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline (7.3s)
+  ok 23 [desktop] › e2e\release.spec.cjs:88:1 › a room search highlights its building on the conditional campus diagram (2.5s)
+  ok 24 [desktop] › e2e\release.spec.cjs:99:1 › online pairs stay compact with readable time and preserved original entries (2.7s)
+  ok  9 [desktop] › e2e\accessibility.spec.cjs:110:1 › secondary dialogs pass axe in dark and light themes (50.6s)
+  ok 25 [desktop] › e2e\release.spec.cjs:121:1 › a slow API response refreshes the visible schedule in the background and remains offline (7.7s)
+  ok 26 [desktop] › e2e\review-fixes.spec.cjs:18:1 › room manual slot determines status, sorted deduplicated rows and active filters (2.7s)
+  ok 27 [desktop] › e2e\review-fixes.spec.cjs:42:1 › single saved source chip keeps age and warning visible after reload failure and recovery (2.2s)
+  ok 28 [desktop] › e2e\review-fixes.spec.cjs:63:1 › finished hero uses tomorrow from actual date, independent of selected agenda day (1.6s)
+  ok 29 [desktop] › e2e\review-fixes.spec.cjs:77:1 › warning source stays collapsed and break identifies both adjacent times (1.7s)
+  ok 30 [desktop] › e2e\review-fixes.spec.cjs:93:1 › picker sorts courses and names, exposes favorites and marks current group (1.8s)
+  ok 32 [desktop] › e2e\schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix (2.9s)
+  ok 33 [desktop] › e2e\schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day (1.3s)
+  ok 34 [desktop] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Источник портала содержит расписание другой группы (ЗУ-395-1). (1.4s)
+  ok 35 [desktop] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Расписание на портале не заполнено. (1.2s)
+  ok 36 [desktop] › e2e\schedule.spec.cjs:47:1 › installation URLs stay inside the repository and the cached shell opens offline (2.9s)
+  ok 31 [desktop] › e2e\review-fixes.spec.cjs:110:1 › radar accessibility, readable labels and responsive views in both themes (10.6s)
+  ok 37 [desktop] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-18T23:30:00+08:00 on a New York device (1.5s)
+(node:27960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ok 35 [desktop] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-19T00:30:00+08:00 on a New York device (1.6s)
-(node:884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+  ok 38 [desktop] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-19T00:30:00+08:00 on a New York device (1.4s)
+(node:24812) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ok 36 [mobile] › e2e\accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher (3.4s)
-  ok 38 [mobile] › e2e\accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it (2.8s)
-  ok 39 [mobile] › e2e\accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group (261ms)
-  ok 40 [mobile] › e2e\accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure (1.4s)
-  ok 41 [mobile] › e2e\accessibility.spec.cjs:66:1 › restoring a saved group resolves its name when the file number changes (1.2s)
-  ok 42 [mobile] › e2e\accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh (2.0s)
-  ok 43 [mobile] › e2e\accessibility.spec.cjs:91:1 › possible teacher identity collision is visible and clears for a group (4.0s)
-  ok 37 [mobile] › e2e\accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks (13.8s)
-  ok 45 [mobile] › e2e\accessibility.spec.cjs:132:1 › server-error cached response is not labeled offline (1.7s)
-  ok 46 [mobile] › e2e\accessibility.spec.cjs:140:1 › stale publication warns without relying on the GitHub scheduler (3.0s)
-  ok 47 [mobile] › e2e\contrast.spec.cjs:5:1 › small labels meet 4.5 contrast against rendered gradients in both themes (5.2s)
-  ok 48 [mobile] › e2e\design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label (4.4s)
-  ok 49 [mobile] › e2e\design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate (6.3s)
-  ok 50 [mobile] › e2e\design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note (2.7s)
-  ok 51 [mobile] › e2e\release.spec.cjs:6:1 › an empty day links to the next known teaching day (1.5s)
-  ok 52 [mobile] › e2e\release.spec.cjs:20:1 › recent schedules are local and search precedes filters (2.7s)
-  ok 53 [mobile] › e2e\release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus (2.3s)
-  ok 54 [mobile] › e2e\release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline (8.6s)
-  ok 55 [mobile] › e2e\release.spec.cjs:88:1 › a room search highlights its building on the conditional campus diagram (2.4s)
-  ok 56 [mobile] › e2e\release.spec.cjs:99:1 › online pairs stay compact with readable time and preserved original entries (3.2s)
-  ok 57 [mobile] › e2e\release.spec.cjs:121:1 › a slow API response refreshes the visible schedule in the background and remains offline (7.8s)
-  ok 58 [mobile] › e2e\review-fixes.spec.cjs:18:1 › room manual slot determines status, sorted deduplicated rows and active filters (2.8s)
-  ok 59 [mobile] › e2e\review-fixes.spec.cjs:42:1 › single saved source chip keeps age and warning visible after reload failure and recovery (2.1s)
-  ok 60 [mobile] › e2e\review-fixes.spec.cjs:63:1 › finished hero uses tomorrow from actual date, independent of selected agenda day (1.7s)
-  ok 44 [mobile] › e2e\accessibility.spec.cjs:110:1 › secondary dialogs pass axe in dark and light themes (1.0m)
-  ok 61 [mobile] › e2e\review-fixes.spec.cjs:77:1 › warning source stays collapsed and break identifies both adjacent times (1.8s)
-  ok 62 [mobile] › e2e\review-fixes.spec.cjs:93:1 › picker sorts courses and names, exposes favorites and marks current group (1.9s)
-  ok 64 [mobile] › e2e\schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix (2.9s)
-  ok 65 [mobile] › e2e\schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day (1.5s)
-  ok 66 [mobile] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Источник портала содержит расписание другой группы (ЗУ-395-1). (1.4s)
-  ok 67 [mobile] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Расписание на портале не заполнено. (1.4s)
-  ok 68 [mobile] › e2e\schedule.spec.cjs:47:1 › installation URLs stay inside the repository and the cached shell opens offline (2.6s)
-  ok 63 [mobile] › e2e\review-fixes.spec.cjs:110:1 › radar accessibility, readable labels and responsive views in both themes (12.7s)
-  ok 69 [mobile] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-18T23:30:00+08:00 on a New York device (1.4s)
-  ok 70 [mobile] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-19T00:30:00+08:00 on a New York device (1.3s)
+  ok 39 [mobile] › e2e\accessibility.spec.cjs:7:1 › dialogs trap focus, close with Escape and return to the launcher (2.8s)
+  ok 41 [mobile] › e2e\accessibility.spec.cjs:40:1 › last successful group is restored and a deep-link overrides it (2.5s)
+  ok 42 [mobile] › e2e\accessibility.spec.cjs:49:1 › an unknown group link never silently opens the saved group (282ms)
+  ok 43 [mobile] › e2e\accessibility.spec.cjs:57:1 › loading skeleton becomes an explicit unavailable state on failure (1.1s)
+  ok 44 [mobile] › e2e\accessibility.spec.cjs:66:1 › restoring a saved group resolves its name when the file number changes (1.2s)
+  ok 45 [mobile] › e2e\accessibility.spec.cjs:77:1 › server fallback remains visible after a manual refresh (1.8s)
+  ok 40 [mobile] › e2e\accessibility.spec.cjs:20:1 › dark and light views and the search dialog pass accessibility checks (11.2s)
+  ok 46 [mobile] › e2e\accessibility.spec.cjs:91:1 › possible teacher identity collision is visible and clears for a group (3.6s)
+  ok 48 [mobile] › e2e\accessibility.spec.cjs:132:1 › server-error cached response is not labeled offline (1.2s)
+  ok 49 [mobile] › e2e\accessibility.spec.cjs:140:1 › stale publication warns without relying on the GitHub scheduler (2.5s)
+  ok 50 [mobile] › e2e\contrast.spec.cjs:5:1 › small labels meet 4.5 contrast against rendered gradients in both themes (4.5s)
+  ok 51 [mobile] › e2e\cyber.spec.cjs:14:1 › lesson states and progress follow the clock, including the break boundary (1.7s)
+  ok 52 [mobile] › e2e\cyber.spec.cjs:30:1 › past lesson notes remain usable and another day is not marked current or next (2.0s)
+  ok 53 [mobile] › e2e\cyber.spec.cjs:40:1 › compact header fits 320px with one heading and distinct search controls (1.6s)
+  ok 54 [mobile] › e2e\design.spec.cjs:5:1 › day controls fit small screens and future lessons never get a current label (3.5s)
+  ok 55 [mobile] › e2e\design.spec.cjs:21:1 › glass search remains accessible in dark mode and keyboard motion is immediate (5.0s)
+  ok 56 [mobile] › e2e\design.spec.cjs:32:1 › glass note dialog saves and deletes a lesson note (2.4s)
+  ok 57 [mobile] › e2e\release.spec.cjs:6:1 › an empty day links to the next known teaching day (1.4s)
+  ok 58 [mobile] › e2e\release.spec.cjs:20:1 › recent schedules are local and search precedes filters (2.5s)
+  ok 59 [mobile] › e2e\release.spec.cjs:32:1 › mobile swipes move days and dismiss a sheet without losing focus (2.0s)
+  ok 60 [mobile] › e2e\release.spec.cjs:50:1 › a real worker update preserves saved data and the new shell opens offline (6.1s)
+  ok 61 [mobile] › e2e\release.spec.cjs:88:1 › a room search highlights its building on the conditional campus diagram (2.3s)
+  ok 62 [mobile] › e2e\release.spec.cjs:99:1 › online pairs stay compact with readable time and preserved original entries (3.0s)
+  ok 47 [mobile] › e2e\accessibility.spec.cjs:110:1 › secondary dialogs pass axe in dark and light themes (49.3s)
+  ok 63 [mobile] › e2e\release.spec.cjs:121:1 › a slow API response refreshes the visible schedule in the background and remains offline (7.6s)
+  ok 64 [mobile] › e2e\review-fixes.spec.cjs:18:1 › room manual slot determines status, sorted deduplicated rows and active filters (2.6s)
+  ok 65 [mobile] › e2e\review-fixes.spec.cjs:42:1 › single saved source chip keeps age and warning visible after reload failure and recovery (2.1s)
+  ok 66 [mobile] › e2e\review-fixes.spec.cjs:63:1 › finished hero uses tomorrow from actual date, independent of selected agenda day (1.5s)
+  ok 67 [mobile] › e2e\review-fixes.spec.cjs:77:1 › warning source stays collapsed and break identifies both adjacent times (1.6s)
+  ok 68 [mobile] › e2e\review-fixes.spec.cjs:93:1 › picker sorts courses and names, exposes favorites and marks current group (1.6s)
+  ok 70 [mobile] › e2e\schedule.spec.cjs:5:1 › schedule, source status and teacher navigation work under the Pages prefix (2.7s)
+  ok 71 [mobile] › e2e\schedule.spec.cjs:23:1 › unreadable data is marked incomplete, not as a free day (1.3s)
+  ok 72 [mobile] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Источник портала содержит расписание другой группы (ЗУ-395-1). (1.3s)
+  ok 73 [mobile] › e2e\schedule.spec.cjs:36:126 › source defect is explained: Расписание на портале не заполнено. (1.2s)
+  ok 74 [mobile] › e2e\schedule.spec.cjs:47:1 › installation URLs stay inside the repository and the cached shell opens offline (2.2s)
+  ok 75 [mobile] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-18T23:30:00+08:00 on a New York device (1.3s)
+  ok 69 [mobile] › e2e\review-fixes.spec.cjs:110:1 › radar accessibility, readable labels and responsive views in both themes (10.5s)
+  ok 76 [mobile] › e2e\timezone.spec.cjs:4:2 › campus week at 2026-10-19T00:30:00+08:00 on a New York device (1.4s)
 
   1 skipped
-  69 passed (3.0m)
+  75 passed (2.7m)
 
 
-===== preview/contract-local.txt =====
-SHA-256: abc95e0a7e7b043c06e78afa527da5daf022e748e6feb337e24421bebe00219b
+===== preview/cyber-contract.txt =====
+SHA-256: 495e9dffbd2de6258671c57a1113b4a86e5f04f73c216c14aa238b839d4b4824
 
+Published API contract smoke OK: 663 groups; original API bytes preserved
 
 Running 8 tests using 2 workers
 
-(node:25572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:2672) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:31524) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:28000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ok 1 [desktop] › e2e\contract.spec.cjs:15:1 › new shell reads a published group and source details (1.7s)
-  ok 2 [desktop] › e2e\contract.spec.cjs:21:1 › new shell can search the published group catalog (1.7s)
-  ok 4 [desktop] › e2e\contract.spec.cjs:33:1 › new shell renders the published room catalog (2.4s)
-  ok 3 [desktop] › e2e\contract.spec.cjs:26:1 › new shell opens a published teacher (2.7s)
-(node:20444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+  ok 1 [desktop] › e2e\contract.spec.cjs:15:1 › new shell reads a published group and source details (1.6s)
+  ok 2 [desktop] › e2e\contract.spec.cjs:21:1 › new shell can search the published group catalog (1.8s)
+  ok 4 [desktop] › e2e\contract.spec.cjs:33:1 › new shell renders the published room catalog (2.2s)
+  ok 3 [desktop] › e2e\contract.spec.cjs:26:1 › new shell opens a published teacher (2.6s)
+(node:25840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:11216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:26520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ok 5 [mobile] › e2e\contract.spec.cjs:15:1 › new shell reads a published group and source details (1.6s)
-  ok 6 [mobile] › e2e\contract.spec.cjs:21:1 › new shell can search the published group catalog (1.9s)
-  ok 7 [mobile] › e2e\contract.spec.cjs:26:1 › new shell opens a published teacher (2.7s)
-  ok 8 [mobile] › e2e\contract.spec.cjs:33:1 › new shell renders the published room catalog (2.3s)
+  ok 5 [mobile] › e2e\contract.spec.cjs:15:1 › new shell reads a published group and source details (1.5s)
+  ok 6 [mobile] › e2e\contract.spec.cjs:21:1 › new shell can search the published group catalog (1.6s)
+  ok 8 [mobile] › e2e\contract.spec.cjs:33:1 › new shell renders the published room catalog (2.2s)
+  ok 7 [mobile] › e2e\contract.spec.cjs:26:1 › new shell opens a published teacher (2.6s)
 
-  8 passed (12.4s)
+  8 passed (11.6s)
 
 
-===== preview/build-final.txt =====
-SHA-256: 3f8521b43c443a3a3cc72d4a7f64b34e5ebc1b710b80c2d687188682a31b6716
+===== preview/cyber-build.txt =====
+SHA-256: d39874dc2f9b730b02b4ddcf455502854e28575a76550abe045957f6564ec360
 
 🚀 Starting static build for GitHub Pages...
 ✓ Copied static files to dist/
@@ -312,7 +319,7 @@ Groups spezialitet: 130
 Groups zo1: 121
 Groups zo2: 199
 Official department files: 90; combined teachers: 601
-🎉 Build complete in 34.75s! All output saved to dist/
+🎉 Build complete in 27.76s! All output saved to dist/
 
 
 ===== .gitattributes =====
@@ -651,8 +658,85 @@ jobs:
             }
 
 
+===== DESIGN.md =====
+SHA-256: 68b9a94bb7ed4b08af67aa56f3f055e647f023ae74967cccc217f22608ca978a
+
+---
+name: "ВСГУТУ — Stealth Cyber-Glass"
+description: "Обсидиановое расписание с изумрудной текущей и фиолетовой следующей парой."
+colors:
+  dark-bg: "#050507"
+  dark-ink: "#f3f5f8"
+  dark-muted: "#a7b2c3"
+  current: "#10b981"
+  next: "#8b5cf6"
+  glass: "rgba(15,15,20,.7)"
+  light-bg: "#f3f5f5"
+  light-ink: "#182321"
+  light-current: "#008260"
+typography:
+  body: "Inter, locally hosted variable WOFF2 with Cyrillic and Latin subsets"
+  time: "ui-monospace; tabular numerals"
+rounded:
+  card: "14px"
+  control: "12px"
+---
+
+# Stealth Cyber-Glass
+
+User-approved reference: stealth_cyber_glass.html, supplied 18 October 2026.
+Mode: Operate. Preserve real source data, incomplete-source warnings, filters,
+notes, teachers, rooms, offline use and keyboard operation.
+
+## Visual language
+
+AMOLED #050507 background with faint emerald/violet ambient gradients. Dark
+obsidian cards use a 1px border and 12px backdrop blur, with opaque fallbacks.
+The current lesson gets an emerald outline, subtle glow, countdown and progress;
+the next visible lesson gets a violet outline and countdown. The chosen reference
+explicitly earns these neon accents. Inter is served locally with its OFL licence;
+there are no runtime font or CSS CDN requests.
+
+## Composition
+
+One compact header row: group selector, campus date/week, SVG search and settings.
+The group is the sole h1. Search controls have distinct accessible names.
+The page has no repeated brand/title banner. Desktop keeps a 300px nearest-lesson
+column and a flexible agenda; mobile stacks them with compact spacing. The agenda
+uses standalone 14px lesson cards and a dashed break row. Each time range is
+inline, while subject, teacher, lesson type and room remain readable.
+
+Styles live in styles/stealth.css, after the shared campus layout. Light theme has
+its own ink, card and state colours. Inputs, selection, scrollbars, focus outlines,
+dialogs and bottom navigation inherit the same tokens. Touch actions stay at
+least 44px. Native details retain the full subject, source details and notes.
+
+## State contract
+
+visualPairStates derives current/next/past from the selected campus date, the
+actual start/end times and the active lesson filter. The end is exclusive;
+seconds advance progress. During a break there is no current pair and the next
+visible slot stays violet. A different future day and ambiguous dated sessions
+never receive a fabricated current/next state. Existing clock updates set the
+classes directly; no MutationObserver watches or reparses visible text.
+
+Past lessons use quieter, contrasting text rather than whole-card opacity or
+pointer-events:none. Users can still read, expand and annotate them. Adjacent
+online lessons retain their original entries and controls inside the disclosure.
+Current/next are labelled in words as well as colour. Source warnings and the
+single freshness chip remain visible. Reduced motion and opaque glass fallbacks
+are preserved.
+
+## Verification
+
+Check 320px mobile and desktop, both themes, every lesson state and the break
+boundary. Exercise notes on a past lesson, selection/filter changes, teacher and
+room search, dialogs, offline loading and worker upgrades. Use axe and rendered
+pixel contrast checks; a screenshot alone does not establish accessibility.
+
+
 ===== README.md =====
-SHA-256: c4f11b7b1f16bc1bac14b148ea60ac181c15a2796c4fdf07ef90f5520940f440
+SHA-256: 6626c2b2d43b74b12917acbd03ffe31bcf3509579d15962c3e3e71d606bd9145
 
 # ВСГУТУ Расписание Live
 
@@ -664,7 +748,15 @@ SHA-256: c4f11b7b1f16bc1bac14b148ea60ac181c15a2796c4fdf07ef90f5520940f440
 
 ## Скриншоты
 
-Campus Glass: тёмная тема, полупрозрачные панели, крупная аудитория ближайшей пары. На компьютере — обзор и расписание в двух колонках, на телефоне — один поток. Светлая тема и уменьшение движения сохранены.
+Stealth Cyber Glass («Обсидиан и неон»): AMOLED-фон, тёмные стеклянные карточки, изумрудный контур текущей пары и фиолетовый — следующей. Компактная шапка содержит группу, дату, поиск и настройки. Состояния карточек и таймеры обновляются по времени; прошедшие пары сохраняют доступ к заметкам. Inter хранится локально и работает офлайн. Светлая тема и уменьшение движения сохранены.
+
+Снимки новой рабочей версии на сохранённых источниках, симулятор времени: 13 октября 2026, 14:00 (на экране «Тест»):
+
+<img src="docs/screenshots/stealth/day-mobile.png" alt="Обсидиан и неон: расписание на телефоне" width="320" />
+
+[День на компьютере](docs/screenshots/stealth/day-desktop.png) · [Весь мобильный экран](docs/screenshots/stealth/day-mobile-full.png) · [Светлая тема](docs/screenshots/stealth/day-mobile-light.png)
+
+Предыдущий дизайн:
 
 Настоящие снимки Chromium версии 2.5.0 на сохранённых источниках. Включён встроенный симулятор времени (15 октября 2026, 11:00), что явно отмечено на экране:
 
@@ -3190,13 +3282,38 @@ SHA-256: 0aea9d5ee33b118f2113191b3c3986d6dfa59f7062da6ce9baa298844f9a73dd
 
 
 ===== docs/verification-review-current.md =====
-SHA-256: 75b8b24ac5869ba73569dad8f32363bfdaf940935fc250172c9b97f452ec4f9d
+SHA-256: 7e29a40bcd8f581264cb806a3847424db688c0a87c1885c24514a37dac8e1431
 
-# Проверка PR #19 после разбора 4f48481
+# Проверка PR #19: данные и Stealth Cyber Glass
 
-17 октября 2026. Ветка codex/reliable-data-updates; main и Pages не менялись.
+18 октября 2026. Ветка codex/reliable-data-updates; изменения main включены в PR, публикация из PR не выполнялась.
 Полный текст исходников и локальные журналы: [verification-inputs-current.txt](verification-inputs-current.txt).
 Удалённый результат проверяется в Checks конкретного коммита PR.
+
+## Дизайн по предоставленному HTML
+
+Визуальная основа — пользовательский stealth_cyber_glass.html: фон #050507,
+обсидиановое стекло, изумрудная текущая и фиолетовая следующая пара,
+свечение точки, прогресс и компактная однострочная шапка. Демо-расписание
+и панель с примером кода из референса не включены в приложение.
+
+Состояния задаются при рендере и обновляются часами приложения. Переход
+через конец пары снимает текущую подсветку; другой день не получает
+ложные состояния «сейчас» и «следующая». Заметки прошедших пар доступны.
+Сохранены предупреждения о качестве источника, светлая тема, клавиатура,
+уменьшение движения и офлайн. Inter с кириллицей хранится локально,
+лицензия OFL включена. SVG-иконки используют общий набор.
+
+В шапке один h1 с названием группы, отдельные доступные имена поиска
+и настроек. Исправления main включены без повреждённого sph1an и без
+постобработки состояний через MutationObserver. CSS собирается из styles/.
+
+Новые сценарии проверяют границы пары, таймер, прогресс, заметки и шапку
+при 320 px. Существующие проверки контраста и axe выполняются в обеих темах.
+Снимки Chromium на сохранённых данных, с явно включённым тестовым временем:
+[телефон](screenshots/stealth/day-mobile.png),
+[компьютер](screenshots/stealth/day-desktop.png),
+[светлая тема](screenshots/stealth/day-mobile-light.png).
 
 ## Запрошенный артефакт
 
@@ -3275,7 +3392,7 @@ status содержит group_check_dates, число/долю проверен�
 ## Проверки и оставшиеся ограничения
 
 Ruff и форматирование прошли. Python: 145 passed, 9 subtests passed в одном
-полном прогоне. Playwright: 69 passed, 1 skipped (из 70), один полный прогон. Полный браузерный журнал и поимённый список Python включены
+полном прогоне. Playwright после нового дизайна: 75 passed, 1 skipped (из 76), один полный прогон. Пропущен сценарий мобильного свайпа в desktop-проекте; на телефоне он проходит. Полный браузерный журнал и поимённый список Python включены
 в verification-inputs-current.txt. Локальные проверки не являются CI;
 удалённые Checks и ручная репетиция указываются отдельными ссылками в PR.
 
@@ -3290,7 +3407,7 @@ Ruff и форматирование прошли. Python: 145 passed, 9 subtest
 
 
 ===== e2e/accessibility.spec.cjs =====
-SHA-256: f13214a569c965b100a83d4ce37a5407d4b8cbbfccf797afed3280d839214e21
+SHA-256: ec7363939a115be030c6d6d5eb0ff26ef9061cf105c20daef3f1ab9f3a11624b
 
 const {test,expect}=require('./fixtures.cjs');
 const {default:AxeBuilder}=require('@axe-core/playwright');
@@ -3314,7 +3431,7 @@ test('dialogs trap focus, close with Escape and return to the launcher',async({p
 test('dark and light views and the search dialog pass accessibility checks',async({page},testInfo)=>{
   await ready(page);
   for(const theme of ['dark','light']){
-    await page.getByRole('button',{name:'Выбрать',exact:true}).hover();
+    await page.getByRole('button',{name:'Сменить расписание',exact:true}).hover();
     const result=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     expect(result.violations).toEqual([]);
     if(process.env.CAPTURE_SCREENSHOTS && theme==='dark'){
@@ -3506,6 +3623,61 @@ test('small labels meet 4.5 contrast against rendered gradients in both themes',
   }
  }
  await testInfo.attach('rendered-contrast',{body:JSON.stringify(results,null,2),contentType:'application/json'});
+});
+
+
+===== e2e/cyber.spec.cjs =====
+SHA-256: 736d6ac98cc4bdb824d8a8bc4420950e4f28a2765a264ce8f2e7393c90b1fe02
+
+const {test:base,expect}=require('./fixtures.cjs');
+const fs=require('fs');
+const test=base.extend({serviceWorkers:'block'});
+async function ready(page){
+  const data=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
+  const lesson={subject:'Разработка клиентских интерфейсов',type:'Лабораторная',type_code:'lab',teacher:'Преподаватель И.О.',room:'0427'};
+  const pairs=[{number:0,start:'07:00',end:'08:35',lessons:[{...lesson,subject:'Прошедшее занятие'}]},
+    {number:1,start:'09:00',end:'10:35',lessons:[lesson]},
+    {number:2,start:'10:45',end:'12:20',lessons:[{...lesson,subject:'Следующее занятие'}]}];
+  data.is_incomplete=false;data.weeks={'1':{friday:{pairs},saturday:{pairs}},'2':{friday:{pairs}}};
+  await page.route('**/api/schedule/bakalavriat/1.json*',route=>route.fulfill({json:data}));
+  await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
+}
+test('lesson states and progress follow the clock, including the break boundary',async({page})=>{
+  await ready(page);
+  const cards=page.locator('#pairsContainer>.lesson-card');
+  await expect(cards.nth(0)).toHaveClass(/is-past/);
+  await expect(cards.nth(1)).toHaveClass(/is-current/);
+  await expect(cards.nth(2)).toHaveClass(/is-next/);
+  await expect(cards.nth(1).locator('[data-pair-countdown]')).toHaveText('ост. 1 ч 5 мин');
+  await expect(cards.nth(1).getByRole('progressbar')).toHaveAttribute('aria-valuenow','32');
+  await page.clock.fastForward(65*60000);
+  await expect(page.locator('#pairsContainer>.is-current')).toHaveCount(0);
+  await expect(cards.nth(1)).toHaveClass(/is-past/);
+  await expect(cards.nth(2)).toHaveClass(/is-next/);
+  await expect(cards.nth(2).locator('[data-pair-countdown]')).toHaveText('через 10 мин');
+  await page.clock.fastForward(10*60000);
+  await expect(cards.nth(2)).toHaveClass(/is-current/);
+});
+test('past lesson notes remain usable and another day is not marked current or next',async({page})=>{
+  await ready(page);
+  const past=page.locator('#pairsContainer>.is-past');
+  await past.locator('summary').click();
+  await past.getByRole('button',{name:'Добавить заметку'}).click();
+  await expect(page.locator('#noteModal')).toBeVisible();
+  await page.getByRole('button',{name:'Закрыть заметку'}).click();
+  await page.locator('#dayTabs button').last().click();
+  await expect(page.locator('#pairsContainer>.is-current,#pairsContainer>.is-next')).toHaveCount(0);
+});
+test('compact header fits 320px with one heading and distinct search controls',async({page})=>{
+  await ready(page);await page.setViewportSize({width:320,height:900});
+  await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
+  await expect(page.getByRole('button',{name:'Поиск',exact:true})).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'Поиск расписания',exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  for(const button of await page.locator('.header-actions button').all()){
+    const box=await button.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+  const h=await page.locator('.campus-header').boundingBox();expect(h.height).toBeLessThanOrEqual(80);
 });
 
 
@@ -3912,14 +4084,15 @@ test('installation URLs stay inside the repository and the cached shell opens of
 
 
 ===== e2e/timezone.spec.cjs =====
-SHA-256: a06040ae2357aa93e834dd39a31204aa3f9b7d860f48632c0e641d3f5c899be5
+SHA-256: 56532f07ba9272d7b83662c583115042107dc3f7a1a4cb6cdf2c4517397f648e
 
 const {test,expect}=require('./fixtures.cjs');
 test.use({timezoneId:'America/New_York'});
 for(const [instant,label,day]of[['2026-10-18T23:30:00+08:00','I неделя','18'],['2026-10-19T00:30:00+08:00','II неделя','19']]){
  test(`campus week at ${instant} on a New York device`,async({page})=>{
    await page.clock.setFixedTime(new Date(instant));await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');
-   await expect(page.locator('#weekBadge')).toHaveText(label);await expect(page.locator('#campusDate')).toContainText(day+' октября');
+   await expect(page.locator('#weekBadge')).toHaveText(label);await expect(page.locator('#campusDate')).toContainText(day+' окт');
+   await expect(page.locator('#campusDate')).toHaveAttribute('title',new RegExp(day+' октября'));
    expect(await page.evaluate(()=>[getUlanUdeNow().getHours(),getUlanUdeNow().getMinutes()])).toEqual(instant.includes('23:30')?[23,30]:[0,30]);
  });
 }
@@ -9298,7 +9471,7 @@ if __name__ == "__main__":
 
 
 ===== static/accessibility.js =====
-SHA-256: 5042ea474dbd7e030ac95abd4116291f610efa0e8eca5ad64c53615db49a64c6
+SHA-256: ee669391bb306cf88413fac492aa5379528d51712cf315f1c161d2b964e4a9a8
 
 // One focus stack for all modal dialogs, including nested dialogs and notes.
 const modalStack=[];
@@ -9427,6 +9600,7 @@ const ICON_PATHS={
   building:'M3 21h18M5 21V8h14v13M3 8l9-5 9 5M9 11v7m6-7v7',
   check:'m4 12 5 5L20 6', warning:'m12 3 10 18H2ZM12 9v5m0 3v1',
   info:'M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM12 11v6m0-10v1',chevron:'m7 10 5 5 5-5',
+  settings:'M9 3h6l1 3 3 1 2 5-2 2-1 3-3 1-1 3H9l-1-3-3-1-2-5 2-2 1-3 3-1 1-3ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
   dot:'M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z', close:'m6 6 12 12M6 18 18 6', more:'M4 12h1m6 0h1m6 0h1'
 };
 function uiIcon(name){return `<svg class="ui-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICON_PATHS[name] || ICON_PATHS.dot}"/></svg>`;}
@@ -9449,7 +9623,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const title=dialog.querySelector('h2,h3');if(title){title.id ||=dialog.id+'Title';dialog.setAttribute('aria-labelledby',title.id);}
     for(const button of dialog.querySelectorAll('button'))if(/^[×✕]$/.test(button.textContent.trim())){button.setAttribute('aria-label',button.getAttribute('aria-label') || 'Закрыть окно');button.innerHTML=uiIcon('close');}
   }
-  document.querySelector('button[aria-label="Ещё"]').innerHTML=uiIcon('more');
+  document.querySelector('button[aria-label="Ещё"]').innerHTML=uiIcon('settings');
   document.getElementById('groupSearchInput').setAttribute('aria-label','Поиск учебной группы');
   document.getElementById('teacherSearchInput').setAttribute('aria-label','Поиск преподавателя');
   document.getElementById('noteTextarea').setAttribute('aria-label','Текст заметки');
@@ -9689,8 +9863,106 @@ async function receiveBackgroundData(event){
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',receiveBackgroundData);
 
 
+===== static/fonts/OFL-Inter.txt =====
+SHA-256: 5dd548d31a85f756e01d63e00d7faf1e324103ed3e9102fcbbabf2cc2db6dd39
+
+Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://scripts.sil.org/OFL
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
 ===== static/index.html =====
-SHA-256: 314ce676606f541090fc0c1b2244cd9e92188fa3367716ae30f8232b34ce5446
+SHA-256: 90228d940f0abba0690348386bc0e6f4063bfed67c8dfe31c01354be8ca032ba
 
 <!DOCTYPE html>
 
@@ -9700,7 +9972,7 @@ SHA-256: 314ce676606f541090fc0c1b2244cd9e92188fa3367716ae30f8232b34ce5446
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <meta content="__BUILD_ID__" name="app-version"/>
 <meta content="2.5.0" name="app-release"/>
-<meta content="#10131d" name="theme-color"/>
+<meta content="#050507" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="manifest.json" rel="manifest"/>
@@ -9725,17 +9997,13 @@ SHA-256: 314ce676606f541090fc0c1b2244cd9e92188fa3367716ae30f8232b34ce5446
 <!-- ===================================================================== -->
 <header class="campus-header">
 <div class="campus-header-inner">
-<div class="campus-brand"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9l12-5 12 5-12 5L4 9Zm5 3v10c5 5 9 5 14 0V12M28 9v12"/></svg><span>ВСГУТУ<span>Расписание</span></span></div><button aria-label="Сменить расписание" class="min-w-0 text-left flex-1" onclick="openSearchModal()">
-<h1 class="font-extrabold text-lg truncate" id="currentEntityBtnText">Выберите расписание</h1>
-<p class="text-[11px] text-slate-500 mt-0.5">ВСГУТУ · <span id="weekBadge">I неделя</span></p>
-</button>
-<button class="campus-change" onclick="openSearchModal()">Выбрать</button>
-<button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h1m6 0h1m6 0h1"/></svg></button>
+<h1 class="header-group"><button aria-label="Сменить расписание" onclick="openSearchModal()"><i class="header-dot" aria-hidden="true"></i><span id="currentEntityBtnText">Выберите расписание</span><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></button></h1>
+<div class="header-date"><span id="campusDate">Расписание занятий</span><span id="weekBadge">I неделя</span></div>
+<div class="header-actions"><button class="campus-more" onclick="openSearchModal()" aria-label="Поиск расписания" title="Поиск расписания"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></button><button aria-label="Ещё" class="campus-more" onclick="openSimpleDialog('moreMenuModal')" title="Настройки и инструменты"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 3-1 3-3 1-2 4 2 2 1 3 3 1 1 3h4l1-3 3-1 2-4-2-2-1-3-3-1-1-3Z"/><circle cx="11" cy="11.5" r="3"/></svg></button></div>
 </div></header>
 <div class="campus-update hidden" id="appUpdateBanner" role="status" aria-live="polite"><span>Доступна новая версия</span><button id="applyAppUpdateButton">Обновить</button></div>
 <!-- ОСНОВНОЙ КОНТЕНТ -->
 <main class="campus-shell">
-<div class="campus-page-heading"><div><h2>Мой день</h2><p id="campusDate">Расписание занятий</p></div><span class="campus-city">Улан-Удэ · UTC+8</span></div>
 <p id="teacherIdentityWarning" hidden role="status" class="campus-warning">Возможны данные нескольких преподавателей: одинаковые фамилия и инициалы встречаются в разных кафедрах. Сверьте занятия с источником.</p>
 <p id="publicationFreshnessWarning" hidden role="status" class="campus-warning"></p>
 <div class="campus-layout"><aside class="campus-overview" aria-label="Ближайшее занятие">
@@ -10666,6 +10934,85 @@ SHA-256: 314ce676606f541090fc0c1b2244cd9e92188fa3367716ae30f8232b34ce5446
 </html>
 
 
+===== static/manifest.json =====
+SHA-256: 125f40f605bfe12bf6218a865fa65a37d6d01faf7a5d56231ab321c6c7253fe1
+
+{
+  "name": "ВСГУТУ Расписание Live",
+  "short_name": "ВСГУТУ Live",
+  "description": "Быстрое и удобное расписание ВСГУТУ для студентов и преподавателей",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050507",
+  "theme_color": "#050507",
+  "icons": [
+    {
+      "src": "icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Следующая пара",
+      "short_name": "Пара",
+      "url": "./?action=now",
+      "icons": [
+        {
+          "src": "shortcut-now.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Свободные аудитории",
+      "short_name": "Аудитории",
+      "url": "./?action=rooms",
+      "icons": [
+        {
+          "src": "shortcut-rooms.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Сессия и зачёты",
+      "short_name": "Сессия",
+      "url": "./?action=session",
+      "icons": [
+        {
+          "src": "shortcut-session.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Корпуса кампуса",
+      "short_name": "Кампус",
+      "url": "./?action=campus",
+      "icons": [
+        {
+          "src": "shortcut-campus.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
+
+
 ===== static/modern.js =====
 SHA-256: d3464bfb36b1ff73962747547b86bbac121ba63e00538914823e7655d1973112
 
@@ -10846,7 +11193,7 @@ document.addEventListener('DOMContentLoaded', () => { setInterval(() => { if (!d
 
 
 ===== static/simple-ui.js =====
-SHA-256: d8ff9eed819f9a330d560ad72f813282a5c7b5ef2fa4e747fc9f133d2334492b
+SHA-256: 5c2f538c303c677681c13b27809a378414117c0b4b68c3c53c75e1257dd910da
 
 let searchMode = 'student';
 function getTypeBorderClass(code) {
@@ -10929,7 +11276,8 @@ function heroState(schedule,now) {
 let campusDayStamp='';
 function updateCampusHero() {
   const now=getUlanUdeNow(),week=getWeekNum(now);
-  document.getElementById('campusDate').textContent=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+(simOverride?' · Тест времени':'');
+  document.getElementById('campusDate').textContent=now.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'}).replace(/\.$/,'')+(simOverride?' · Тест':'');
+  document.getElementById('campusDate').title=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · Улан-Удэ, UTC+8'+(simOverride?' · Тест времени':'');
   document.getElementById('weekBadge').textContent=week===1?'I неделя':'II неделя';
   document.getElementById('clockDisplay').textContent=now.toLocaleString('ru-RU')+' · Улан-Удэ'+(simOverride?' · ТЕСТ':'');
   const stamp=now.toDateString();
@@ -10965,20 +11313,45 @@ function updateCampusHero() {
   if(state.next)next.textContent=`Далее в ${state.next.start} · через ${durationText(timeToMinutes(state.next.start)-now.getHours()*60-now.getMinutes()-now.getSeconds()/60)} · `+state.next.lessons.map(lesson=>`${displaySubject(lesson)}${lessonRoomLabel(lesson)?' · '+lessonRoomLabel(lesson):''}`).join(' / ');
 }
 function heroRoomAction(index) {const pair=heroState(currentSchedule,getUlanUdeNow()).pair;if(pair?.lessons[index]?.room)openRoomsModal(pair.lessons[index].room);}
+function visualPairStates(now) {
+  const day=currentSchedule?.weeks?.[selectedWeek]?.[selectedDayKey];
+  const pairs=day?.pairs || [],minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const date=day?.session_date?null:getWeekRangeDates(selectedWeek,now)[selectedDayKey]?.date;
+  const sameDay=date?.toDateString()===now.toDateString();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const next=sameDay?pairs.filter(pair=>filterLessons(pair.lessons).length && timeToMinutes(pair.start)>minutes).sort((a,b)=>timeToMinutes(a.start)-timeToMinutes(b.start))[0]:null;
+  return pairs.map(pair=>{
+    const start=timeToMinutes(pair.start),end=timeToMinutes(pair.end);
+    const current=!!sameDay && minutes>=start && minutes<end;
+    const kind=current?'current':pair===next?'next':date && (date<today || sameDay && minutes>=end)?'past':'upcoming';
+    return {kind,remaining:current?Math.ceil(end-minutes):Math.ceil(start-minutes),progress:current?Math.min(100,Math.max(0,100*(minutes-start)/(end-start))):0};
+  });
+}
+function applyPairVisualState(card,state) {
+  const kind=state?.kind || 'upcoming',active=kind==='current';
+  card.dataset.current=String(active);card.dataset.state=kind;
+  for(const name of ['current','next','past'])card.classList.toggle('is-'+name,kind===name);
+  if(card.dataset.pairIndex===undefined)return;
+  card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
+  const status=card.querySelector('[data-pair-state]');
+  if(status){
+    status.hidden=!['current','next'].includes(kind);
+    card.querySelector('[data-pair-state-name]').textContent=active?'Идёт сейчас':'Следующая пара';
+    card.querySelector('[data-pair-countdown]').textContent=active?'ост. '+durationText(state.remaining):'через '+durationText(state.remaining);
+  }
+  const progress=card.querySelector('[data-pair-progress]');
+  if(progress){progress.hidden=!active;progress.setAttribute('aria-valuenow',Math.round(state?.progress || 0));progress.firstElementChild.style.transform=`scaleX(${(state?.progress || 0)/100})`;}
+}
 function updateCurrentCards(now) {
   if(viewMode!=='day')return;
-  const day=DAY_KEYS[(now.getDay()+6)%7],minutes=now.getHours()*60+now.getMinutes();
-  const pairs=currentSchedule?.weeks?.[selectedWeek]?.[selectedDayKey]?.pairs || [];
+  const states=visualPairStates(now);
   for(const card of document.querySelectorAll('[data-pair-index]')){
-    const pair=pairs[Number(card.dataset.pairIndex)];
-    const active=pair && !currentSchedule.weeks[selectedWeek][selectedDayKey].session_date && day===selectedDayKey && getWeekNum(now)===selectedWeek && minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end);
-    card.dataset.current=String(active);
-    card.classList.toggle('border-teal-500',active);card.classList.toggle('border-slate-200',!active);card.classList.toggle('dark:border-slate-800',!active);
-    card.querySelector('[data-current-label]')?.classList.toggle('hidden',!active);
+    applyPairVisualState(card,states[Number(card.dataset.pairIndex)]);
   }
   for(const block of document.querySelectorAll('[data-online-pair-indices]')){
-    const active=day===selectedDayKey && getWeekNum(now)===selectedWeek && block.dataset.onlinePairIndices.split(',').some(index=>pairs[index] && minutes>=timeToMinutes(pairs[index].start) && minutes<timeToMinutes(pairs[index].end));
-    block.dataset.current=String(active);block.querySelector('[data-merged-current-label]').hidden=!active;
+    const members=block.dataset.onlinePairIndices.split(',').map(index=>states[Number(index)]);
+    const state=members.find(state=>state?.kind==='current') || members.find(state=>state?.kind==='next') || {kind:members.every(state=>state?.kind==='past')?'past':'upcoming'};
+    applyPairVisualState(block,state);block.querySelector('[data-merged-current-label]').hidden=state.kind!=='current';
   }
 }
 function openSimpleDialog(id) { presentDialog(id); }
@@ -11055,8 +11428,9 @@ function renderCompactDay(container) {
           </div>
         </div></details>`;
     }).join('');
-    return `${gap}<article data-pair-index="${pairIndex}" data-current="${current}" class="schedule-pair ${current?'border-teal-500':'border-slate-200 dark:border-slate-800'}">
-      <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="${current?'':'hidden'} text-[9px] text-teal-500 font-bold">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div></article>`;
+    return `${gap}<article data-pair-index="${pairIndex}" data-current="${current}" class="schedule-pair lesson-card">
+      <div class="pair-state" data-pair-state hidden><span class="pair-state-name"><i class="pulse-dot" aria-hidden="true"></i><span data-pair-state-name></span></span><span class="pair-countdown" data-pair-countdown></span></div>
+      <div class="pair-time"><div class="font-semibold text-xs">${escapeHTML(pair.start)}</div><div class="text-[11px] text-slate-400 mt-1">${escapeHTML(pair.end)}</div><div class="text-[10px] text-slate-400 mt-2">${pair.number} пара</div><span data-current-label class="sr-only ${current?'':'hidden'}">СЕЙЧАС</span></div><div class="pair-lessons">${lessons}</div><div class="pair-progress" data-pair-progress hidden role="progressbar" aria-label="Прошло времени пары ${escapeHTML(pair.number)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar-fill"></div></div></article>`;
   });
   const pairs=day.pairs || [];
   const grouped=groupOnlinePairs(pairs).map(group=>{
@@ -11066,9 +11440,10 @@ function renderCompactDay(container) {
     const originals=rows.slice(group.start,group.end+1);originals[0]=originals[0].slice(gap.length);
     const indices=Array.from({length:count},(_,i)=>group.start+i).join(',');
     const active=isToday && pairs.slice(group.start,group.end+1).some(pair=>minutes>=timeToMinutes(pair.start) && minutes<timeToMinutes(pair.end));
-    return `${gap}<details class="merged-online-block" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
+    return `${gap}<details class="merged-online-block lesson-card" data-online-pair-indices="${indices}" data-current="${active}"><summary class="lesson-summary"><div class="merged-online-meta">${first.start}–${last.end} · ${count} ${pairWord(count)}<span data-merged-current-label ${active?'':'hidden'}>Сейчас</span></div><div class="lesson-title-row"><span class="lesson-subject">${escapeHTML(displaySubject(lesson))}</span><span class="lesson-room">${uiIcon('link')} Онлайн</span></div><div class="merged-online-bottom"><span>Раскрыть время каждой пары и заметки</span><span class="detail-chevron" aria-hidden="true">${uiIcon('chevron')}</span></div></summary><div class="merged-online-originals">${originals.join('')}</div></details>`;
   });
   container.innerHTML=grouped.join('') || renderEmptyStudyDay();
+  updateCurrentCards(now);
 }
 function updateCompactUI() {
   if(!currentSchedule)return;
@@ -11082,7 +11457,7 @@ function updateCompactUI() {
   theme.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;
 }
 const simpleApplyTheme=applyTheme;
-applyTheme=function(){simpleApplyTheme();document.querySelector('meta[name="theme-color"]').content=document.documentElement.classList.contains('dark')?'#10131d':'#eef0f6';const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
+applyTheme=function(){simpleApplyTheme();document.querySelector('meta[name="theme-color"]').content=document.documentElement.classList.contains('dark')?'#050507':'#f3f5f5';const button=document.getElementById('themeToggleBtn');button.textContent=`Тема: ${{dark:'тёмная',light:'светлая',system:'как на устройстве'}[themeMode]}`;};
 document.addEventListener('DOMContentLoaded',()=>{
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
   document.getElementById('debugTools').hidden=new URLSearchParams(location.search).get('debug')!=='1';
@@ -11835,11 +12210,50 @@ html { scroll-padding-bottom:calc(116px + env(safe-area-inset-bottom)); }
 @media(max-width:360px) { .calendar-count.has-lessons::before { display:none; } .room-timeline { gap:6px; } }
 
 
+===== styles/fonts.css =====
+SHA-256: a08edca6c5b257c81ccf136eeca8d0670d5815767e0c39769b3e9f8cad011640
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(./fonts/inter-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(./fonts/inter-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(./fonts/inter-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(./fonts/inter-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
 ===== styles/input.css =====
-SHA-256: 34f37ebb6a1905c8914f51556f59aa5c7fb1515d6915cd94ef62a9a58c6cbad2
+SHA-256: cb5d8e8009f1d29bd263f0c65725748f5a0905eed33a1727a4c563dfc703076b
 
 @import "tailwindcss" source(none);
+@import "./fonts.css";
 @import "./campus.css";
+@import "./stealth.css";
 @source "../static";
 @config "../tailwind.config.cjs";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -11875,6 +12289,146 @@ input::placeholder,textarea::placeholder {color:#56677e;opacity:1;}
 .dark input::placeholder,.dark textarea::placeholder {color:#a6b7cc;}
 
 [class~="hover:bg-teal-500"]:hover {background-color:#115e59;}
+
+
+===== styles/stealth.css =====
+SHA-256: d86e03c4026ea8bc1efa8bc85831b6ff8109546119de51945301ad1d9e20d18f
+
+/* Stealth Cyber-Glass. The schedule is real; only its presentation changes. */
+:root {
+  --campus-bg:#f3f5f5; --campus-ink:#182321; --campus-muted:#4c5c58;
+  --campus-glass:rgba(255,255,255,.9); --campus-panel:#fff;
+  --campus-line:#d5dfdb; --campus-control:#eaf0ed;
+  --campus-accent:#00634b; --campus-solid:#006b50; --campus-accent-soft:#e0f2e9;
+  --campus-focus:#006b50; --campus-warning:#764607;
+  --cyber-current:#008260; --cyber-current-ink:#006047; --cyber-current-bg:#edf9f2;
+  --cyber-next:#8b5cf6; --cyber-next-ink:#6434ad; --cyber-next-bg:#f7f2ff;
+  --cyber-card:rgba(255,255,255,.9); --cyber-past:#56635f;
+}
+.dark {
+  --campus-bg:#050507; --campus-ink:#f3f5f8; --campus-muted:#a7b2c3;
+  --campus-glass:rgba(15,15,20,.88); --campus-panel:#101015;
+  --campus-line:rgba(255,255,255,.1); --campus-control:rgba(255,255,255,.045);
+  --campus-accent:#50dbb1; --campus-solid:#087958; --campus-accent-soft:rgba(16,185,129,.12);
+  --campus-focus:#6ee7b7; --campus-warning:#f4cb8e;
+  --cyber-current:#10b981; --cyber-current-ink:#6ee7b7; --cyber-current-bg:rgba(12,22,19,.76);
+  --cyber-next:#8b5cf6; --cyber-next-ink:#c5b3ff; --cyber-next-bg:rgba(18,14,28,.74);
+  --cyber-card:rgba(15,15,20,.7); --cyber-past:#929aa9;
+}
+body.campus-app { font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.campus-app::before { background:radial-gradient(ellipse at 18% 0%,rgba(16,185,129,.055),transparent 44%),radial-gradient(ellipse at 85% 18%,rgba(139,92,246,.05),transparent 46%); }
+.campus-header { background:var(--campus-glass); }
+.campus-header-inner { min-height:72px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; gap:20px; }
+.campus-header h1.header-group { font-size:1rem; font-weight:750; margin:0; min-width:0; letter-spacing:-.025em; }
+.header-group button { display:flex; align-items:center; gap:8px; max-width:100%; padding:0 12px; border:1px solid var(--campus-line); border-radius:12px; background:var(--campus-control); }
+#currentEntityBtnText { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.header-group .ui-icon { width:14px; height:14px; color:var(--campus-muted); }
+.header-dot,.pulse-dot { width:6px; height:6px; flex-shrink:0; display:inline-block; border-radius:50%; background:var(--cyber-current); box-shadow:0 0 7px color-mix(in srgb,var(--cyber-current) 50%,transparent); }
+.header-date { min-width:0; display:flex; align-items:center; gap:9px; }
+#campusDate { font-size:.8125rem; margin:0; color:var(--campus-ink); font-weight:550; line-height:1.4; }
+#weekBadge { font-size:.75rem; color:var(--campus-accent); background:var(--campus-accent-soft); border:1px solid color-mix(in srgb,var(--cyber-current) 30%,transparent); border-radius:6px; padding:3px 6px; white-space:nowrap; }
+.header-actions { display:flex; gap:6px; }
+.campus-more { border-radius:12px; background:var(--campus-control); }
+.campus-shell { margin-top:24px; }
+.campus-layout { grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:24px; }
+.campus-overview { top:96px; }
+#liveHeroCard.campus-hero { background:var(--cyber-card); padding:20px; border-color:var(--campus-line); border-radius:14px; }
+#liveHeroCard[data-state="current"] { border-color:var(--cyber-current); background:var(--cyber-current-bg); }
+#liveHeroCard[data-state="next"] { border-color:var(--cyber-next); background:var(--cyber-next-bg); }
+#heroStatusLabel { display:inline-flex; align-items:center; gap:7px; color:var(--cyber-current-ink); }
+#liveHeroCard[data-state="current"] #heroStatusLabel::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--cyber-current); box-shadow:0 0 8px var(--cyber-current); }
+#liveHeroCard[data-state="next"] #heroStatusLabel,#liveHeroCard[data-state="next"] #heroRemainingTime { color:var(--cyber-next-ink); }
+#heroRemainingTime { color:var(--cyber-current-ink); font-size:.75rem; padding:4px 7px; border:1px solid var(--campus-line); border-radius:6px; background:var(--campus-control); }
+.hero-subject { font-size:1.125rem; line-height:1.45; }
+.hero-room strong { font-size:2rem; font-weight:650; }
+.hero-location { margin-top:18px; }
+#heroLessons { margin-top:15px; }
+#heroProgressFill,.progress-bar-fill { background:linear-gradient(90deg,#059669,#10b981); transform-origin:left; }
+#heroProgressWrap { margin-top:18px; }
+.campus-agenda { padding:0; border:0; border-radius:0; background:transparent; backdrop-filter:none; }
+#weekControls { margin-bottom:15px; }
+#weekControls>div { background:var(--campus-control); }
+#weekControls button[aria-pressed="true"] { color:var(--campus-accent); background:var(--campus-accent-soft); border:1px solid color-mix(in srgb,var(--cyber-current) 40%,transparent); }
+#dayTabs { margin-bottom:18px; gap:6px; }
+.calendar-day { padding:11px 2px; border:1px solid var(--campus-line); background:var(--campus-control); border-radius:12px; }
+#dayTabs button[aria-pressed="true"] { border-color:var(--cyber-current); background:var(--campus-accent-soft); }
+.calendar-date { margin-top:6px; font-size:.8125rem; }
+.calendar-count { margin-top:5px; font-size:.75rem; }
+#selectedDaySummary { margin:0 0 12px; font-size:.875rem; }
+#calendarChangesLegend { margin:-5px 0 12px; }
+#pairsContainer { display:grid; gap:10px; }
+.lesson-card.schedule-pair,.lesson-card.merged-online-block { display:block; margin:0; padding:15px; background:var(--cyber-card); border:1px solid var(--campus-line); border-radius:14px; }
+.lesson-card.is-current { border-color:var(--cyber-current); background:var(--cyber-current-bg); }
+.lesson-card.is-next { border-color:var(--cyber-next); background:var(--cyber-next-bg); }
+.dark .lesson-card.is-current { box-shadow:inset 0 0 8px rgba(16,185,129,.05),0 0 16px rgba(16,185,129,.1); }
+.dark .lesson-card.is-next { box-shadow:inset 0 0 8px rgba(139,92,246,.05),0 0 16px rgba(139,92,246,.1); }
+/* Do not fade the whole card: old lessons and their notes must stay readable. */
+.lesson-card.is-past { --campus-ink:var(--cyber-past); --campus-muted:var(--cyber-past); color:var(--cyber-past); background:var(--campus-control); }
+.lesson-card.is-past .lesson-room { color:var(--cyber-past); background:var(--campus-control); }
+.pair-time { display:flex; align-items:center; gap:4px; width:auto; padding:0; margin-bottom:9px; font-variant-numeric:tabular-nums; }
+.pair-time>div:first-child,.pair-time>div:nth-child(2) { font:650 .8125rem ui-monospace,SFMono-Regular,Consolas,monospace; margin:0; color:var(--campus-ink); }
+.pair-time>div:nth-child(2)::before { content:"–"; }
+.pair-time>div:nth-child(3) { color:var(--campus-muted); margin:0 0 0 auto; font-size:.75rem; }
+.pair-time [data-current-label] { position:absolute; margin:0; padding:0; }
+.pair-state { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px; font-size:.75rem; color:var(--cyber-current-ink); font-weight:650; }
+.pair-state-name { display:inline-flex; align-items:center; gap:7px; }
+.pair-countdown { padding:3px 7px; background:var(--campus-control); border:1px solid var(--campus-line); border-radius:6px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.is-next .pair-state { color:var(--cyber-next-ink); }
+.is-next .pulse-dot { background:var(--cyber-next); box-shadow:0 0 7px var(--cyber-next); }
+.pair-progress { height:4px; border-radius:3px; overflow:hidden; background:var(--campus-control); margin-top:12px; }
+.progress-bar-fill { width:100%; height:100%; }
+.lesson-summary { min-height:0; }
+.lesson-kind { display:inline-flex; align-items:center; padding:2px 6px; margin-bottom:7px; font-size:.75rem; border:1px solid var(--campus-line); border-radius:4px; line-height:1.5; }
+.lesson-detail[data-type="lecture"] .lesson-kind { color:var(--campus-warning); background:color-mix(in srgb,var(--campus-warning) 6%,transparent); }
+.lesson-detail[data-type="practice"] .lesson-kind,.lesson-detail[data-type="lab"] .lesson-kind { color:var(--campus-accent); background:var(--campus-accent-soft); }
+.lesson-subject { color:var(--campus-ink); font-size:.875rem; font-weight:700; line-height:1.5; }
+.lesson-title-row { flex-wrap:wrap; gap:7px; }
+.lesson-room { margin-left:auto; color:var(--campus-ink); background:var(--campus-control); border:1px solid var(--campus-line); font-weight:600; font-size:.75rem; padding:3px 7px; }
+.lesson-summary>div:last-child { margin-top:1px; }
+.detail-chevron { height:44px; width:44px; }
+.lesson-break { padding:8px 11px; margin:0; border:1px dashed var(--campus-line); border-radius:10px; font-size:.75rem; }
+.lesson-break::after { display:none; }
+.merged-online-meta { margin:0 0 8px; }
+.merged-online-originals .lesson-card { box-shadow:none; border:0; border-top:1px solid var(--campus-line); border-radius:0; padding:15px 0; background:transparent; }
+.campus-freshness { font-size:.75rem; }
+.campus-nav { background:var(--campus-glass); border-radius:16px; }
+.simple-sheet { background:var(--campus-glass); }
+@supports (backdrop-filter:blur(1px)) { .lesson-card { backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); } }
+@media (hover:hover) and (pointer:fine) { .lesson-card:not(.is-current):not(.is-next):hover { border-color:color-mix(in srgb,var(--campus-ink) 25%,transparent); } }
+@media (max-width:850px) { .campus-layout { grid-template-columns:minmax(0,260px) minmax(0,1fr); gap:20px; } }
+@media (max-width:700px) {
+  .campus-header-inner { width:calc(100% - 24px); min-height:68px; gap:8px; grid-template-columns:minmax(0,1fr) minmax(0,.85fr) auto; }
+  .campus-header h1.header-group { font-size:.875rem; }
+  .header-group button { gap:6px; padding:0 8px; }
+  .header-group .ui-icon { width:12px; height:12px; }
+  .header-date { flex-direction:column; align-items:flex-start; gap:2px; }
+  #campusDate,#weekBadge { font-size:.75rem; }
+  #weekBadge { padding:0; border:0; background:transparent; }
+  .header-actions { gap:3px; }
+  .campus-shell { width:calc(100% - 24px); margin-top:16px; }
+  .campus-layout { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .campus-overview { position:static; }
+  #liveHeroCard.campus-hero { padding:16px; }
+  .hero-subject { font-size:1rem; margin:6px 0; }
+  .hero-lesson { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; }
+  .hero-lesson-meta,.hero-subject,.hero-teacher { grid-column:1; }
+  .hero-location { grid-column:2; grid-row:1 / span 3; margin:0; align-self:center; }
+  .hero-room strong { font-size:1.5rem; }
+  .hero-room span { font-size:.75rem; margin-bottom:4px; }
+  .hero-building { display:none; }
+  #heroNextPairRow { margin-top:10px; padding-top:8px; font-size:.75rem; line-height:1.5; }
+  #heroLessons { margin-top:10px; }
+  #heroProgressWrap { margin-top:10px; }
+  .hero-lesson-meta,.hero-teacher { font-size:.75rem; }
+  .campus-agenda { padding:0; }
+  .calendar-day { padding:10px 1px; }
+  .calendar-date { font-size:.75rem; }
+  .calendar-count { font-size:.75rem; }
+  .lesson-card.schedule-pair,.lesson-card.merged-online-block { padding:13px; }
+  .campus-freshness { margin:0; padding:8px 0; font-size:.75rem; }
+}
+@media (prefers-reduced-transparency:reduce) { .lesson-card { background:var(--campus-panel); backdrop-filter:none; -webkit-backdrop-filter:none; } }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .lesson-card { background:var(--campus-panel); } }
 
 
 ===== tests/test_audit.py =====
