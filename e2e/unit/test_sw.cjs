@@ -3,6 +3,14 @@ const scope='https://example.test/esstu-schedule/', prefix=`esstu-pwa:${scope}:`
 const handlers={},stores=new Map(),deleted=[],timeouts=[],installRequests=[];
 let offline=false,status=200,failPut=false,fetches=0,skipped=false,deferred=null;
 const notifications=[],backgroundJobs=[];
+// Advance the saved-response deadline explicitly; crypto/cache work must not
+// race a 10 ms wall-clock timer on a busy CI runner.
+const deadlines=new Map();let deadlineReady=null;
+function schedule(fn,ms){
+  if(ms!==3500)return setTimeout(fn,ms);
+  const token={swDeadline:true};deadlines.set(token,fn);deadlineReady?.();return token;
+}
+function cancel(timer){if(timer?.swDeadline)deadlines.delete(timer);else clearTimeout(timer);}
 const key=request=>new URL(typeof request==='string'?request:request.url,scope).href;
 function store(name){
   if(!stores.has(name)){
@@ -24,7 +32,7 @@ function store(name){
 const context={self:{addEventListener:(name,fn)=>handlers[name]=fn,location:{origin:new URL(scope).origin},registration:{scope},clients:{claim:async()=>{},matchAll:async()=>[{postMessage:message=>notifications.push(message)}]},skipWaiting:async()=>{skipped=true}},
   caches:{open:async name=>store(name),keys:async()=>[...stores.keys()],delete:async name=>{deleted.push(name);return stores.delete(name);}},
   fetch:async(request,options)=>{fetches++;assert.equal(options.cache,'reload');if(offline)throw Error('offline');if(deferred)return deferred;return new Response('network',{status});},
-  Request,Response,Headers,URL,crypto:require('crypto').webcrypto,setTimeout:(fn,ms)=>setTimeout(fn,ms===3500?10:ms),clearTimeout,AbortSignal:{timeout:ms=>{timeouts.push(ms);return AbortSignal.timeout(ms);}},console:{warn(){}}};
+  Request,Response,Headers,URL,crypto:require('crypto').webcrypto,setTimeout:schedule,clearTimeout:cancel,AbortSignal:{timeout:ms=>{timeouts.push(ms);return AbortSignal.timeout(ms);}},console:{warn(){}}};
 vm.createContext(context);vm.runInContext(fs.readFileSync('static/sw.js','utf8'),context);
 async function lifecycle(name,event={}){let job;handlers[name]({...event,waitUntil:p=>job=p});await job;}
 async function request(path,options={}){let result;handlers.fetch({request:new Request(new URL(path,scope),options),waitUntil:p=>backgroundJobs.push(p),respondWith:p=>result=p});return result;}
@@ -65,7 +73,10 @@ async function request(path,options={}){let result;handlers.fetch({request:new R
   offline=false;
   await lifecycle('message',{data:{type:'PROTECT_DATA',urls:[new URL('api/schedule?group=A',scope).href]}});
   let resolveSlow;deferred=new Promise(resolve=>resolveSlow=resolve);
-  const slow=await request('api/schedule?group=A');assert.equal(slow.headers.get('X-ESSTU-Cache'),'refreshing');assert.equal(await slow.text(),'network');
+  const waiting=request('api/schedule?group=A');
+  if(!deadlines.size)await new Promise(resolve=>{deadlineReady=resolve;});deadlineReady=null;
+  assert.equal(deadlines.size,1);for(const callback of deadlines.values())callback();
+  const slow=await waiting;assert.equal(slow.headers.get('X-ESSTU-Cache'),'refreshing');assert.equal(await slow.text(),'network');
   resolveSlow(new Response('slow fresh data'));await Promise.all(backgroundJobs);deferred=null;
   assert.equal(await (await data.match('api/schedule?group=A')).text(),'slow fresh data');assert(notifications.some(message=>message.type==='DATA_UPDATED'));
   await Promise.all(Array.from({length:205},(_,i)=>request('api/bounded/'+i)));
