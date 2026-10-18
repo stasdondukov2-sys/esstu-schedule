@@ -6,6 +6,8 @@ async function ready(page){await page.goto('./');await expect(page.locator('#pai
 test('approved compact shell retains real source slots and working subgroup/week controls',async({page})=>{
   await ready(page);
   await expect(page.locator('.campus-nav')).toHaveCount(0);
+  await expect(page.locator('#daySourceStatus')).toBeHidden();
+  await expect(page.locator('#calendarChangesLegend,#dayTabs .calendar-changed')).toHaveCount(0);
   await expect(page.locator('#moreMenuModal .campus-overview')).toHaveCount(1);
   const source=JSON.parse(fs.readFileSync('dist/api/schedule/bakalavriat/1.json','utf8'));
   await expect(page.locator('#pairsContainer>article')).toHaveCount(source.weeks['1'].friday.pairs.length);

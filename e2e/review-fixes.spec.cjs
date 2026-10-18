@@ -39,18 +39,18 @@ test('room manual slot determines status, sorted deduplicated rows and active fi
   await expect(page.locator('.room-context')).toContainText('сейчас');
 });
 
-test('single saved source chip keeps age and warning visible after reload failure and recovery',async({page})=>{
+test('saved source details remain available in Data after reload failure and recovery',async({page})=>{
   await ready(page);
   await page.evaluate(()=>{
     currentSchedule.source_checked_at='2026-10-16T15:00:00+08:00';
     currentSchedule.is_stale_fallback=true;renderAll();
   });
   await expect(page.locator('#compactFreshnessText')).toContainText('Сохранённая копия · 5 ч назад');
-  await expect(page.locator('#daySourceStatus button')).toHaveCount(1);
+  await expect(page.locator('#daySourceStatus button')).toHaveCount(0);await expect(page.locator('#daySourceStatus')).toBeHidden();
   await expect(page.locator('.campus-overview .campus-freshness')).toHaveCount(0);
   await page.evaluate(()=>{scheduleUnavailable('Проверка недоступности');renderAll();});
   await expect(page.locator('#compactFreshnessText')).toContainText('Сохранённая копия');
-  await page.locator('#compactFreshnessText').click();
+  await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.getByRole('button',{name:'Данные и обновления',exact:true}).click();
   await expect(page.locator('#freshnessModal')).toBeVisible();
   await page.locator('#refreshSchedule').click();
   await expect(page.locator('#refreshSchedule')).toBeEnabled();

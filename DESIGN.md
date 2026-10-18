@@ -221,7 +221,7 @@ The compact subject uses the lesson role. Teacher, time, day, type and freshness
 
 ## Layout
 
-The agenda keeps the approved (430px) outer composition and maximum (402px) content width on desktop and phone. Header and main use width:min(402px,calc(100% - 28px)); the main begins (5px) below the header. At (360px) and below they use calc(100% - 20px). Header controls occupy one row; six day pills, one source-status chip, the lesson stack and a quiet footer follow. The approved first screen has no sidebar, hero or floating navigation.
+The agenda keeps the approved (430px) outer composition and maximum (402px) content width on desktop and phone. Header and main use width:min(402px,calc(100% - 28px)); the main begins (5px) below the header. At (360px) and below they use calc(100% - 20px). Header controls occupy one row; six day pills, the lesson stack and a quiet footer follow. Source freshness is available in More → Data and updates; no saved-copy chip or change-count legend occupies the agenda. The approved first screen has no sidebar, hero or floating navigation.
 
 Cards use (13px) padding and (10px) gaps. Days have (6px) gaps and (46px) minimum height. At the narrow breakpoint single-lesson rooms return to normal flow. Header controls and footer buttons use (32px) minimum height; sheet buttons use at least (36px). Other inherited actions retain their own sizes. These are observed compact dimensions rather than a universal touch-target claim.
 

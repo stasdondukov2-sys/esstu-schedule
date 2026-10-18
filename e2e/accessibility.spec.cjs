@@ -81,7 +81,7 @@ routedTest('server fallback remains visible after a manual refresh',async({page}
   await ready(page);
   await expect(page.locator('#compactFreshnessText')).toContainText('Сохранённая копия');
   await expect(page.locator('#daySourceStatus')).toContainText('Сохранённая копия');
-  await page.locator('#compactFreshnessText').click();
+  await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.getByRole('button',{name:'Данные и обновления',exact:true}).click();
   await page.locator('#refreshSchedule').click();
   await expect(page.locator('#refreshSchedule')).toBeEnabled();
   await expect(page.locator('#freshnessBadge')).toContainText('Сохранённая копия');
@@ -117,7 +117,7 @@ test('secondary dialogs pass axe in dark and light themes',async({page})=>{
     await page.getByRole('button',{name:'Аудитории',exact:true}).click();
     await expect(page.locator('#roomTimeControls')).toBeVisible();await scan();await page.keyboard.press('Escape');
     await page.getByRole('button',{name:'Ещё',exact:true}).click();await scan();await page.keyboard.press('Escape');
-    await page.locator('#compactFreshnessText').click();await scan();await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.getByRole('button',{name:'Данные и обновления',exact:true}).click();await scan();await page.keyboard.press('Escape');
     await page.getByRole('button',{name:'Ещё',exact:true}).click();
     await page.getByRole('button',{name:'Корпуса кампуса',exact:true}).click();
     await expect(page.locator('#campusDiagram').getByRole('button').first()).toBeVisible();await scan();await page.keyboard.press('Escape');
