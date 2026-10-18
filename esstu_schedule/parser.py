@@ -251,6 +251,35 @@ def extract_tags(text: str) -> list[str]:
     return tags
 
 
+def parse_room_suffix(value: str) -> tuple[str, str] | None:
+    """Recognize complete source room labels; never discard an unknown suffix."""
+    value = clean_text(value)
+    if re.fullmatch(
+        r"(?:дист(?:анц)?[.,]*(?:/?об[.,]*)?|он-?лайн\s+курс)",
+        value,
+        re.IGNORECASE,
+    ):
+        return "online", value
+    if re.fullmatch(r"8-фил\.ТМКП\s+[12]", value, re.IGNORECASE):
+        return value, ""
+    match = re.fullmatch(
+        r"(?P<room>\d+(?:-\d+)?[а-яa-z]?)"
+        r"(?P<note>\s*(?:и/[пд](?:экол)?|д/кл?|л/пгс|пгс|смук|экол|геол|эбж|н/х|тэс|л)"
+        r"(?:\s+(?:и/[пд]|д/кл?|л/пгс|пгс|смук|экол|геол|эбж|н/х|тэс|л))*)",
+        value,
+        re.IGNORECASE,
+    )
+    if match:
+        room, note = match["room"], match["note"].strip()
+        # Preserve the existing board notation consumed by the UI and room index.
+        if note in {"и/п", "и/д"}:
+            return value, ""
+        if note.lower() == "и/дэкол":
+            return room + " и/д", "экол"
+        return room, note
+    return None
+
+
 def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
     raw = clean_text(chunk)
     lesson_type, type_code, rest = "Занятие", "other", raw
@@ -277,15 +306,22 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
     elif "физическая культура" in raw.lower() or "фкс" in raw.lower():
         lesson_type, type_code = "Физкультура", "sport"
 
-    room = ""
+    room, room_note, teacher_note = "", "", ""
     room_match = re.search(r"\bа\.?\s*([0-9А-Яа-яA-Za-z\-/]+(?:\s+и/[пд])?)\s*$", rest)
     if room_match:
         room = room_match.group(1).strip()
         rest = rest[: room_match.start()].strip()
+    else:
+        annotated_room = re.search(r"\bа\.\s*(.+)$", rest)
+        parsed_room = parse_room_suffix(annotated_room[1]) if annotated_room else None
+        if parsed_room:
+            room, room_note = parsed_room
+            rest = rest[: annotated_room.start()].strip()
 
     teacher, teacher_key, teacher_profile = "", "", None
     teacher_match = re.search(
-        r"([А-ЯЁ][А-ЯЁа-яё\-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.(?:[А-ЯЁа-яё\.]+)?)\s*[-–—]?\s*$",
+        r"([А-ЯЁ][А-ЯЁа-яё\-]+\s+[А-ЯЁ]\.\s*[А-ЯЁ]\.(?:[А-ЯЁа-яё\.]+)?)"
+        r"(?:\s+(СМАДИД))?\s*[-–—]?\s*$",
         rest,
     )
     if teacher_match:
@@ -293,6 +329,7 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
         teacher = format_teacher_display_name(raw_t)
         teacher_key = normalize_teacher_key(raw_t)
         teacher_profile = build_teacher_profile(raw_t)
+        teacher_note = teacher_match.group(2) or ""
         rest = rest[: teacher_match.start()].strip()
 
     tags = extract_tags(raw)
@@ -307,6 +344,7 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
             "other",
         )
         room, teacher, teacher_key, teacher_profile = "", "", "", None
+        room_note, teacher_note = "", ""
     missing_subject = bool(teacher_match) and not rest
     warning = ""
     if ambiguous:
@@ -331,6 +369,8 @@ def parse_single_lesson_chunk(chunk: str) -> dict[str, Any]:
         "teacher_photo": teacher_profile["photo"] if teacher_profile else "",
         "teacher_caf_id": teacher_profile["caf_id"] if teacher_profile else "",
         "room": room,
+        **({"room_note": room_note} if room_note else {}),
+        **({"teacher_note": teacher_note} if teacher_note else {}),
         "tag": ", ".join(tags),
         "tags": tags,
         "groups": "",
