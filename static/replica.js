@@ -119,7 +119,7 @@ renderCompactDay=function(container){
   for(const [index,pair] of (day.pairs || []).entries()){
     if(filterLessons(pair.lessons).length)continue;
     const template=document.createElement('template');template.innerHTML=replicaEmptyHTML(pair,index,day);const empty=template.content.firstElementChild;
-    const next=[...container.children].find(node=>Number(node.dataset.pairIndex)>index || node.dataset.onlinePairIndices && Number(node.dataset.onlinePairIndices.split(',')[0])>index);
+    const next=[...container.children].find(node=>Number(node.dataset.pairIndex)>index);
     if(next)container.insertBefore(empty,next);else container.append(empty);
   }
   bindReplicaGlare(container);updateCurrentCards(getUlanUdeNow());
@@ -198,6 +198,7 @@ renderRoomsModalList=function(){
 async function replicaRoomTeacher(index){const name=replicaRoomLessonChoices[index]?.teacher;if(!name)return;if(!allTeachersDirectory.length)await loadDepartmentsAndTeachers();const teacher=allTeachersDirectory.find(item=>normSearch(item.teacher_key)===normSearch(name) || normSearch(item.profile?.short_name)===normSearch(name));if(teacher)openReplicaTeachers(teacher.teacher_key,teacher.caf_id || '');else{await openReplicaTeachers();document.getElementById('replicaTeacherQuery').value=name;renderReplicaTeachers();}}
 
 document.addEventListener('DOMContentLoaded',()=>{
+  if(localStorage.getItem('esstu_view_mode')==='week')localStorage.setItem('esstu_view_mode','day');
   // Tools and optional week controls remain available without occupying the first screen.
   const tools=document.querySelector('#moreMenuModal .simple-sheet');
   const week=document.getElementById('weekControls');tools?.append(week);

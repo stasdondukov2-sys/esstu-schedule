@@ -17,3 +17,5 @@ Group and teacher selection, current/next lesson, I/II week and day controls, su
 
 ## Success
 Nearest lesson and room can be read at a glance on a phone. The day list stays readable with long subjects and parallel lessons. On 2026-10-18 the user approved the compact reference and explicitly requested it for the actual published site: desktop retains the same centered 430px outer column, with no sidebar or floating navigation. The single header leads to group selection, subgroup, week, teacher preview and rooms; notes open from lesson cards or empty slots. Secondary tools and the overview remain in More. Reduced-motion and light/dark contrast ship with the redesign. Reference examples never replace real portal times, people or rooms.
+
+On 2026-10-19 the user removed the full-week overview: retain I/II parity and day selection, dated schedules and session records. Consecutive online lessons must be separate cards with their own times and notes. Saved full-week preferences migrate to day mode.
