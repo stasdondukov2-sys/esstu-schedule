@@ -2,6 +2,7 @@
 @import "./fonts.css";
 @import "./campus.css";
 @import "./liquid.css";
+@import "./replica.css";
 @source "../static";
 @config "../tailwind.config.cjs";
 @custom-variant dark (&:where(.dark, .dark *));

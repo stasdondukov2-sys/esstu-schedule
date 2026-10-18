@@ -10,7 +10,7 @@ test('schedule, source status and teacher navigation work under the Pages prefix
   await page.locator('#compactFreshnessText').click();
   await expect(page.locator('#parseQualityStatus')).toContainText('Ошибок разбора:');
   await page.getByRole('button',{name:'Закрыть сведения',exact:true}).click();
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.getByRole('button',{name:'Преподаватели',exact:true}).click();
   await page.locator('#teacherSearchInput').fill('Дарибазарон');
   const teacher=page.locator('#teacherModalContent button').filter({hasText:'Дарибазарон'});

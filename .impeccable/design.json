@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T11:47:59.396290+00:00",
-  "title": "Design System: ВСГУТУ — Dark Liquid Glass",
+  "generatedAt": "2026-10-18T13:36:27.853961+00:00",
+  "title": "Design System: ВСГУТУ — Compact Liquid Glass",
   "extensions": {
     "colorMeta": {
       "light-campus-bg": {
@@ -955,19 +955,211 @@
           "oklch(83.6% 0.1713 13.7)",
           "oklch(95.0% 0.1713 13.7)"
         ]
+      },
+      "replica-practice-ink": {
+        "role": "secondary",
+        "displayName": "Practice Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0284 294.6)",
+          "oklch(26.4% 0.0284 294.6)",
+          "oklch(37.9% 0.0284 294.6)",
+          "oklch(49.3% 0.0284 294.6)",
+          "oklch(60.7% 0.0284 294.6)",
+          "oklch(72.1% 0.0284 294.6)",
+          "oklch(83.6% 0.0284 294.6)",
+          "oklch(95.0% 0.0284 294.6)"
+        ]
+      },
+      "replica-lab-ink": {
+        "role": "secondary",
+        "displayName": "Lab Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0693 103.2)",
+          "oklch(26.4% 0.0693 103.2)",
+          "oklch(37.9% 0.0693 103.2)",
+          "oklch(49.3% 0.0693 103.2)",
+          "oklch(60.7% 0.0693 103.2)",
+          "oklch(72.1% 0.0693 103.2)",
+          "oklch(83.6% 0.0693 103.2)",
+          "oklch(95.0% 0.0693 103.2)"
+        ]
+      },
+      "replica-lecture-ink": {
+        "role": "secondary",
+        "displayName": "Lecture Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0298 12.6)",
+          "oklch(26.4% 0.0298 12.6)",
+          "oklch(37.9% 0.0298 12.6)",
+          "oklch(49.3% 0.0298 12.6)",
+          "oklch(60.7% 0.0298 12.6)",
+          "oklch(72.1% 0.0298 12.6)",
+          "oklch(83.6% 0.0298 12.6)",
+          "oklch(95.0% 0.0298 12.6)"
+        ]
+      },
+      "replica-current-tag-ink": {
+        "role": "primary",
+        "displayName": "Current Tag Ink",
+        "tonalRamp": [
+          "oklch(15.0% 0.0507 163.1)",
+          "oklch(26.4% 0.0507 163.1)",
+          "oklch(37.9% 0.0507 163.1)",
+          "oklch(49.3% 0.0507 163.1)",
+          "oklch(60.7% 0.0507 163.1)",
+          "oklch(72.1% 0.0507 163.1)",
+          "oklch(83.6% 0.0507 163.1)",
+          "oklch(95.0% 0.0507 163.1)"
+        ]
+      },
+      "replica-current-room-top": {
+        "role": "primary",
+        "displayName": "Current Room Top",
+        "tonalRamp": [
+          "oklch(15.0% 0.0895 164.2)",
+          "oklch(26.4% 0.0895 164.2)",
+          "oklch(37.9% 0.0895 164.2)",
+          "oklch(49.3% 0.0895 164.2)",
+          "oklch(60.7% 0.0895 164.2)",
+          "oklch(72.1% 0.0895 164.2)",
+          "oklch(83.6% 0.0895 164.2)",
+          "oklch(95.0% 0.0895 164.2)"
+        ]
+      },
+      "replica-current-room-mid": {
+        "role": "primary",
+        "displayName": "Current Room Mid",
+        "tonalRamp": [
+          "oklch(15.0% 0.1535 163.2)",
+          "oklch(26.4% 0.1535 163.2)",
+          "oklch(37.9% 0.1535 163.2)",
+          "oklch(49.3% 0.1535 163.2)",
+          "oklch(60.7% 0.1535 163.2)",
+          "oklch(72.1% 0.1535 163.2)",
+          "oklch(83.6% 0.1535 163.2)",
+          "oklch(95.0% 0.1535 163.2)"
+        ]
+      },
+      "replica-current-room-bottom": {
+        "role": "primary",
+        "displayName": "Current Room Bottom",
+        "tonalRamp": [
+          "oklch(15.0% 0.1491 162.5)",
+          "oklch(26.4% 0.1491 162.5)",
+          "oklch(37.9% 0.1491 162.5)",
+          "oklch(49.3% 0.1491 162.5)",
+          "oklch(60.7% 0.1491 162.5)",
+          "oklch(72.1% 0.1491 162.5)",
+          "oklch(83.6% 0.1491 162.5)",
+          "oklch(95.0% 0.1491 162.5)"
+        ]
+      },
+      "replica-practice-fill": {
+        "role": "secondary",
+        "displayName": "Practice Fill",
+        "tonalRamp": [
+          "oklch(15.0% 0.2189 292.7)",
+          "oklch(26.4% 0.2189 292.7)",
+          "oklch(37.9% 0.2189 292.7)",
+          "oklch(49.3% 0.2189 292.7)",
+          "oklch(60.7% 0.2189 292.7)",
+          "oklch(72.1% 0.2189 292.7)",
+          "oklch(83.6% 0.2189 292.7)",
+          "oklch(95.0% 0.2189 292.7)"
+        ]
+      },
+      "replica-lab-fill": {
+        "role": "secondary",
+        "displayName": "Lab Fill",
+        "tonalRamp": [
+          "oklch(15.0% 0.1617 86.0)",
+          "oklch(26.4% 0.1617 86.0)",
+          "oklch(37.9% 0.1617 86.0)",
+          "oklch(49.3% 0.1617 86.0)",
+          "oklch(60.7% 0.1617 86.0)",
+          "oklch(72.1% 0.1617 86.0)",
+          "oklch(83.6% 0.1617 86.0)",
+          "oklch(95.0% 0.1617 86.0)"
+        ]
+      },
+      "replica-lecture-fill": {
+        "role": "secondary",
+        "displayName": "Lecture Fill",
+        "tonalRamp": [
+          "oklch(15.0% 0.2154 16.4)",
+          "oklch(26.4% 0.2154 16.4)",
+          "oklch(37.9% 0.2154 16.4)",
+          "oklch(49.3% 0.2154 16.4)",
+          "oklch(60.7% 0.2154 16.4)",
+          "oklch(72.1% 0.2154 16.4)",
+          "oklch(83.6% 0.2154 16.4)",
+          "oklch(95.0% 0.2154 16.4)"
+        ]
+      },
+      "replica-current-fill": {
+        "role": "primary",
+        "displayName": "Current Fill",
+        "tonalRamp": [
+          "oklch(15.0% 0.1491 162.5)",
+          "oklch(26.4% 0.1491 162.5)",
+          "oklch(37.9% 0.1491 162.5)",
+          "oklch(49.3% 0.1491 162.5)",
+          "oklch(60.7% 0.1491 162.5)",
+          "oklch(72.1% 0.1491 162.5)",
+          "oklch(83.6% 0.1491 162.5)",
+          "oklch(95.0% 0.1491 162.5)"
+        ]
       }
     },
     "typographyMeta": {
       "time": {
         "displayName": "Compact numerals",
         "purpose": "Local JetBrains Mono for times and calendar dates."
+      },
+      "lesson": {
+        "displayName": "Compact lesson",
+        "purpose": "Day subject; 15.5px, weight 750, line-height 1.35."
+      },
+      "sheet-title": {
+        "displayName": "Sheet title",
+        "purpose": "15px contextual sheet heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base interface text."
+      },
+      "hero-subject": {
+        "displayName": "Hero Subject",
+        "purpose": "Optional overview subject inside More."
+      },
+      "room": {
+        "displayName": "Room",
+        "purpose": "Optional overview room inside More."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compact interface labels."
+      },
+      "room-chip": {
+        "displayName": "Room Chip",
+        "purpose": "Compact room identity."
       }
     },
     "shadows": [
       {
-        "name": "liquid-card",
-        "value": "inset 0 1.5px 1px var(--liquid-edge),inset 0 -1px 1px rgba(var(--liquid-rgb),.15),0 12px 26px -16px rgba(var(--liquid-rgb),.3),0 10px 24px -10px var(--liquid-shadow)",
-        "purpose": "Upper bevel, lower edge and diffuse depth."
+        "name": "replica-neutral-card",
+        "value": "inset 0 1.5px 2px rgba(255,255,255,.32), inset 0 -1px 3px rgba(255,255,255,.08), 0 16px 34px -10px rgba(0,0,0,.78)",
+        "purpose": "Silver upper bevel and neutral depth."
+      },
+      {
+        "name": "replica-current-card",
+        "value": "inset 0 1.5px 2px rgba(255,255,255,.35), inset 0 -1px 3px rgba(16,185,129,.25), inset 0 0 22px rgba(16,185,129,.08), 0 18px 38px -10px rgba(6,95,70,.45), 0 6px 20px -4px rgba(0,0,0,.8)",
+        "purpose": "Current emerald framing over final neutral body."
+      },
+      {
+        "name": "replica-sheet",
+        "value": "inset 0 1.5px 2px rgba(255,255,255,.28),0 -20px 50px rgba(0,0,0,.88)",
+        "purpose": "Contextual bottom sheet."
       }
     ],
     "motion": [
@@ -1000,17 +1192,24 @@
         "name": "sheet-drag-reset",
         "value": "160ms cubic-bezier(.23,1,.32,1)",
         "purpose": "Short/cancelled mobile drag reset; downward >80px closes; reduced motion immediate."
+      },
+      {
+        "name": "replica-card-state",
+        "value": "220ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Card transform; shadow/border use 220ms ease."
+      },
+      {
+        "name": "replica-day-state",
+        "value": "200ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Day feedback."
+      },
+      {
+        "name": "replica-pill-state",
+        "value": "180ms ease",
+        "purpose": "Liquid pill feedback."
       }
     ],
     "breakpoints": [
-      {
-        "name": "compact-desktop",
-        "value": "850px"
-      },
-      {
-        "name": "stacked-mobile",
-        "value": "700px"
-      },
       {
         "name": "narrow-mobile",
         "value": "360px"
@@ -1031,8 +1230,8 @@
       "kind": "button",
       "refersTo": "button-glass",
       "html": "<button class=\"ds-glass\">Выбрать расписание</button>",
-      "css": ".ds-glass{font-family:Inter,sans-serif;color:var(--campus-ink,#f8fafc);background:linear-gradient(155deg,rgba(255,255,255,.13),transparent 46%),var(--campus-glass,rgba(13,16,22,.92));border:1px solid var(--campus-line,rgba(255,255,255,.1));box-shadow:inset 0 1px 1px var(--liquid-edge,rgba(255,255,255,.34)),inset 0 -1px 1px rgba(0,0,0,.08),0 8px 18px -12px var(--liquid-shadow,rgba(0,0,0,.7));transition:background-color 160ms ease,border-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);font-size:1rem;min-height:44px;padding:0 12px;border-radius:18px;cursor:pointer}.ds-glass:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}.ds-glass:hover{border-color:var(--campus-focus,#6ee7b7)}.ds-glass:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-glass{transition:none}.ds-glass:active{transform:none}}",
-      "description": "Group selector material."
+      "css": ".ds-glass{font-family:Inter,sans-serif;color:var(--campus-ink,#f8fafc);background:linear-gradient(155deg,rgba(255,255,255,.13),transparent 46%),var(--campus-glass,rgba(13,16,22,.92));border:1px solid var(--campus-line,rgba(255,255,255,.1));box-shadow:inset 0 1px 1px var(--liquid-edge,rgba(255,255,255,.34)),inset 0 -1px 1px rgba(0,0,0,.08),0 8px 18px -12px var(--liquid-shadow,rgba(0,0,0,.7));transition:background-color 160ms ease,border-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);font-size:12px;min-height:32px;padding:0 12px;border-radius:16px;cursor:pointer}.ds-glass:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}.ds-glass:hover{border-color:var(--campus-focus,#6ee7b7)}.ds-glass:active{transform:scale(.98)}@media(prefers-reduced-motion:reduce){.ds-glass{transition:none}.ds-glass:active{transform:none}}",
+      "description": "Compact group selector."
     },
     {
       "name": "Search field",
@@ -1046,45 +1245,61 @@
       "name": "Room droplet",
       "kind": "chip",
       "refersTo": "room-chip",
-      "html": "<span class=\"ds-room\">ауд. —</span>",
-      "css": ".ds-room{font:650 .75rem \"JetBrains Mono\",monospace;padding:2px 10px;border-radius:999px;display:inline-block;color:var(--liquid-room-ink,#e2e8f0);background:var(--liquid-room-bg,rgba(148,163,184,.18));border:1px solid rgba(var(--liquid-rgb,148,163,184),.45);box-shadow:inset 0 1px 1px var(--liquid-edge,rgba(255,255,255,.34)),0 4px 11px -6px rgba(var(--liquid-rgb,148,163,184),.75)}.ds-room:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}",
-      "description": "Informational placeholder; no invented room."
+      "html": "<button class=\"ds-room\">ауд. —</button>",
+      "css": ".ds-room{font:650 12px/16px \"JetBrains Mono\",monospace;padding:2px 11px;border-radius:999px;display:inline-block;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(30,41,59,.42));color:#cbd5e1;border:1px solid rgba(255,255,255,.15);cursor:pointer}.ds-room:hover{border-color:var(--campus-accent,#50dbb1)}.ds-room:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}",
+      "description": "Physical rooms open previews; placeholder does not invent a room."
     },
     {
       "name": "Lesson glass",
       "kind": "card",
       "refersTo": "lesson-card",
-      "html": "<article class=\"ds-card\"><details><summary><strong>Выберите расписание</strong><span>Данные появятся после загрузки источника.</span></summary><p>Сведения, действия и заметки занятия.</p></details></article>",
-      "css": ".ds-card{font-family:Inter,sans-serif;color:var(--campus-ink,#f8fafc);background:radial-gradient(ellipse at 15% 0%,var(--liquid-tint,rgba(148,163,184,.06)),transparent 72%),linear-gradient(145deg,var(--liquid-top,rgba(30,34,43,.66)),var(--liquid-bottom,rgba(8,10,16,.88)));border:1px solid rgba(var(--liquid-rgb,148,163,184),.42);box-shadow:inset 0 1.5px 1px var(--liquid-edge,rgba(255,255,255,.34)),inset 0 -1px 1px rgba(var(--liquid-rgb,148,163,184),.15),0 12px 26px -16px rgba(var(--liquid-rgb,148,163,184),.3),0 10px 24px -10px var(--liquid-shadow,rgba(0,0,0,.7));border-radius:22px;padding:15px;backdrop-filter:blur(28px) saturate(185%)}.ds-card:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}.ds-card summary{cursor:pointer;min-height:44px;list-style:none}.ds-card strong{display:block;font-size:.9375rem;font-weight:750;line-height:1.4;letter-spacing:-.018em}.ds-card span,.ds-card p{display:block;font-size:.75rem;line-height:1.5;color:var(--campus-muted,#bcc5d2)}.ds-card summary:hover strong{color:var(--campus-accent,#50dbb1)}.ds-card summary:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}@media(max-width:700px){.ds-card{padding:13px}}@media(prefers-reduced-transparency:reduce){.ds-card{background:var(--campus-panel,#101218);backdrop-filter:none}}@supports not(backdrop-filter:blur(1px)){.ds-card{background:var(--campus-panel,#101218)}}",
-      "description": "Neutral disclosure with truthful placeholder."
+      "html": "<article class=\"ds-card\" tabindex=\"0\" role=\"group\" aria-label=\"Открыть заметку\"><section><div class=\"ds-summary\"><strong>Выберите расписание</strong><span>Данные появятся после загрузки источника.</span></div></section></article>",
+      "css": ".ds-card{font-family:Inter,sans-serif;color:var(--campus-ink,#f8fafc);background:radial-gradient(300px circle at 25% 15%,rgba(255,255,255,.1),transparent 65%),linear-gradient(145deg,rgba(255,255,255,.08),rgba(18,20,28,.55) 48%,rgba(8,10,16,.8));border:1px solid rgba(var(--liquid-rgb,148,163,184),.42);box-shadow:inset 0 1.5px 2px rgba(255,255,255,.32),inset 0 -1px 3px rgba(255,255,255,.08),0 16px 34px -10px rgba(0,0,0,.78);border-radius:22px;padding:13px;backdrop-filter:blur(28px) saturate(185%)}.ds-card:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}.ds-card .ds-summary{cursor:pointer;min-height:0;list-style:none}.ds-card strong{display:block;font-size:15.5px;font-weight:750;line-height:1.35;letter-spacing:-.018em}.ds-card span,.ds-card p{display:block;font-size:.75rem;line-height:1.5;color:var(--campus-muted,#bcc5d2)}.ds-card .ds-summary:hover strong{color:var(--campus-accent,#50dbb1)}.ds-card .ds-summary:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}@media(max-width:700px){.ds-card{padding:13px}}@media(prefers-reduced-transparency:reduce){.ds-card{background:var(--campus-panel,#101218);backdrop-filter:none}}@supports not(backdrop-filter:blur(1px)){.ds-card{background:var(--campus-panel,#101218)}}",
+      "description": "Compact lesson section. In the app the card/subject opens full lesson/source metadata in the note sheet; teacher and room actions are independent. Merged online blocks alone retain native disclosure."
     },
     {
-      "name": "Floating navigation",
+      "name": "Agenda footer",
       "kind": "nav",
-      "refersTo": "floating-nav",
-      "html": "<nav class=\"ds-nav\" aria-label=\"Основная навигация\"><button><svg aria-hidden=\"true\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M4 4h16v16H4z M4 9h16 M9 9v11\"/></svg><span>Расписание</span></button><button><svg aria-hidden=\"true\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"m15 15 6 6 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0\"/></svg><span>Поиск</span></button><button><svg aria-hidden=\"true\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M6 21V3h12v18 M3 21h18 M14 12h1\"/></svg><span>Аудитории</span></button></nav>",
-      "css": ".ds-nav{font-family:Inter,sans-serif;color:var(--campus-ink,#f8fafc);background:linear-gradient(155deg,rgba(255,255,255,.13),transparent 46%),var(--campus-glass,rgba(13,16,22,.92));border:1px solid var(--campus-line,rgba(255,255,255,.1));box-shadow:inset 0 1px 1px var(--liquid-edge,rgba(255,255,255,.34)),inset 0 -1px 1px rgba(0,0,0,.08),0 8px 18px -12px var(--liquid-shadow,rgba(0,0,0,.7));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:7px;border-radius:24px;width:360px;max-width:100%;backdrop-filter:blur(22px)}.ds-nav:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}.ds-nav button{transition:background-color 160ms ease,border-color 160ms ease,transform 120ms cubic-bezier(.23,1,.32,1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:52px;padding:6px 8px;border:0;border-radius:17px;background:transparent;color:var(--campus-muted,#bcc5d2);font:500 .75rem Inter,sans-serif;cursor:pointer}.ds-nav button:first-child,.ds-nav button:hover{background:var(--campus-accent-soft,rgba(16,185,129,.12));color:var(--campus-accent,#50dbb1)}.ds-nav button:active{transform:scale(.98)}.ds-nav button:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-nav button{transition:none}.ds-nav button:active{transform:none}}@media(prefers-reduced-transparency:reduce){.ds-nav{background:var(--campus-panel,#101218);backdrop-filter:none}}",
-      "description": "Schedule remains highlighted while tool sheets open."
+      "refersTo": "footer-navigation",
+      "description": "In-flow source, teachers and More actions.",
+      "html": "<nav class=\"ds-footer\" aria-label=\"Инструменты\"><a href=\"https://portal.esstu.ru/raspisan.htm\">portal.esstu.ru</a><div><button>Преподаватели</button><button aria-label=\"Ещё\"><svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M4 12h1m6 0h1m6 0h1\"/></svg></button></div></nav>",
+      "css": ".ds-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 2px 0;color:var(--campus-muted,#bcc5d2);font:11px Inter,sans-serif}.ds-footer>a{font-family:\"JetBrains Mono\",monospace;color:inherit}.ds-footer>div{display:flex;align-items:center;gap:7px}.ds-footer button{min-height:32px;border:0;background:transparent;color:inherit;font:11px Inter,sans-serif;cursor:pointer}.ds-footer button:hover,.ds-footer>a:hover{color:var(--campus-accent,#50dbb1)}.ds-footer button:focus-visible,.ds-footer>a:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:2px}"
+    },
+    {
+      "name": "Teacher search",
+      "kind": "input",
+      "refersTo": "teacher-search-field",
+      "description": "Contextual search with 16px field text.",
+      "html": "<input class=\"ds-teacher-search\" type=\"search\" aria-label=\"Поиск преподавателей\" placeholder=\"Фамилия, предмет или кафедра\">",
+      "css": ".ds-teacher-search{width:100%;padding:10px 12px;min-height:42px;border:1px solid var(--campus-line,rgba(255,255,255,.1));border-radius:16px;background:var(--campus-control,rgba(255,255,255,.045));font:16px Inter,sans-serif;color:var(--campus-ink,#f8fafc)}.ds-teacher-search:focus-visible{outline:2px solid var(--campus-focus,#6ee7b7);outline-offset:0}.ds-teacher-search::placeholder{color:var(--campus-muted,#bcc5d2)}"
+    },
+    {
+      "name": "Type chip",
+      "kind": "chip",
+      "refersTo": "type-chip",
+      "description": "Category identity survives current state.",
+      "html": "<span class=\"ds-type\">Практика</span>",
+      "css": ".ds-type{display:inline-flex;padding:2px 10px;border-radius:8px;font:650 12px/14px Inter,sans-serif;color:#ede9fe;background:rgba(139,92,246,.24);border:1px solid rgba(196,181,253,.45);box-shadow:inset 0 1px 1px rgba(255,255,255,.30)}"
     }
   ],
   "narrative": {
-    "northStar": "Dark Liquid Glass",
-    "overview": "True black, a static neutral ambient wash and glossy bevels turn the timetable into compact glass objects. This world follows the user's pinned ai_studio_code.html and replaces Stealth Cyber-Glass. Its material serves a working schedule: source uncertainty, room identity and long subjects remain readable.\n\nThe shipped source is styles/liquid.css after styles/campus.css, with local fonts, utility adjustments in styles/input.css, and card/day markup in static/simple-ui.js. Dark and light themes share geometry with separate inks and glass. Final dark mobile, desktop and light mobile captures show the implementation; their visible test-clock state is not a claim about the live schedule.",
+    "northStar": "Compact Liquid Glass",
+    "overview": "Black glass, a static silver ambient wash and glossy upper bevels make the real day schedule a compact stack. The approved reference supplies material and narrow composition; actual portal data supplies dates, people, rooms and uncertainty. Light mode keeps the same geometry with pale glass and darker ink.\n\nThe current system is the final cascade of styles/campus.css, styles/liquid.css and styles/replica.css, with local fonts and utilities in styles/input.css. static/replica.js adapts the existing service-backed interface. Context stays close to the selected lesson, teacher or room.",
     "keyCharacteristics": [
-      "Black glass with bright upper bevels and darker lower edges.",
-      "Type-tinted cards, informational room droplets and compact mono numerals.",
-      "Emerald current state, readable neutral past state and truthful source status.",
-      "Glossy controls and sheets with keyboard, motion and transparency alternatives."
+      "One narrow agenda column on phones and desktop.",
+      "Neutral glass bodies with silver bevels and categorical borders, shadows and labels.",
+      "Emerald current state and room with independently meaningful lesson-type labels.",
+      "Contextual bottom sheets, truthful source status and keyboard alternatives."
     ],
     "rules": [
       {
-        "name": "The State Before Type Rule",
-        "body": "Current emerald and past neutral override categorical tint. A mixed card never invents a dominant lesson type; preserve each actual label.",
+        "name": "The State With Meaning Rule",
+        "body": "Current framing and room may turn emerald; the lesson-type label must retain the actual category and readable text.",
         "section": "colors"
       },
       {
-        "name": "The Readable Past Rule",
-        "body": "Quiet past text remains readable, expandable and annotatable. Never fade the complete card.",
+        "name": "The Meaning Survives Density Rule",
+        "body": "Compact presentation keeps full subjects, parallel lessons, source warnings and text labels available.",
         "section": "typography"
       },
       {
@@ -1094,15 +1309,16 @@
       }
     ],
     "dos": [
-      "**Do** preserve truthful source status, dates, lesson types and room identities.",
-      "**Do** use local Inter text and JetBrains Mono for compact functional numerals.",
-      "**Do** retain native disclosure, keyboard focus and readable light/opaque/reduced-motion states."
+      "**Do** preserve truthful source status, real dates, lesson categories and room identities.",
+      "**Do** retain the narrow agenda geometry on desktop and phone.",
+      "**Do** use local Inter and JetBrains Mono for their established roles.",
+      "**Do** retain access to full lesson/source details, focus, light mode and reduced-motion/transparency alternatives."
     ],
     "donts": [
-      "**Don't** import demo timetable data or infer occupancy beyond known scheduled lessons.",
-      "**Don't** fade past cards or present informational room droplets as standalone navigation.",
-      "**Don't** flatten the bevel, add continuous ambient animation, or apply card corners to every overlay.",
-      "**Don't** replace text labels or source warnings with colour alone."
+      "**Don't** import demonstration schedules, invent floors or addresses, or infer physical occupancy.",
+      "**Don't** restore a sidebar, hero above the agenda or floating navigation to the approved first screen.",
+      "**Don't** repaint current lesson-type labels emerald or replace source warnings with colour alone.",
+      "**Don't** flatten the bevel or add continuous ambient animation."
     ]
   }
 }

@@ -6,7 +6,7 @@ const routedTest=test.extend({serviceWorkers:'block'});
 async function ready(page){await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');}
 test('dialogs trap focus, close with Escape and return to the launcher',async({page})=>{
   await ready(page);
-  const launcher=page.getByRole('button',{name:'Поиск',exact:true});await launcher.click();
+  const launcher=page.getByRole('button',{name:'Сменить расписание',exact:true});await launcher.click();
   await expect(page.getByRole('textbox',{name:'Поиск учебной группы'})).toBeFocused();
   const dialog=page.getByRole('dialog',{name:'Выбрать расписание'});
   const close=page.getByRole('button',{name:'Закрыть поиск'});await close.focus();await page.keyboard.press('Shift+Tab');
@@ -32,7 +32,7 @@ test('dark and light views and the search dialog pass accessibility checks',asyn
       await page.getByRole('button',{name:'Сменить тему'}).click();await page.keyboard.press('Escape');
     }
   }
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   const modal=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
   expect(modal.violations).toEqual([]);
 });
@@ -94,13 +94,13 @@ routedTest('possible teacher identity collision is visible and clears for a grou
   teacher.identity_ambiguous=true;
   await page.route('**/api/teachers/all/bakalavriat.json*',route=>route.fulfill({json:payload}));
   await ready(page);
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.getByRole('button',{name:'Преподаватели',exact:true}).click();
   await page.locator('#teacherSearchInput').fill(teacher.profile.short_name);
   await page.locator('#teacherModalContent button').filter({hasText:teacher.profile.short_name}).first().click();
   await expect(page.locator('#teacherIdentityWarning')).toBeVisible();
   await expect(page.locator('#teacherIdentityWarning')).toContainText('Возможны данные нескольких преподавателей');
-  await page.getByRole('button',{name:'Поиск',exact:true}).click();
+  await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();
   await page.getByRole('button',{name:'Группы',exact:true}).click();
   await page.locator('#groupSearchInput').fill('1146 тпуп');
   await page.locator('#groupsListContainer button').filter({hasText:'1146 тпуп'}).click();

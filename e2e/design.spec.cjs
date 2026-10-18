@@ -20,7 +20,7 @@ test('day controls fit small screens and future lessons never get a current labe
 
 test('glass search remains accessible in dark mode and keyboard motion is immediate',async({page})=>{
   await ready(page);
-  const search=page.getByRole('button',{name:'Поиск',exact:true});
+  const search=page.getByRole('button',{name:'Сменить расписание',exact:true});
   await search.focus();await page.keyboard.press('Enter');
   await expect(page.locator('#searchModal .simple-sheet')).not.toHaveClass(/motion-enter/);
   expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);
@@ -33,16 +33,14 @@ test('glass note dialog saves and deletes a lesson note',async({page})=>{
   await ready(page);
   await page.evaluate(()=>{selectedWeek=1;selectedDayKey='thursday';renderAll();});
   const lesson=page.locator('.lesson-detail').first();
-  await lesson.locator('summary').click();
-  await lesson.getByRole('button',{name:'Добавить заметку',exact:true}).click();
+  await lesson.locator('.lesson-subject').first().click();
   await page.locator('#noteTextarea').fill('Проверка заметки в новом интерфейсе');
   await page.getByRole('button',{name:'Сохранить',exact:true}).click();
   await expect(page.locator('#noteModal')).toBeHidden();
-  await lesson.locator('summary').click();
   await expect(lesson).toContainText('Проверка заметки в новом интерфейсе');
-  await lesson.getByRole('button',{name:'Изменить заметку',exact:true}).click();
+  await lesson.locator('.lesson-subject').first().click();
+  await expect(page.locator('#noteModal')).toBeVisible();
   await expect(page.locator('#noteTextarea')).toHaveValue('Проверка заметки в новом интерфейсе');
   await page.getByRole('button',{name:'Удалить',exact:true}).click();
-  await lesson.locator('summary').click();
   await expect(lesson).not.toContainText('Проверка заметки в новом интерфейсе');
 });

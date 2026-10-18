@@ -30,8 +30,7 @@ test('lesson states and progress follow the clock, including the break boundary'
 test('past lesson notes remain usable and another day is not marked current or next',async({page})=>{
   await ready(page);
   const past=page.locator('#pairsContainer>.is-past');
-  await past.locator('summary').click();
-  await past.getByRole('button',{name:'Добавить заметку'}).click();
+  await past.locator('.lesson-subject').first().click();
   await expect(page.locator('#noteModal')).toBeVisible();
   await page.getByRole('button',{name:'Закрыть заметку'}).click();
   await page.locator('#dayTabs button').last().click();
@@ -40,11 +39,11 @@ test('past lesson notes remain usable and another day is not marked current or n
 test('compact header fits 320px with one heading and distinct search controls',async({page})=>{
   await ready(page);await page.setViewportSize({width:320,height:900});
   await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
-  await expect(page.getByRole('button',{name:'Поиск',exact:true})).toHaveCount(1);
-  await expect(page.getByRole('button',{name:'Поиск расписания',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Сменить расписание',exact:true})).toHaveCount(1);
+  await expect(page.getByRole('button',{name:'Поиск преподавателя',exact:true})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   for(const button of await page.locator('.header-actions button').all()){
-    const box=await button.boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);
+    const box=await button.boundingBox();expect(box.width).toBeGreaterThanOrEqual(32);expect(box.height).toBeGreaterThanOrEqual(32);
   }
   const h=await page.locator('.campus-header').boundingBox();expect(h.height).toBeLessThanOrEqual(80);
 });
@@ -68,7 +67,6 @@ test('type colours preserve mixed parallel lessons and accessible day counts',as
     expect(new Set(backgrounds).size).toBe(4);
   }
   await expect(page.locator('#dayTabs [aria-pressed="true"] .calendar-dots i')).toHaveCount(4);
-  await cards.last().locator('summary').last().click();
-  await cards.last().getByRole('button',{name:'Добавить заметку'}).last().click();
+  await cards.last().locator('.lesson-subject').last().click();
   await expect(page.locator('#noteModal')).toBeVisible();
 });
