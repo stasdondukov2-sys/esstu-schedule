@@ -14,7 +14,7 @@ async function ready(page){
 }
 test('new shell reads a published group and source details',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await ready(page);await page.locator('#compactFreshnessText').click();
+  await ready(page);await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.getByRole('button',{name:'Данные и обновления',exact:true}).click();
   await expect(page.locator('#parseQualityStatus')).toBeVisible();
   expect(errors).toEqual([]);
 });

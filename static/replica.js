@@ -29,7 +29,7 @@ function updateReplicaHeader(){
   if((viewMode!=='day' || scheduleTab==='session') && !notice){
     const button=document.createElement('button');button.id='replicaViewNotice';button.className='replica-return';button.textContent='К расписанию дня';button.onclick=()=>{scheduleTab='semester';setViewMode('day');};document.getElementById('dayTabs').before(button);
   }else if(viewMode==='day' && scheduleTab!=='session')notice?.remove();
-  let badge=document.getElementById('replicaTestBadge');if(simOverride && !badge){badge=document.createElement('span');badge.id='replicaTestBadge';badge.textContent='Тест времени';document.getElementById('daySourceStatus').append(badge);}if(!simOverride)badge?.remove();
+  let badge=document.getElementById('replicaTestBadge');if(simOverride && !badge){badge=document.createElement('span');badge.id='replicaTestBadge';badge.textContent='Тест времени';document.getElementById('dayTabs').after(badge);}if(!simOverride)badge?.remove();
 }
 updateCompactUI=function(){replicaOriginalCompact();updateReplicaHeader();};
 updateCampusHero=function(){replicaOriginalHero();updateReplicaHeader();};

@@ -26,17 +26,12 @@ function renderCalendarDays() {
   document.getElementById('dayTabs').innerHTML=DAY_NAMES.map(day=>{
     const meta=dayDateMeta(week[day.key],day.key,dates),active=day.key===selectedDayKey;
     const count=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length).length;
-    const changes=hasDayChanges(selectedWeek,day.key)?scheduleChanges.filter(change=>[change.current,change.previous].some(row=>row && String(row.week)===String(selectedWeek) && row.day===day.key)).length:0;
     const past=meta.date && !meta.isToday && meta.date<getUlanUdeNow();
     const dayPairs=(week[day.key]?.pairs || []).filter(pair=>filterLessons(pair.lessons).length);
     const countLabel=currentSchedule?.is_incomplete?'нет данных':count?count+' '+pairWord(count):'нет пар';
     const dots=dayPairs.map(pair=>{const types=[...new Set(filterLessons(pair.lessons).map(lesson=>lesson.parse_warning?'review':lesson.type_code || 'other'))];return `<i data-type="${escapeHTML(types.length===1?types[0]:'mixed')}"></i>`;}).join('');
-    return `<button onclick="selectDay('${day.key}')" aria-label="${escapeHTML(day.full+', '+meta.shortLabel+' · '+countLabel+(meta.isToday?' · Сегодня':'')+(changes?' · изменений: '+changes:''))}" aria-pressed="${active}" data-past="${!!past}" ${meta.isToday?'aria-current="date"':''} class="calendar-day"><span class="calendar-heading"><span class="calendar-weekday">${day.short}${changes?`<span class="calendar-changed" title="Изменений: ${changes}"><i aria-hidden="true"></i>${changes}</span>`:''}</span><span class="calendar-date">${escapeHTML(meta.date?String(meta.date.getDate()):meta.shortLabel)}</span></span><span class="calendar-dots" aria-hidden="true">${dots || '<i></i>'}</span><span class="calendar-count sr-only ${count>0?'has-lessons':''}">${countLabel}</span></button>`;
+    return `<button onclick="selectDay('${day.key}')" aria-label="${escapeHTML(day.full+', '+meta.shortLabel+' · '+countLabel+(meta.isToday?' · Сегодня':''))}" aria-pressed="${active}" data-past="${!!past}" ${meta.isToday?'aria-current="date"':''} class="calendar-day"><span class="calendar-heading"><span class="calendar-weekday">${day.short}</span><span class="calendar-date">${escapeHTML(meta.date?String(meta.date.getDate()):meta.shortLabel)}</span></span><span class="calendar-dots" aria-hidden="true">${dots || '<i></i>'}</span><span class="calendar-count sr-only ${count>0?'has-lessons':''}">${countLabel}</span></button>`;
   }).join('');
-  let legend=document.getElementById('calendarChangesLegend');
-  if(!legend){legend=document.createElement('p');legend.id='calendarChangesLegend';document.getElementById('dayTabs').after(legend);}
-  legend.hidden=viewMode!=='day' || scheduleTab==='session' || hasDatedSchedule(currentSchedule) || !DAY_KEYS.some(day=>hasDayChanges(selectedWeek,day));
-  legend.innerHTML='<span class="calendar-changed"><i aria-hidden="true"></i></span> Число рядом с днём — изменения расписания';
   const day=DAY_NAMES.find(day=>day.key===selectedDayKey),meta=dayDateMeta(week[selectedDayKey],selectedDayKey,dates);
   document.getElementById('selectedDaySummary').textContent=day?`${day.full}, ${meta.shortLabel}${meta.isToday?' · Сегодня':''}`:'';
 }

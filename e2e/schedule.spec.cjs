@@ -7,7 +7,7 @@ test('schedule, source status and teacher navigation work under the Pages prefix
   await page.goto('./');
   await expect(page.getByRole('heading',{level:1})).toHaveText('1146 тпуп');
   await expect(page.locator('#pairsContainer')).not.toContainText('Загрузка');
-  await page.locator('#compactFreshnessText').click();
+  await page.getByRole('button',{name:'Ещё',exact:true}).click();await page.getByRole('button',{name:'Данные и обновления',exact:true}).click();
   await expect(page.locator('#parseQualityStatus')).toContainText('Ошибок разбора:');
   await page.getByRole('button',{name:'Закрыть сведения',exact:true}).click();
   await page.getByRole('button',{name:'Сменить расписание',exact:true}).click();

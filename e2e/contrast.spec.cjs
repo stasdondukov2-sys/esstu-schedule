@@ -6,7 +6,7 @@ test('small labels meet 4.5 contrast against rendered gradients in both themes',
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('./');await expect(page.locator('#pairsContainer')).toHaveAttribute('aria-busy','false');const results=[];
  for(const theme of ['dark','light']){
   await page.evaluate(theme=>{themeMode=theme;applyTheme();},theme);
-  for(const selector of ['.calendar-weekday','.pair-time>div:nth-child(3)','.lesson-warning .lesson-kind','#compactFreshnessText','.lesson-person']){
+  for(const selector of ['.calendar-weekday','.pair-time>div:nth-child(3)','.lesson-warning .lesson-kind','.lesson-person']){
    const node=page.locator(selector).first();const style=await node.evaluate(node=>{const css=getComputedStyle(node);const inset=['Top','Right','Bottom','Left'].map(side=>Math.max(2,Math.ceil(parseFloat(css['border'+side+'Width'])+parseFloat(css['padding'+side]))));return {color:css.color,fontSize:css.fontSize,inline:node.getAttribute('style'),inset};});
    const rgb=style.color.match(/[\d.]+/g).slice(0,3).map(Number);await node.evaluate(node=>node.style.setProperty('color','transparent','important'));
    let minimum=Infinity;
